@@ -86,7 +86,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
               </div>
             </div>
             <div class="route-actions">
-              <button id="calculate-route-btn" class="route-action-btn primary">Calculer l'itinéraire</button>
               <button id="clear-route-btn" class="route-action-btn secondary">Effacer</button>
             </div>
           </div>
@@ -178,6 +177,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     let routeMode = false;
     let currentFocusedInput = 'A'; // Track which input (A or B) has focus
     let geocoderB = null; // Geocoder pour le Point B
+    let realRouteData = null; // Stocker les données réelles de routage (distance et temps)
     
     // Fonction pour mapper les activités vers les types de légende
     function getActivityType(activity) {
@@ -1364,6 +1364,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     function clearCurrentRoute() {
         console.log('Clearing current route...');
         
+        // Réinitialiser les données réelles de routage
+        realRouteData = null;
+        
         // Nettoyer la route du plugin Directions
         if (directions) {
             directions.removeRoutes();
@@ -1431,6 +1434,14 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const realTravelTime = formatDuration(realDurationSeconds);
         const realDistance = (realDistanceMeters / 1000).toFixed(1); // convertir en km
         
+        // Stocker les données réelles pour une utilisation dans les popups
+        realRouteData = {
+            distance: realDistance,
+            travelTime: realTravelTime,
+            distanceMeters: realDistanceMeters,
+            durationSeconds: realDurationSeconds
+        };
+        
         // Mettre à jour les badges existants avec les données réelles
         const distanceBadges = document.querySelectorAll('.distance-badge');
         if (distanceBadges) {
@@ -1449,6 +1460,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 }
             });
         }
+        
+        // Rafraîchir la sidebar pour utiliser les nouvelles données réelles
+        applyFilters();
     }
 
     function formatDuration(seconds) {
@@ -2030,12 +2044,21 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         let distanceInfo = '';
         if (currentSearchCenter && coordinates) {
-            const distance = getDistanceFromLatLonInKm(
-                currentSearchCenter[1], currentSearchCenter[0],
-                coordinates[1], coordinates[0]
-            );
-            const travelTime = calculateTravelTime(distance);
-            distanceInfo = `<p><strong>Distance:</strong> <span class="distance-badge">${distance.toFixed(1)} km</span> <span class="time-badge">${travelTime}</span></p>`;
+            let distance, travelTime;
+            
+            // Utiliser les données réelles de routage si disponibles, sinon calcul à vol d'oiseau
+            if (realRouteData) {
+                distance = parseFloat(realRouteData.distance);
+                travelTime = realRouteData.travelTime;
+            } else {
+                distance = getDistanceFromLatLonInKm(
+                    currentSearchCenter[1], currentSearchCenter[0],
+                    coordinates[1], coordinates[0]
+                );
+                travelTime = calculateTravelTime(distance);
+            }
+            
+            distanceInfo = `<p><strong>Distance:</strong> <span class="distance-badge">${distance.toFixed ? distance.toFixed(1) : distance} km</span> <span class="time-badge">${travelTime}</span></p>`;
         }
         
         // Créer le popup avec DOM uniquement (évite tous problèmes de syntaxe)
@@ -2061,11 +2084,19 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         // Distance (si disponible)
         if (currentSearchCenter && coordinates) {
-            const distance = getDistanceFromLatLonInKm(
-                currentSearchCenter[1], currentSearchCenter[0],
-                coordinates[1], coordinates[0]
-            );
-            const travelTime = calculateTravelTime(distance);
+            let distance, travelTime;
+            
+            // Utiliser les données réelles de routage si disponibles, sinon calcul à vol d'oiseau
+            if (realRouteData) {
+                distance = parseFloat(realRouteData.distance);
+                travelTime = realRouteData.travelTime;
+            } else {
+                distance = getDistanceFromLatLonInKm(
+                    currentSearchCenter[1], currentSearchCenter[0],
+                    coordinates[1], coordinates[0]
+                );
+                travelTime = calculateTravelTime(distance);
+            }
             
             const distanceP = document.createElement('p');
             const distanceStrong = document.createElement('strong');
@@ -2074,7 +2105,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             
             const distanceBadge = document.createElement('span');
             distanceBadge.className = 'distance-badge';
-            distanceBadge.textContent = distance.toFixed(1) + ' km';
+            distanceBadge.textContent = (distance.toFixed ? distance.toFixed(1) : distance) + ' km';
             distanceP.appendChild(distanceBadge);
             
             const timeBadge = document.createElement('span');
@@ -2563,12 +2594,25 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             // Calculer la distance et le temps de trajet
             let distanceHTML = '';
             if (currentSearchCenter) {
-                const distance = getDistanceFromLatLonInKm(
-                    currentSearchCenter[1], currentSearchCenter[0],
-                    feature.geometry.coordinates[1], feature.geometry.coordinates[0]
-                );
-                const travelTime = calculateTravelTime(distance);
-                distanceHTML = `<span class="distance-badge">${distance.toFixed(1)} km</span> <span class="time-badge">${travelTime}</span>`;
+                let distance, travelTime;
+                
+                // Vérifier si c'est l'établissement de destination avec données réelles
+                const isDestination = destinationCoords && 
+                    Math.abs(feature.geometry.coordinates[0] - destinationCoords[0]) < 0.0001 &&
+                    Math.abs(feature.geometry.coordinates[1] - destinationCoords[1]) < 0.0001;
+                
+                if (isDestination && realRouteData) {
+                    distance = parseFloat(realRouteData.distance);
+                    travelTime = realRouteData.travelTime;
+                } else {
+                    distance = getDistanceFromLatLonInKm(
+                        currentSearchCenter[1], currentSearchCenter[0],
+                        feature.geometry.coordinates[1], feature.geometry.coordinates[0]
+                    );
+                    travelTime = calculateTravelTime(distance);
+                }
+                
+                distanceHTML = `<span class="distance-badge">${distance.toFixed ? distance.toFixed(1) : distance} km</span> <span class="time-badge">${travelTime}</span>`;
             }
 
             // Créer les éléments DOM de manière sécurisée
@@ -2580,15 +2624,27 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 // Créer les badges de distance de manière sécurisée
                 title.textContent = name + ' ';
                 if (currentSearchCenter) {
-                    const distance = getDistanceFromLatLonInKm(
-                        currentSearchCenter[1], currentSearchCenter[0],
-                        feature.geometry.coordinates[1], feature.geometry.coordinates[0]
-                    );
-                    const travelTime = calculateTravelTime(distance);
+                    let distance, travelTime;
+                    
+                    // Vérifier si c'est l'établissement de destination avec données réelles
+                    const isDestination = destinationCoords && 
+                        Math.abs(feature.geometry.coordinates[0] - destinationCoords[0]) < 0.0001 &&
+                        Math.abs(feature.geometry.coordinates[1] - destinationCoords[1]) < 0.0001;
+                    
+                    if (isDestination && realRouteData) {
+                        distance = parseFloat(realRouteData.distance);
+                        travelTime = realRouteData.travelTime;
+                    } else {
+                        distance = getDistanceFromLatLonInKm(
+                            currentSearchCenter[1], currentSearchCenter[0],
+                            feature.geometry.coordinates[1], feature.geometry.coordinates[0]
+                        );
+                        travelTime = calculateTravelTime(distance);
+                    }
                     
                     const distanceBadge = document.createElement('span');
                     distanceBadge.className = 'distance-badge';
-                    distanceBadge.textContent = distance.toFixed(1) + ' km';
+                    distanceBadge.textContent = (distance.toFixed ? distance.toFixed(1) : distance) + ' km';
                     title.appendChild(distanceBadge);
                     
                     const timeBadge = document.createElement('span');
