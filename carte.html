@@ -1698,6 +1698,19 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     actionsDiv.appendChild(routeBtn);
                 }
                 
+                // Bouton nettoyer le trajet (si un trajet est visible)
+                if (currentRouteSource) {
+                    const clearRouteBtn = document.createElement('button');
+                    clearRouteBtn.className = 'action-btn clear-route';
+                    clearRouteBtn.textContent = 'Nettoyer le trajet';
+                    clearRouteBtn.setAttribute('tabindex', '0');
+                    clearRouteBtn.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        clearCurrentRoute();
+                    });
+                    actionsDiv.appendChild(clearRouteBtn);
+                }
+                
                 card.appendChild(actionsDiv);
             }
             
