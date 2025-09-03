@@ -1948,6 +1948,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         clearPointADisplay();
         clearCurrentRoute(); // Effacer la route tracée
         
+        // Fermer tous les popups ouverts
+        activePopups.forEach(p => p.remove());
+        activePopups.length = 0;
+        
         // Réinitialiser les filtres de légende
         activeFilters.clear();
         activeFilters.add('beton');
