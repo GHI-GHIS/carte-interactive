@@ -1156,7 +1156,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
        geocoder.on('clear', () => {
             console.log('🧹 Geocoder cleared');
             currentSearchCenter = null; 
-            hideRouteInterface();
+            
+            // Ne cacher l'interface de routage que si Point B n'est pas sélectionné
+            if (!isPointBSelected()) {
+                hideRouteInterface();
+            }
+            
             // Cacher le contrôle de rayon quand on efface la recherche
             hideRadiusControl();
             removeSearchRadiusCircle(); 
@@ -2147,18 +2152,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         popupDiv.appendChild(emailP);
         
         // Bouton trajet (si applicable)
-        const showRouteButton = currentSearchCenter && coordinates && 
-            (currentSearchCenter[0] !== coordinates[0] || currentSearchCenter[1] !== coordinates[1]);
-            
-        if (showRouteButton) {
-            const routeBtn = document.createElement('button');
-            routeBtn.textContent = 'Voir le trajet';
-            routeBtn.style.cssText = 'background-color: #17a2b8; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; width: 100%; margin-top: 10px;';
-            routeBtn.addEventListener('click', () => {
-                showRouteOnMap(currentSearchCenter, coordinates);
-            });
-            popupDiv.appendChild(routeBtn);
-        }
         
         // Bouton nettoyer le trajet supprimé - non nécessaire dans les tooltips
         
@@ -2330,14 +2323,20 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             geocoderContainer.style.display = 'flex';
         }
         
-        // Réinitialiser le geocoder A
+        // Réinitialiser le geocoder A sans déclencher l'événement clear
         if (geocoder) {
-            geocoder.clear();
+            // Nettoyer manuellement l'input du geocoder plutôt que d'utiliser .clear()
+            const geocoderInput = geocoderContainer.querySelector('input');
+            if (geocoderInput) {
+                geocoderInput.value = '';
+            }
+            // Alternative : utiliser setInput si disponible
+            if (typeof geocoder.setInput === 'function') {
+                geocoder.setInput('');
+            }
         }
         
-        // Masquer le Point B et supprimer le trajet
-        hidePointB();
-        destinationCoords = null;
+        // Supprimer le trajet (mais garder Point B si il est sélectionné)
         clearCurrentRoute();
         
         // Remettre le focus sur A
@@ -2385,6 +2384,40 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     function showIdenticalPointsWarning() {
         alert('Les points A et B ne peuvent pas être identiques. Veuillez choisir une destination différente.');
     }
+
+    function isPointBSelected() {
+        // Vérifier si Point B est actuellement sélectionné
+        const selectedPointB = document.getElementById('selected-point-b');
+        const pointBSection = document.getElementById('point-b-section');
+        
+        return destinationCoords !== null && 
+               selectedPointB && 
+               selectedPointB.style.display !== 'none' &&
+               pointBSection &&
+               pointBSection.style.display !== 'none';
+    }
+
+    function getCurrentPointACoords() {
+        // Obtenir les coordonnées réelles du Point A depuis l'affichage ou les variables
+        const selectedPointA = document.getElementById('selected-point-a');
+        if (selectedPointA && selectedPointA.style.display !== 'none') {
+            // Si Point A est affiché, utiliser currentSearchCenter ou chercher dans les données
+            return currentSearchCenter;
+        }
+        return null;
+    }
+
+    function getCurrentPointBCoords() {
+        // Obtenir les coordonnées réelles du Point B depuis l'affichage ou les variables
+        const selectedPointB = document.getElementById('selected-point-b');
+        const pointBSection = document.getElementById('point-b-section');
+        
+        if (selectedPointB && selectedPointB.style.display !== 'none' &&
+            pointBSection && pointBSection.style.display !== 'none') {
+            return destinationCoords;
+        }
+        return null;
+    }
     
     function showSinglePopup(properties, coordinates) {
         // Fermer tous les popups existants
@@ -2408,32 +2441,43 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         console.log('Current focused input:', currentFocusedInput);
         const coordinates = feature.geometry.coordinates;
         
+        // Vérification globale d'identité des points avant toute action
+        const currentPointACoords = getCurrentPointACoords();
+        const currentPointBCoords = getCurrentPointBCoords();
+        
+        // Vérifier si les coordonnées sont identiques à un point existant
+        if (currentPointACoords && areCoordinatesIdentical(currentPointACoords, coordinates)) {
+            showIdenticalPointsWarning();
+            return;
+        }
+        if (currentPointBCoords && areCoordinatesIdentical(currentPointBCoords, coordinates)) {
+            showIdenticalPointsWarning();
+            return;
+        }
+        
         // Déterminer quel point mettre à jour selon le focus
         if (currentFocusedInput === 'B') {
-            // Vérifier si les points ne sont pas identiques
-            if (areCoordinatesIdentical(currentSearchCenter, coordinates)) {
-                showIdenticalPointsWarning();
-                return;
-            }
             
             // Mettre à jour le Point B
             destinationCoords = coordinates;
             updatePointBDisplay(feature.properties);
             
             // Si Point A est défini, calculer l'itinéraire
-            if (currentSearchCenter && destinationCoords) {
+            const realPointACoords = getCurrentPointACoords();
+            if (realPointACoords && destinationCoords) {
                 console.log('🎯 Déclenchement calcul auto - Point B sélectionné:', {
-                    currentSearchCenter,
+                    realPointACoords,
                     destinationCoords,
                     focusedInput: currentFocusedInput
                 });
                 setTimeout(() => {
-                    showRouteOnMap(currentSearchCenter, destinationCoords);
+                    showRouteOnMap(realPointACoords, destinationCoords);
                 }, 500);
             } else {
                 console.warn('⚠️ Calcul auto annulé - Variables manquantes:', {
-                    currentSearchCenter,
-                    destinationCoords
+                    realPointACoords,
+                    destinationCoords,
+                    currentSearchCenter
                 });
             }
         } else if (currentFocusedInput === 'A' || !currentSearchCenter) {
@@ -2459,12 +2503,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             drawSearchRadiusCircle(currentSearchCenter, 80);
             applyFilters();
         } else if (currentSearchCenter && !destinationCoords) {
-            // Vérifier si les points ne sont pas identiques
-            if (areCoordinatesIdentical(currentSearchCenter, coordinates)) {
-                showIdenticalPointsWarning();
-                return;
-            }
-            
             // Si Point A est défini mais pas Point B, définir Point B
             destinationCoords = coordinates;
             updatePointBDisplay(feature.properties);
@@ -2478,6 +2516,22 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             });
             setTimeout(() => {
                 showRouteOnMap(currentSearchCenter, destinationCoords);
+            }, 500);
+        } else if (!currentSearchCenter && getCurrentPointBCoords()) {
+            // Cas spécial : Point A a été désélectionné mais Point B existe encore
+            // Définir le nouveau point comme Point A
+            currentSearchCenter = coordinates;
+            updatePointADisplay(feature.properties);
+            
+            // Calculer l'itinéraire avec le Point B existant
+            const existingPointBCoords = getCurrentPointBCoords();
+            console.log('🎯 Déclenchement calcul auto - A redéfini, B existant:', {
+                currentSearchCenter,
+                destinationCoords: existingPointBCoords,
+                source: 'focusOnEstablishment-case-special'
+            });
+            setTimeout(() => {
+                showRouteOnMap(currentSearchCenter, existingPointBCoords);
             }, 500);
         } else {
             // Vérifier si les points ne sont pas identiques
@@ -2694,30 +2748,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     actionsDiv.appendChild(emailBtn);
                 }
                 
-                if (hasRouteButton) {
-                    const routeBtn = document.createElement('button');
-                    routeBtn.className = 'action-btn route';
-                    routeBtn.textContent = 'Voir le trajet';
-                    routeBtn.setAttribute('tabindex', '0');
-                    routeBtn.addEventListener('click', (event) => {
-                        event.stopPropagation();
-                        showRouteOnMap(currentSearchCenter, feature.geometry.coordinates);
-                    });
-                    actionsDiv.appendChild(routeBtn);
-                }
-                
-                // Bouton nettoyer le trajet (si un trajet est visible)
-                if (currentRouteSource) {
-                    const clearRouteBtn = document.createElement('button');
-                    clearRouteBtn.className = 'action-btn clear-route';
-                    clearRouteBtn.textContent = 'Nettoyer le trajet';
-                    clearRouteBtn.setAttribute('tabindex', '0');
-                    clearRouteBtn.addEventListener('click', (event) => {
-                        event.stopPropagation();
-                        clearCurrentRoute();
-                    });
-                    actionsDiv.appendChild(clearRouteBtn);
-                }
                 
                 card.appendChild(actionsDiv);
             }
