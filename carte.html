@@ -1483,6 +1483,17 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             popupDiv.appendChild(routeBtn);
         }
         
+        // Bouton nettoyer le trajet (si un trajet est visible)
+        if (currentRouteSource) {
+            const clearRouteBtn = document.createElement('button');
+            clearRouteBtn.textContent = 'Nettoyer le trajet';
+            clearRouteBtn.style.cssText = 'background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; width: 100%; margin-top: 10px;';
+            clearRouteBtn.addEventListener('click', () => {
+                clearCurrentRoute();
+            });
+            popupDiv.appendChild(clearRouteBtn);
+        }
+        
         popup.setDOMContent(popupDiv);
         
         return popup;
