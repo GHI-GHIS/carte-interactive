@@ -14,18 +14,25 @@
   <script src='https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js'></script>
   
 <style>
-body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:hidden}#map-container{display:flex;height:85vh;width:100vw;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:20}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:10}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}.geolocate-btn{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>') center/18px no-repeat;width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0}.filter-controls-inline{display:flex;justify-content:flex-start;align-items:center;flex-wrap:wrap;gap:15px}.radius-control-group,.activity-control-group{display:flex;align-items:center;gap:8px}.activity-control-group label,.radius-control-group label{font-size:14px;white-space:nowrap;color:#333}#activity-filter{padding:8px;box-sizing:border-box;border:1px solid #ccc;border-radius:4px;min-width:150px;flex-grow:1}#radius-slider{flex-grow:1;cursor:pointer}#radius-value{font-weight:bold;color:#002060;min-width:45px}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px}.establishment-card{background:#fff;margin:6px 8px 10px 7px;padding:11px 15px 0 20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.38);cursor:pointer;transition:transform .2s,box-shadow .2s;font-family:Arial,sans-serif}.establishment-card:hover{transform:scale(1.02);box-shadow:0 4px 8px rgba(0,0,0,.15)}.establishment-card h3{font-size:16px;color:#002060;margin:0 0 5px 0}.establishment-card p{font-size:14px;color:#333;margin:0 0 12px 0}.establishment-card a{color:#002060;text-decoration:none}.establishment-card a:hover{text-decoration:underline}.establishment-card .more-info{font-size:12px;color:#ff9900;margin-top:10px;display:block}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:9999;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}.mapboxgl-popup-content{width:max-content;font-family:Arial,sans-serif;padding:15px!important;max-width:280px!important}.mapboxgl-popup-content h3{color:#002060;margin:0 0 10px 0;font-size:16px}.mapboxgl-popup-content p{margin:0 0 5px 0;line-height:1.4;font-size:14px}.mapboxgl-popup-content p strong{color:#333;font-weight:bold}#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-right,#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-left{display:none}.modal{display:none;position:fixed;z-index:1001;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.4)}.modal-content{background-color:#fefefe;margin:15% auto;padding:20px;border:1px solid #888;width:80%;max-width:600px;border-radius:8px}.close-button{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}.close-button:hover,.close-button:focus{color:#000;text-decoration:none}.view-switcher{position:fixed;top:83px;right:28px;z-index:1005;padding:10px 15px;background-color:#002060;color:#fff;border:0;border-radius:5px;cursor:pointer;font-size:14px;box-shadow:0 2px 5px rgba(0,0,0,.2);display:none;transition:background-color .3s}.view-switcher:hover{background-color:#003380}#map-container.layout-dual #sidebar{width:30%;min-width:415px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,415px));opacity:1}#map-container.layout-sidebar-full{height:100vh}#map-container.layout-sidebar-full #sidebar{width:94%;min-width:94%;opacity:1;transform:translateX(0)}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-map-full{height:100vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none}#map-container.layout-map-full #map{width:100%;opacity:1}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:415px}#map-container.layout-dual #map{width:calc(100% - 415px)}}@media (max-width:600px){.radius-control-group,.activity-control-group{scale:.8;max-width:121px}#map-container.layout-sidebar-full #sidebar{width:100%;min-width:88%}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
+body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:hidden}#map-container{display:flex;height:85vh;width:100vw;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:20}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:10}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}.geolocate-btn{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>') center/18px no-repeat;width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon{display:none!important}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px}.establishment-card{background:#fff;margin:6px 8px 10px 7px;padding:11px 15px 0 20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.38);cursor:pointer;transition:transform .2s,box-shadow .2s;font-family:Arial,sans-serif}.establishment-card:hover{transform:scale(1.02);box-shadow:0 4px 8px rgba(0,0,0,.15)}.establishment-card h3{font-size:16px;color:#002060;margin:0 0 5px 0}.establishment-card p{font-size:14px;color:#333;margin:0 0 12px 0}.establishment-card a{color:#002060;text-decoration:none}.establishment-card a:hover{text-decoration:underline}.establishment-card .more-info{font-size:12px;color:#ff9900;margin-top:10px;display:block}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:9999;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}.mapboxgl-popup-content{width:max-content;font-family:Arial,sans-serif;padding:15px!important;max-width:280px!important}.mapboxgl-popup-content h3{color:#002060;margin:0 0 10px 0;font-size:16px}.mapboxgl-popup-content p{margin:0 0 5px 0;line-height:1.4;font-size:14px}.mapboxgl-popup-content p strong{color:#333;font-weight:bold}#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-right,#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-left{display:none}.modal{display:none;position:fixed;z-index:1001;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.4)}.modal-content{background-color:#fefefe;margin:15% auto;padding:20px;border:1px solid #888;width:80%;max-width:600px;border-radius:8px}.close-button{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}.close-button:hover,.close-button:focus{color:#000;text-decoration:none}.view-switcher{position:fixed;top:83px;right:28px;z-index:1005;padding:10px 15px;background-color:#002060;color:#fff;border:0;border-radius:5px;cursor:pointer;font-size:14px;box-shadow:0 2px 5px rgba(0,0,0,.2);display:none;transition:background-color .3s}.view-switcher:hover{background-color:#003380}#map-container.layout-dual #sidebar{width:30%;min-width:415px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,415px));opacity:1}#map-container.layout-sidebar-full{height:100vh}#map-container.layout-sidebar-full #sidebar{width:94%;min-width:94%;opacity:1;transform:translateX(0)}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-map-full{height:100vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none}#map-container.layout-map-full #map{width:100%;opacity:1}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:415px}#map-container.layout-dual #map{width:calc(100% - 415px)}}@media (max-width:600px){#map-container.layout-sidebar-full #sidebar{width:100%;min-width:88%}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
 /* Légende de la carte */
-.map-legend{position:absolute;bottom:30px;left:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:100;font-size:13px}.map-legend h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold}.legend-item{display:flex;align-items:center;margin:6px 0}.legend-marker{width:30px;height:30px;margin-right:8px;background-size:contain;background-repeat:no-repeat;background-position:center}.legend-marker.beton{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-beton.png')}.legend-marker.granulats{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-granulats.png')}.legend-marker.ciment{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-ciment.png')}.legend-marker.ciment-prompt{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-12/ciment-prompt-naturel.png')}
+.map-legend{position:absolute;bottom:30px;left:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:100;font-size:13px}.map-legend h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold}.legend-item{display:flex;align-items:center;margin:6px 0;cursor:pointer;padding:4px;border-radius:4px;transition:background-color .2s}.legend-item:hover{background-color:#f0f8ff}.legend-item.inactive{opacity:.4}.legend-item.inactive:hover{opacity:.6}.legend-marker{width:30px;height:30px;margin-right:8px;background-size:contain;background-repeat:no-repeat;background-position:center}.legend-marker.beton{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-beton.png')}.legend-marker.granulats{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-granulats.png')}.legend-marker.ciment{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-ciment.png')}.legend-marker.ciment-prompt{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-12/ciment-prompt-naturel.png')}
+
+/* Contrôle de rayon sur la carte */
+.map-radius-control{position:absolute;bottom:120px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:100;font-size:13px;display:none}.map-radius-control h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold}.radius-control-map{display:flex;align-items:center;gap:10px}.radius-control-map label{font-size:13px;color:#333;white-space:nowrap}.radius-control-map input[type="range"]{flex:1;min-width:120px}.radius-control-map span{font-weight:bold;color:#002060;min-width:50px;font-size:13px}
+
+/* Interface d'itinéraire améliorée */
+#route-interface-container{margin-top:15px}.route-point-section{border:1px solid #ddd;padding:15px;border-radius:6px;background:#f9f9f9;transition:all .3s ease-in-out}.route-input-group{margin-bottom:12px;display:flex;flex-direction:column;gap:5px}.route-input-group label{display:block;margin-bottom:5px;font-weight:bold;color:#333;font-size:14px}.point-input-container{display:flex;align-items:center;gap:5px}.point-input-container #geocoder-container{flex:1;display:flex;align-items:center;gap:5px;min-width:0}.point-input-container #geocoder-container-b{flex:1;display:flex;align-items:center;gap:5px;min-width:0}.point-input-container input{flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px}.search-btn,.add-point-btn{background:#002060;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .2s}.search-btn:hover,.add-point-btn:hover{background:#003380}.add-point-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;flex-shrink:0}.route-actions{display:flex;gap:10px;margin-top:15px}.route-action-btn{padding:10px 15px;border:none;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .2s}.route-action-btn.primary{background:#28a745;color:white}.route-action-btn.primary:hover{background:#218838}.route-action-btn.secondary{background:#6c757d;color:white}.route-action-btn.secondary:hover{background:#545b62}#point-b-section{animation:slideDown .3s ease-in-out}@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}#clear-point-a:hover,#clear-point-b:hover{background:rgba(211,47,47,0.2)!important;border-color:rgba(211,47,47,0.5)!important;transform:translateY(-50%) scale(1.1)!important}
 
 /* Clustering */
 .cluster-marker{background:#555;border:3px solid #fff;border-radius:50%;color:#fff;font-weight:bold;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:transform .2s}.cluster-marker:hover{transform:scale(1.1)}.cluster-small{width:35px;height:35px;background:#555}.cluster-medium{width:45px;height:45px;background:#333}.cluster-large{width:55px;height:55px;background:#222}
 
-/* Barre de recherche */
-.search-container{position:relative;margin-bottom:15px}.search-input{width:100%;padding:10px 35px 10px 12px;border:1px solid #ccc;border-radius:4px;font-size:14px;box-sizing:border-box}.search-input:focus{outline:none;border-color:#002060}.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#999;cursor:pointer;font-size:18px;padding:5px}.search-clear:hover{color:#333}
 
 /* Indicateurs de distance */
 .distance-badge{display:inline-block;background:#002060;color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:bold;margin-left:8px}.time-badge{display:inline-block;background:#28a745;color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:bold;margin-left:5px}
+
+/* Contrôles de zoom personnalisés */
+.custom-zoom-controls{position:fixed;bottom:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:2px}.zoom-btn{width:40px;height:40px;background:#fff;border:1px solid #ccc;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;color:#333;box-shadow:0 2px 4px rgba(0,0,0,.1);transition:all .2s}.zoom-btn:hover{background:#f8f8f8;box-shadow:0 3px 6px rgba(0,0,0,.15)}.zoom-btn:active{transform:scale(0.95);box-shadow:0 1px 2px rgba(0,0,0,.1)}
 
 /* Accessibilité */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}*:focus-visible{outline:2px solid #002060;outline-offset:2px}button:focus-visible,a:focus-visible{outline:2px solid #002060;outline-offset:2px}
@@ -43,31 +50,49 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
   <div id="map-container">
     <div id="sidebar">
-      <!-- Barre de recherche -->
-      <div class="search-container">
-        <input type="text" id="search-input" class="search-input" placeholder="Rechercher un établissement..." aria-label="Rechercher un établissement">
-        <button class="search-clear" id="search-clear" aria-label="Effacer la recherche" style="display:none;">×</button>
-      </div>
 
       <div class="filter-section">
-        <div id="geocoder-container">
-          <button id="geolocate" class="geolocate-btn" title="Utiliser ma position"></button>
+        <h2>Recherche et itinéraire</h2>
+        
+        <!-- Interface d'itinéraire avec Points A et B -->
+        <div id="route-interface-container">
+          <!-- Point A (origine) -->
+          <div class="route-point-section" id="point-a-section" style="position: relative;">
+            <button id="add-destination-btn" class="add-point-btn" title="Ajouter une destination" style="position: absolute; top: 8px; right: 8px; z-index: 10; width: 24px; height: 24px; font-size: 14px; padding: 0;">+</button>
+            <div class="route-input-group">
+              <label>Point A (origine):</label>
+              <div id="selected-point-a" style="display:none; padding: 8px 40px 8px 8px; background: #e3f2fd; border-radius: 4px; margin-bottom: 8px; font-size: 14px; color: #1976d2; position: relative;">
+                <strong>📍 </strong><span id="point-a-name"></span>
+                <button id="clear-point-a" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; background: rgba(211, 47, 47, 0.1); color: #d32f2f; border: 1px solid rgba(211, 47, 47, 0.3); width: 20px; height: 20px; border-radius: 50%; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="Désélectionner">×</button>
+              </div>
+              <div class="point-input-container">
+                <div id="geocoder-container">
+                  <button id="geolocate" class="geolocate-btn" title="Utiliser ma position"></button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Point B (destination) - masqué initialement -->
+          <div id="point-b-section" class="route-point-section" style="display:none; margin-top:10px;">
+            <div class="route-input-group">
+              <label>Point B (destination):</label>
+              <div id="selected-point-b" style="display:none; padding: 8px 40px 8px 8px; background: #fff3cd; border-radius: 4px; margin-bottom: 8px; font-size: 14px; color: #856404; position: relative;">
+                <strong>📍 </strong><span id="point-b-name"></span>
+                <button id="clear-point-b" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; background: rgba(211, 47, 47, 0.1); color: #d32f2f; border: 1px solid rgba(211, 47, 47, 0.3); width: 20px; height: 20px; border-radius: 50%; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="Désélectionner">×</button>
+              </div>
+              <div class="point-input-container">
+                <div id="geocoder-container-b"></div>
+              </div>
+            </div>
+            <div class="route-actions">
+              <button id="calculate-route-btn" class="route-action-btn primary">Calculer l'itinéraire</button>
+              <button id="clear-route-btn" class="route-action-btn secondary">Effacer</button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="filter-section filter-controls-inline">
-        <div class="radius-control-group">
-          <label for="radius-slider">Rayon:</label>
-          <input type="range" id="radius-slider" value="30" min="1" max="200" step="1">
-          <span id="radius-value">30 km</span>
-        </div>
-        <div class="activity-control-group">
-          <label for="activity-filter">Activité:</label>
-          <select id="activity-filter">
-            <option value="">Toutes activités</option>
-          </select>
-        </div>
-      </div>
 
       <div class="filter-section">
         <button id="reset-map">Réinitialiser la carte</button>
@@ -78,7 +103,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     </div>
     <div id="map">
       <!-- Légende de la carte (overlay sur la carte) -->
-      <div class="map-legend" id="map-legend" style="display:none;">
+      <div class="map-legend" id="map-legend" style="display:block;">
         <h4>Légende</h4>
         <div class="legend-item">
           <div class="legend-marker beton"></div>
@@ -104,6 +129,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     </div>
   </div>
 
+  <!-- Contrôles de zoom personnalisés -->
+  <div class="custom-zoom-controls">
+    <button class="zoom-btn" id="zoom-in-btn" title="Zoomer" aria-label="Zoomer">+</button>
+    <button class="zoom-btn" id="zoom-out-btn" title="Dézoomer" aria-label="Dézoomer">−</button>
+  </div>
+
   <!-- Bouton mobile pour basculer carte/liste -->
   <button class="mobile-toggle-btn" id="mobile-toggle" aria-label="Basculer vue" style="display:none;">
     <svg viewBox="0 0 24 24" fill="currentColor">
@@ -127,7 +158,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     let geocoder;
     let directions;
     let currentSearchCenter = null;
-    let currentSearchRadius = 30;
+    let currentSearchRadius = 80;
     let currentLayoutMode = 'dual';
     let primaryFilteredFeatures = [];
     let currentMapboxMarkers = [];
@@ -137,8 +168,27 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     const VIEW_MODE_THRESHOLD = 700;
     
     // Nouvelles variables pour les améliorations
-    let searchQuery = '';
     let sortByDistance = true;
+    
+    // Filtrage par légende interactive
+    let activeFilters = new Set(['beton', 'granulats', 'ciment', 'ciment-prompt']);
+    
+    // Variables pour l'itinéraire
+    let destinationCoords = null;
+    let routeMode = false;
+    let currentFocusedInput = 'A'; // Track which input (A or B) has focus
+    let geocoderB = null; // Geocoder pour le Point B
+    
+    // Fonction pour mapper les activités vers les types de légende
+    function getActivityType(activity) {
+        const activityLower = activity?.toLowerCase() || '';
+        if (activityLower.includes('béton') || activityLower.includes('beton')) return 'beton';
+        if (activityLower.includes('granulat')) return 'granulats';
+        // Tester "ciment prompt" en PREMIER pour éviter le conflit avec "ciment"
+        if (activityLower.includes('ciment prompt') || activityLower.includes('prompt')) return 'ciment-prompt';
+        if (activityLower.includes('ciment')) return 'ciment';
+        return 'ciment'; // Par défaut
+    }
     
     // Données des établissements
     const establishmentsData = {
@@ -351,6 +401,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
 
     function localUPGeocoder(query) {
+        console.log('🔍 localUPGeocoder called with query:', query);
         const matchingFeatures = [];
         const queryLower = query.toLowerCase();
         establishmentsData.features.forEach((feature) => {
@@ -360,14 +411,20 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 const decodedVille = decodeHTMLEntities(feature.properties.Ville || '');
                 const placeName = `${decodedUP}, ${decodedAdresse}, ${decodedVille}`;
 
-                matchingFeatures.push({
+                const upResult = {
                     id: `up_${feature.properties.id}`, type: 'Feature', place_type: ['place'], relevance: 0.99,
                     properties: feature.properties, text: decodedUP, place_name: placeName,
                     center: feature.geometry.coordinates, geometry: feature.geometry
-                });
+                };
+                
+                console.log('✅ Found UP match:', upResult);
+                matchingFeatures.push(upResult);
             }
         });
-        return matchingFeatures.slice(0, 5);
+        
+        const results = matchingFeatures.slice(0, 5);
+        console.log('📋 localUPGeocoder returning:', results.length, 'results');
+        return results;
     }
 
     // Définition des régions françaises avec leurs coordonnées approximatives
@@ -714,22 +771,25 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
     
     function setupClusterInteractions() {
-        // Click event for clusters - zoom into cluster
+        // Click event for clusters - progressive zoom
         map.on('click', 'clusters', (e) => {
             const features = map.queryRenderedFeatures(e.point, {
                 layers: ['clusters']
             });
-            const clusterId = features[0].properties.cluster_id;
-            map.getSource('establishments').getClusterExpansionZoom(
-                clusterId,
-                (err, zoom) => {
-                    if (err) return;
-                    map.easeTo({
-                        center: features[0].geometry.coordinates,
-                        zoom: zoom
-                    });
-                }
-            );
+            
+            const currentZoom = map.getZoom();
+            const maxZoom = 16; // Limite de zoom maximum
+            const zoomIncrement = 2; // Zoom progressif par étapes de 2
+            
+            // Calculer le nouveau niveau de zoom
+            const newZoom = Math.min(currentZoom + zoomIncrement, maxZoom);
+            
+            // Zoomer vers le cluster de manière progressive
+            map.easeTo({
+                center: features[0].geometry.coordinates,
+                zoom: newZoom,
+                duration: 500
+            });
         });
 
         // Click event for individual points - show popup
@@ -742,8 +802,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
             
-            const popupContent = createPopupContent(properties, coordinates);
-            popupContent.setLngLat(coordinates).addTo(map);
+            // Utiliser showSinglePopup pour garantir qu'un seul popup soit visible
+            showSinglePopup(properties, coordinates);
         });
         
         // Double-click event for individual points - focus on establishment
@@ -865,7 +925,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         map = new mapboxgl.Map({
             container: 'map', style: 'mapbox://styles/mapbox/streets-v11',
-            center: [2.2137, 46.2276], zoom: 5, pitch: 0, bearing: 0
+            center: [2.2137, 46.2276], zoom: 5, pitch: 0, bearing: 0,
+            zoomControl: false // Désactiver les contrôles de zoom par défaut
         });
         
         // Restaurer la légende après l'initialisation de Mapbox
@@ -942,22 +1003,215 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
 
     function initializeGeocoder() {
+       console.log('🔧 Initializing geocoder...');
        geocoder = new MapboxGeocoder({
             accessToken: mapboxgl.accessToken, mapboxgl: mapboxgl,
             placeholder: 'Rechercher ville ou U.P.',
             countries: 'fr', localGeocoder: localUPGeocoder, localGeocoderOnly: false, language: 'fr'
        });
-       document.getElementById('geocoder-container').prepend(geocoder.onAdd(map));
+       console.log('✅ Geocoder created:', geocoder);
+       document.getElementById('geocoder-container').appendChild(geocoder.onAdd(map));
+       console.log('✅ Geocoder added to DOM');
+       // Événement principal 'result'
        geocoder.on('result', (e) => {
+            console.log('🎯 Geocoder result event triggered:', e.result);
             currentSearchCenter = e.result.center || e.result.geometry.coordinates;
+            console.log('📍 Current search center set to:', currentSearchCenter);
+            // Point A sélectionné - afficher automatiquement le Point B
+            showRouteInterface();
+            showPointB();
+            
+            // Changer automatiquement le focus vers B pour le prochain double-clic
+            setFocusOnPointB();
+            
+            // Mettre à jour l'affichage
+            if (e.result.properties && e.result.properties['Nom du site']) {
+                updatePointADisplay(e.result.properties);
+            } else {
+                // Pour une adresse normale, afficher dans le bandeau
+                const selectedPointA = document.getElementById('selected-point-a');
+                const pointAName = document.getElementById('point-a-name');
+                const geocoderContainer = document.getElementById('geocoder-container');
+                const clearPointA = document.getElementById('clear-point-a');
+                
+                if (selectedPointA && pointAName) {
+                    pointAName.textContent = e.result.place_name || e.result.text;
+                    selectedPointA.style.display = 'block';
+                    
+                    // Cacher le geocoder
+                    if (geocoderContainer) {
+                        geocoderContainer.style.display = 'none';
+                    }
+                    
+                    // Ajouter l'event listener sur la croix
+                    if (clearPointA) {
+                        clearPointA.addEventListener('click', clearPointASelection);
+                    }
+                }
+            }
+            
+            // Afficher le contrôle de rayon quand une UP est sélectionnée
+            console.log('🔄 About to call showRadiusControl()...');
+            showRadiusControl();
             applyFilters();
             if (e.result.properties && e.result.properties.UP) {
+                console.log('🏭 UP detected, flying to location');
                 map.flyTo({ center: e.result.center, zoom: 14, pitch: 45, essential: true });
             }
        });
-       geocoder.on('clear', () => {
-            currentSearchCenter = null; removeSearchRadiusCircle(); applyFilters();
+       
+       // Créer le geocoder pour le Point B
+       geocoderB = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken, mapboxgl: mapboxgl,
+            placeholder: 'Rechercher ville ou U.P.',
+            countries: 'fr', localGeocoder: localUPGeocoder, localGeocoderOnly: false, language: 'fr'
        });
+       console.log('✅ Geocoder B created:', geocoderB);
+       document.getElementById('geocoder-container-b').appendChild(geocoderB.onAdd(map));
+       console.log('✅ Geocoder B added to DOM');
+       
+       // Événement 'result' pour Point B
+       geocoderB.on('result', (e) => {
+            console.log('🎯 Geocoder B result event triggered:', e.result);
+            const newDestinationCoords = e.result.center || e.result.geometry.coordinates;
+            
+            // Vérifier si les points ne sont pas identiques
+            if (areCoordinatesIdentical(currentSearchCenter, newDestinationCoords)) {
+                showIdenticalPointsWarning();
+                geocoderB.clear();
+                return;
+            }
+            
+            destinationCoords = newDestinationCoords;
+            console.log('📍 Destination set to:', destinationCoords);
+            
+            // Mettre à jour l'affichage
+            if (e.result.properties && e.result.properties['Nom du site']) {
+                updatePointBDisplay(e.result.properties);
+            } else {
+                // Pour une adresse normale
+                const selectedPointB = document.getElementById('selected-point-b');
+                const pointBName = document.getElementById('point-b-name');
+                const geocoderContainerB = document.getElementById('geocoder-container-b');
+                const clearPointB = document.getElementById('clear-point-b');
+                
+                if (selectedPointB && pointBName) {
+                    pointBName.textContent = e.result.place_name || e.result.text;
+                    selectedPointB.style.display = 'block';
+                    
+                    // Cacher le geocoder B
+                    if (geocoderContainerB) {
+                        geocoderContainerB.style.display = 'none';
+                    }
+                    
+                    // Ajouter l'event listener sur la croix
+                    if (clearPointB) {
+                        clearPointB.addEventListener('click', clearPointBSelection);
+                    }
+                    
+                    const pointBSection = document.getElementById('point-b-section');
+                    if (pointBSection) {
+                        pointBSection.style.borderColor = '#ffc107';
+                        pointBSection.style.borderWidth = '2px';
+                    }
+                }
+            }
+            
+            // Si A et B sont définis, calculer automatiquement l'itinéraire
+            if (currentSearchCenter && destinationCoords) {
+                console.log('🎯 Déclenchement calcul auto - Geocoder B:', {
+                    currentSearchCenter,
+                    destinationCoords,
+                    source: 'geocoder-B'
+                });
+                setTimeout(() => {
+                    showRouteOnMap(currentSearchCenter, destinationCoords);
+                }, 500);
+            } else {
+                console.warn('⚠️ Calcul auto annulé - Geocoder B variables manquantes:', {
+                    currentSearchCenter,
+                    destinationCoords
+                });
+            }
+       });
+       
+       // Événements supplémentaires pour debug
+       geocoder.on('loading', (e) => {
+            console.log('🔄 Geocoder loading:', e);
+       });
+       
+       geocoder.on('results', (e) => {
+            console.log('📋 Geocoder results:', e.features);
+       });
+       
+       geocoder.on('error', (e) => {
+            console.log('❌ Geocoder error:', e);
+       });
+       
+       // Nouvel événement pour capturer les sélections (alternative)
+       geocoder.on('response', (e) => {
+            console.log('📡 Geocoder response:', e);
+       });
+       
+       geocoder.on('clear', () => {
+            console.log('🧹 Geocoder cleared');
+            currentSearchCenter = null; 
+            hideRouteInterface();
+            // Cacher le contrôle de rayon quand on efface la recherche
+            hideRadiusControl();
+            removeSearchRadiusCircle(); 
+            applyFilters();
+       });
+       
+       // Surveillance DOM en fallback pour capturer les clics sur les suggestions
+       setupGeocoderDOMWatcher();
+    }
+    
+    function setupGeocoderDOMWatcher() {
+        console.log('🔧 Setting up geocoder DOM watcher...');
+        
+        // Surveiller les changements dans le container du geocoder
+        setTimeout(() => {
+            const geocoderContainer = document.querySelector('.mapboxgl-ctrl-geocoder');
+            if (geocoderContainer) {
+                console.log('✅ Geocoder container found, adding DOM watcher');
+                
+                // Surveiller les clics sur les suggestions
+                geocoderContainer.addEventListener('click', (e) => {
+                    console.log('🖱️ Click detected in geocoder:', e.target);
+                    
+                    // Vérifier si c'est un clic sur une suggestion
+                    const suggestion = e.target.closest('.mapboxgl-ctrl-geocoder--suggestion');
+                    if (suggestion) {
+                        console.log('🎯 Suggestion clicked:', suggestion);
+                        
+                        // Attendre un peu pour que le geocoder traite le clic
+                        setTimeout(() => {
+                            const inputValue = geocoderContainer.querySelector('.mapboxgl-ctrl-geocoder--input').value;
+                            console.log('📝 Input value after click:', inputValue);
+                            
+                            // Si l'input contient quelque chose qui ressemble à une UP, déclencher showRadiusControl
+                            if (inputValue && inputValue.includes(',')) {
+                                console.log('🏭 Detected UP-like format, triggering radius control...');
+                                // Essayer de trouver les coordonnées depuis les données
+                                const matchingUP = establishmentsData.features.find(f => 
+                                    f.properties.UP && inputValue.includes(f.properties.UP)
+                                );
+                                if (matchingUP) {
+                                    console.log('✅ Found matching UP:', matchingUP);
+                                    currentSearchCenter = matchingUP.geometry.coordinates;
+                                    showRadiusControl();
+                                    applyFilters();
+                                }
+                            }
+                        }, 100);
+                    }
+                });
+            } else {
+                console.log('❌ Geocoder container not found, retrying...');
+                setTimeout(setupGeocoderDOMWatcher, 1000);
+            }
+        }, 500);
     }
 
     function initializeDirections() {
@@ -1000,12 +1254,25 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
 
     function showRouteOnMap(originCoords, destinationCoords) {
-        console.log('showRouteOnMap called with:', { originCoords, destinationCoords });
+        console.log('🚗 showRouteOnMap called with:', { 
+            originCoords, 
+            destinationCoords,
+            currentSearchCenter: currentSearchCenter,
+            destinationCoordsVar: destinationCoords
+        });
         
         if (!originCoords || !destinationCoords) {
-            console.error('Missing coordinates:', { originCoords, destinationCoords });
+            console.error('❌ Missing coordinates:', { originCoords, destinationCoords });
             return;
         }
+        
+        // Vérifier que les coordonnées sont valides
+        if (!Array.isArray(originCoords) || !Array.isArray(destinationCoords)) {
+            console.error('❌ Invalid coordinate format:', { originCoords, destinationCoords });
+            return;
+        }
+        
+        console.log('✅ Route calculation starting...');
         
         // Nettoyer la route précédente
         clearCurrentRoute();
@@ -1108,13 +1375,44 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             map.removeSource('route');
         }
         
-        // Supprimer le bouton de nettoyage
+        // Supprimer le marker de destination et nettoyer l'interface
+        removeDestinationMarker();
+        
+        // Supprimer le bouton de nettoyage fixe s'il existe
         const clearBtn = document.getElementById('clear-route-btn');
         if (clearBtn) {
             clearBtn.remove();
         }
         
         currentRouteSource = null;
+        
+        // Rafraîchir les popups actifs pour mettre à jour les boutons
+        activePopups.forEach(popup => {
+            try {
+                const lngLat = popup.getLngLat();
+                const popupElement = popup.getElement();
+                if (popupElement && establishmentsData && establishmentsData.features) {
+                    // Trouver les propriétés de l'établissement basé sur les coordonnées
+                    const feature = establishmentsData.features.find(f => 
+                        Math.abs(f.geometry.coordinates[0] - lngLat.lng) < 0.0001 &&
+                        Math.abs(f.geometry.coordinates[1] - lngLat.lat) < 0.0001
+                    );
+                    if (feature) {
+                        const newPopup = createPopupContent(feature.properties, [lngLat.lng, lngLat.lat]);
+                        const newPopupElement = newPopup.getElement();
+                        if (newPopupElement && newPopupElement.firstChild) {
+                            popup.setDOMContent(newPopupElement.firstChild);
+                        }
+                    }
+                }
+            } catch (error) {
+                console.warn('Error refreshing popup:', error);
+            }
+        });
+        
+        // Rafraîchir la barre latérale pour mettre à jour les boutons
+        updateSidebarBasedOnMapViewport();
+        
         console.log('Route cleared');
     }
 
@@ -1165,18 +1463,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
 
     function addRouteClearButton() {
-        // Ajouter un bouton pour nettoyer le trajet si il n'existe pas déjà
-        let clearBtn = document.getElementById('clear-route-btn');
-        if (!clearBtn && currentRouteSource) {
-            clearBtn = document.createElement('button');
-            clearBtn.id = 'clear-route-btn';
-            clearBtn.textContent = 'Nettoyer le trajet';
-            clearBtn.style.cssText = 'position: fixed; top: 120px; right: 28px; z-index: 1005; padding: 8px 12px; background-color: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);';
-            clearBtn.addEventListener('click', () => {
-                clearCurrentRoute();
-                clearBtn.remove();
-            });
-            document.body.appendChild(clearBtn);
+        // Cette fonction ne crée plus de bouton fixe car les boutons sont maintenant intégrés 
+        // dans les popups et les cartes de la barre latérale
+        // Supprimer le bouton fixe existant s'il existe
+        const existingBtn = document.getElementById('clear-route-btn');
+        if (existingBtn) {
+            existingBtn.remove();
         }
     }
     
@@ -1185,27 +1477,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         establishmentsData.features.forEach(feature => {
             if (feature.properties.activity) activityOptions.add(feature.properties.activity);
         });
-        const activitySelect = document.getElementById('activity-filter');
-        activitySelect.innerHTML = '<option value="">Toutes activités</option>';
-        Array.from(activityOptions).sort().forEach(option => {
-            const optionElement = document.createElement('option');
-            optionElement.value = option;
-            optionElement.textContent = option.charAt(0).toUpperCase() + option.slice(1);
-            activitySelect.appendChild(optionElement);
-        });
     }
     
     function setupEventListeners() {
-        document.getElementById('activity-filter').addEventListener('change', applyFilters);
-        
-        const radiusSlider = document.getElementById('radius-slider');
-        const radiusValue = document.getElementById('radius-value');
-        radiusSlider.addEventListener('input', () => {
-            radiusValue.textContent = `${radiusSlider.value} km`;
-        });
-        radiusSlider.addEventListener('change', debounce(() => {
-            if (currentSearchCenter) { applyFilters(); }
-        }, 300));
+        // Les event listeners du contrôle de rayon seront ajoutés dynamiquement
+        // quand le contrôle devient visible
 
         document.getElementById('geolocate').addEventListener('click', () => {
             if (navigator.geolocation) {
@@ -1213,12 +1489,25 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     currentSearchCenter = [position.coords.longitude, position.coords.latitude];
                     if (geocoder) geocoder.setInput('Ma position actuelle');
                     map.flyTo({ center: currentSearchCenter, zoom: 9 });
+                    // Afficher le contrôle de rayon - l'interface itinéraire est toujours visible
+                    showRadiusControl();
+                    showRouteInterface();
                     applyFilters();
                 }, () => { alert("Impossible d'accéder à votre position."); });
             } else { alert("La géolocalisation n'est pas supportée par votre navigateur."); }
         });
 
         document.getElementById('reset-map').addEventListener('click', resetMap);
+        
+        // Initialiser les event listeners de la légende interactive
+        initializeLegendListeners();
+        
+        // Initialiser les event listeners de l'interface d'itinéraire
+        initializeRouteInterface();
+        
+        // Initialiser les contrôles de zoom personnalisés
+        initializeCustomZoomControls();
+        
         
         const modal = document.getElementById('modal');
         const closeButton = document.querySelector('.close-button');
@@ -1227,9 +1516,351 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         window.addEventListener('resize', debounce(checkAndSetLayout, 300));
     }
     
+    // Fonction pour initialiser les contrôles de zoom personnalisés
+    function initializeCustomZoomControls() {
+        console.log('🎛️ Initializing custom zoom controls...');
+        
+        const zoomInBtn = document.getElementById('zoom-in-btn');
+        const zoomOutBtn = document.getElementById('zoom-out-btn');
+        
+        if (zoomInBtn && zoomOutBtn) {
+            zoomInBtn.addEventListener('click', () => {
+                console.log('🔍 Zoom in clicked');
+                if (map) {
+                    map.zoomIn();
+                }
+            });
+            
+            zoomOutBtn.addEventListener('click', () => {
+                console.log('🔍 Zoom out clicked');
+                if (map) {
+                    map.zoomOut();
+                }
+            });
+            
+            console.log('✅ Custom zoom controls initialized');
+        } else {
+            console.error('❌ Zoom buttons not found!');
+        }
+    }
+    
+    // Fonction pour initialiser les événements de clic sur la légende
+    function initializeLegendListeners() {
+        const legendItems = document.querySelectorAll('.legend-item');
+        
+        legendItems.forEach(item => {
+            // Extraire le type d'activité du marker
+            const marker = item.querySelector('.legend-marker');
+            const activityType = marker.className.split(' ').find(cls => 
+                cls === 'beton' || cls === 'granulats' || cls === 'ciment' || cls === 'ciment-prompt'
+            );
+            
+            if (activityType) {
+                item.addEventListener('click', () => {
+                    toggleActivityFilter(activityType);
+                });
+                
+                // Ajouter l'attribut pour l'accessibilité
+                item.setAttribute('role', 'button');
+                item.setAttribute('tabindex', '0');
+                item.setAttribute('aria-pressed', 'true');
+                
+                // Support clavier
+                item.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        toggleActivityFilter(activityType);
+                    }
+                });
+            }
+        });
+    }
+    
+    // Fonction pour basculer un filtre d'activité
+    function toggleActivityFilter(activityType) {
+        if (activeFilters.has(activityType)) {
+            activeFilters.delete(activityType);
+        } else {
+            activeFilters.add(activityType);
+        }
+        
+        updateLegendVisualState();
+        applyFilters();
+    }
+    
+    // Fonction pour mettre à jour l'état visuel de la légende
+    function updateLegendVisualState() {
+        const legendItems = document.querySelectorAll('.legend-item');
+        
+        legendItems.forEach(item => {
+            const marker = item.querySelector('.legend-marker');
+            const activityType = marker.className.split(' ').find(cls => 
+                cls === 'beton' || cls === 'granulats' || cls === 'ciment' || cls === 'ciment-prompt'
+            );
+            
+            if (activityType) {
+                const isActive = activeFilters.has(activityType);
+                item.classList.toggle('inactive', !isActive);
+                item.setAttribute('aria-pressed', isActive.toString());
+            }
+        });
+    }
+    
+    // Fonctions pour l'interface d'itinéraire améliorée
+    function showRouteInterface() {
+        // Ne plus afficher automatiquement le Point B - seulement s'assurer que le Point A est visible
+        // Le Point A est toujours visible maintenant
+        console.log('✅ Point A interface ready');
+    }
+    
+    function showPointB() {
+        const pointBSection = document.getElementById('point-b-section');
+        const addBtn = document.getElementById('add-destination-btn');
+        if (pointBSection && addBtn) {
+            pointBSection.style.display = 'block';
+            addBtn.textContent = '−';
+            addBtn.title = 'Masquer la destination';
+            console.log('✅ Point B section expanded');
+        }
+    }
+    
+    function hidePointB() {
+        const pointBSection = document.getElementById('point-b-section');
+        const addBtn = document.getElementById('add-destination-btn');
+        if (pointBSection && addBtn) {
+            pointBSection.style.display = 'none';
+            addBtn.textContent = '+';
+            addBtn.title = 'Ajouter une destination';
+            // Reset destination data
+            destinationCoords = null;
+            clearPointBDisplay();
+            // Réinitialiser le geocoder B
+            if (geocoderB) {
+                geocoderB.clear();
+            }
+            removeDestinationMarker();
+            console.log('✅ Point B section collapsed');
+        }
+    }
+    
+    function togglePointB() {
+        const pointBSection = document.getElementById('point-b-section');
+        if (pointBSection) {
+            if (pointBSection.style.display === 'none' || pointBSection.style.display === '') {
+                showPointB();
+            } else {
+                hidePointB();
+                // Clear route if it exists
+                clearRoute();
+            }
+        }
+    }
+    
+    function hideRouteInterface() {
+        // Reset everything to initial state
+        hidePointB();
+        destinationCoords = null;
+        routeMode = false;
+    }
+    
+    function initializeRouteInterface() {
+        const addDestinationBtn = document.getElementById('add-destination-btn');
+        const calculateRouteBtn = document.getElementById('calculate-route-btn');
+        const clearRouteBtn = document.getElementById('clear-route-btn');
+        const pointASection = document.getElementById('point-a-section');
+        const pointBSection = document.getElementById('point-b-section');
+        
+        // Event listeners pour tracker le focus
+        if (pointASection) {
+            pointASection.addEventListener('click', () => {
+                setFocusOnPointA();
+            });
+        }
+        
+        if (pointBSection) {
+            pointBSection.addEventListener('click', () => {
+                setFocusOnPointB();
+            });
+        }
+        
+        // Bouton pour expand/collapse le Point B
+        if (addDestinationBtn) {
+            addDestinationBtn.addEventListener('click', () => {
+                togglePointB();
+            });
+        }
+        
+        // Calculer l'itinéraire
+        if (calculateRouteBtn) {
+            calculateRouteBtn.addEventListener('click', () => {
+                if (currentSearchCenter && destinationCoords) {
+                    showRouteOnMap(currentSearchCenter, destinationCoords);
+                } else {
+                    alert('Veuillez sélectionner un point de départ et une destination.');
+                }
+            });
+        }
+        
+        // Effacer l'itinéraire
+        if (clearRouteBtn) {
+            clearRouteBtn.addEventListener('click', () => {
+                clearCurrentRoute();
+                destinationCoords = null;
+                clearPointBDisplay();
+                // Réinitialiser le geocoder B
+                if (geocoderB) {
+                    geocoderB.clear();
+                }
+                hidePointB(); // Masquer le Point B après effacement
+            });
+        }
+    }
+    
+    async function searchDestination() {
+        const destinationInput = document.getElementById('destination-input');
+        const query = destinationInput.value.trim();
+        
+        if (!query) {
+            alert('Veuillez saisir une adresse de destination.');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?country=fr&access_token=${mapboxgl.accessToken}`);
+            const data = await response.json();
+            
+            if (data.features && data.features.length > 0) {
+                const feature = data.features[0];
+                destinationCoords = feature.center;
+                
+                // Mettre à jour le placeholder avec le lieu trouvé
+                destinationInput.value = feature.place_name;
+                
+                // Ajouter un marker temporaire pour la destination
+                addDestinationMarker(destinationCoords);
+                
+                // Zoomer sur la destination
+                map.flyTo({ 
+                    center: destinationCoords, 
+                    zoom: 12, 
+                    essential: true 
+                });
+            } else {
+                alert('Aucun résultat trouvé pour cette adresse.');
+            }
+        } catch (error) {
+            console.error('Erreur lors de la recherche de destination:', error);
+            alert('Erreur lors de la recherche. Veuillez réessayer.');
+        }
+    }
+    
+    function addDestinationMarker(coords) {
+        // Supprimer l'ancien marker de destination s'il existe
+        removeDestinationMarker();
+        
+        // Créer un nouveau marker pour la destination
+        const marker = new mapboxgl.Marker({ 
+            color: '#ff0000',
+            scale: 1.2
+        })
+        .setLngLat(coords)
+        .addTo(map);
+        
+        // Stocker le marker pour pouvoir le supprimer plus tard
+        window.destinationMarker = marker;
+    }
+    
+    function removeDestinationMarker() {
+        if (window.destinationMarker) {
+            window.destinationMarker.remove();
+            window.destinationMarker = null;
+        }
+    }
+    
+    // Fonctions pour contrôler l'affichage du sélecteur de rayon
+    function showRadiusControl() {
+        console.log('🔍 showRadiusControl() appelée');
+        let radiusControl = document.getElementById('map-radius-control-overlay');
+        
+        if (!radiusControl) {
+            console.log('🔧 Création dynamique du contrôle de rayon');
+            // Créer l'élément dynamiquement
+            radiusControl = document.createElement('div');
+            radiusControl.id = 'map-radius-control-overlay';
+            radiusControl.className = 'map-radius-control';
+            radiusControl.style.cssText = 'position:absolute;bottom:220px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:1001;font-size:13px;display:block;';
+            
+            // Créer le contenu HTML
+            radiusControl.innerHTML = `
+                <h4 style="margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold;">Rayon de recherche</h4>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <label style="font-size:13px;color:#333;white-space:nowrap;">Rayon:</label>
+                    <input type="range" id="radius-slider" value="80" min="1" max="200" step="1" style="flex:1;min-width:120px;">
+                    <span id="radius-value" style="font-weight:bold;color:#002060;min-width:50px;font-size:13px;">80 km</span>
+                </div>
+            `;
+            
+            // Ajouter à la carte
+            const mapContainer = document.getElementById('map');
+            if (mapContainer) {
+                mapContainer.appendChild(radiusControl);
+                console.log('✅ Contrôle de rayon ajouté au conteneur map');
+            } else {
+                console.error('❌ Conteneur map non trouvé');
+                return;
+            }
+        } else {
+            console.log('✅ Élément trouvé, affichage du contrôle de rayon');
+            radiusControl.style.display = 'block';
+        }
+        
+        console.log('📍 Style après modification:', radiusControl.style.cssText);
+        
+        // Ajouter les event listeners maintenant que l'élément est visible
+        initializeRadiusControlListeners();
+    }
+    
+    // Variable pour éviter d'ajouter les listeners plusieurs fois
+    let radiusControlListenersInitialized = false;
+    
+    function initializeRadiusControlListeners() {
+        if (radiusControlListenersInitialized) return;
+        
+        const radiusSlider = document.getElementById('radius-slider');
+        const radiusValue = document.getElementById('radius-value');
+        
+        if (radiusSlider && radiusValue) {
+            console.log('🎛️ Initialisation des event listeners du contrôle de rayon');
+            
+            radiusSlider.addEventListener('input', () => {
+                radiusValue.textContent = `${radiusSlider.value} km`;
+            });
+            
+            radiusSlider.addEventListener('change', debounce(() => {
+                if (currentSearchCenter) { applyFilters(); }
+            }, 300));
+            
+            radiusControlListenersInitialized = true;
+            console.log('✅ Event listeners du contrôle de rayon initialisés');
+        } else {
+            console.error('❌ Éléments radius-slider ou radius-value non trouvés dans initializeRadiusControlListeners');
+        }
+    }
+    
+    function hideRadiusControl() {
+        console.log('🔍 hideRadiusControl() appelée');
+        const radiusControl = document.getElementById('map-radius-control-overlay');
+        if (radiusControl) {
+            console.log('✅ Élément trouvé, masquage du contrôle de rayon');
+            radiusControl.style.display = 'none';
+        } else {
+            console.log('ℹ️ Élément map-radius-control-overlay non trouvé (normal si pas encore créé)');
+        }
+    }
+    
     function applyFilters() {
-        const activityFilterValue = document.getElementById('activity-filter').value;
-        currentSearchRadius = parseInt(document.getElementById('radius-slider').value, 10);
+        const radiusSlider = document.getElementById('radius-slider');
+        currentSearchRadius = radiusSlider ? parseInt(radiusSlider.value, 10) : 80;
 
         if (currentSearchCenter) {
             drawSearchRadiusCircle(currentSearchCenter, currentSearchRadius);
@@ -1237,8 +1868,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
         let featuresToDisplay = [...establishmentsData.features];
         
-        // Filtrer par recherche textuelle
-        featuresToDisplay = filterBySearch(featuresToDisplay);
+        // Filtrer par activité selon la légende interactive
+        featuresToDisplay = featuresToDisplay.filter(feature => {
+            const activityType = getActivityType(feature.properties.activity);
+            return activeFilters.has(activityType);
+        });
         
         // Filtrer par distance si un centre de recherche est défini
         if (currentSearchCenter && !isNaN(currentSearchRadius) && currentSearchRadius > 0) {
@@ -1249,10 +1883,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             });
         }
         
-        // Filtrer par activité
-        if (activityFilterValue) {
-            featuresToDisplay = featuresToDisplay.filter(f => f.properties.activity === activityFilterValue);
-        }
         
         primaryFilteredFeatures = featuresToDisplay;
         
@@ -1282,18 +1912,34 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
     
     function resetMap() {
-        const activityFilter = document.getElementById('activity-filter');
-        if (activityFilter) activityFilter.value = "";
         
         const radiusSlider = document.getElementById('radius-slider');
-        if (radiusSlider) radiusSlider.value = 30;
+        if (radiusSlider) radiusSlider.value = 80;
         
         const radiusValue = document.getElementById('radius-value');
-        if (radiusValue) radiusValue.textContent = "30 km";
+        if (radiusValue) radiusValue.textContent = "80 km";
         
         currentSearchCenter = null;
-        currentSearchRadius = 30;
+        currentSearchRadius = 80;
         removeSearchRadiusCircle();
+        clearPointADisplay();
+        
+        // Réinitialiser les filtres de légende
+        activeFilters.clear();
+        activeFilters.add('beton');
+        activeFilters.add('granulats');  
+        activeFilters.add('ciment');
+        activeFilters.add('ciment-prompt');
+        updateLegendVisualState();
+        
+        // Réinitialiser l'interface d'itinéraire
+        hideRouteInterface();
+        removeDestinationMarker();
+        const destinationInput = document.getElementById('destination-input');
+        if (destinationInput) destinationInput.value = '';
+        
+        // Cacher le contrôle de rayon
+        hideRadiusControl();
         
         if (geocoder && typeof geocoder.clear === 'function') { geocoder.clear(); }
         
@@ -1483,46 +2129,352 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             popupDiv.appendChild(routeBtn);
         }
         
-        // Bouton nettoyer le trajet (si un trajet est visible)
-        if (currentRouteSource) {
-            const clearRouteBtn = document.createElement('button');
-            clearRouteBtn.textContent = 'Nettoyer le trajet';
-            clearRouteBtn.style.cssText = 'background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; width: 100%; margin-top: 10px;';
-            clearRouteBtn.addEventListener('click', () => {
-                clearCurrentRoute();
-            });
-            popupDiv.appendChild(clearRouteBtn);
-        }
+        // Bouton nettoyer le trajet supprimé - non nécessaire dans les tooltips
         
         popup.setDOMContent(popupDiv);
         
         return popup;
     }
     
-    function focusOnEstablishment(feature) {
-        const coordinates = feature.geometry.coordinates;
-        const previousSearchCenter = currentSearchCenter;
+    function updatePointADisplay(properties) {
+        const selectedPointA = document.getElementById('selected-point-a');
+        const pointAName = document.getElementById('point-a-name');
+        const pointASection = document.getElementById('point-a-section');
+        const geocoderContainer = document.getElementById('geocoder-container');
+        const clearPointA = document.getElementById('clear-point-a');
         
-        currentSearchCenter = coordinates;
-        const radiusSlider = document.getElementById('radius-slider');
-        if (radiusSlider) radiusSlider.value = 30;
+        if (selectedPointA && pointAName) {
+            // Construire le nom de l'établissement
+            const name = properties['Nom du site'] || properties['Nom_du_site'] || 'Établissement sélectionné';
+            const ville = properties.Ville || '';
+            const displayName = ville ? `${name} - ${ville}` : name;
+            
+            // Afficher l'élément avec le nom
+            pointAName.textContent = displayName;
+            selectedPointA.style.display = 'block';
+            
+            // Cacher le geocoder quand un point est sélectionné
+            if (geocoderContainer) {
+                geocoderContainer.style.display = 'none';
+            }
+            
+            // Ajouter l'event listener sur la croix
+            if (clearPointA) {
+                clearPointA.addEventListener('click', clearPointASelection);
+            }
+            
+            // Ajouter une bordure colorée à la section Point A
+            if (pointASection) {
+                pointASection.style.borderColor = '#1976d2';
+                pointASection.style.borderWidth = '2px';
+            }
+        }
+    }
+    
+    function clearPointADisplay() {
+        const selectedPointA = document.getElementById('selected-point-a');
+        const pointASection = document.getElementById('point-a-section');
+        const geocoderContainer = document.getElementById('geocoder-container');
         
-        const radiusValue = document.getElementById('radius-value');
-        if (radiusValue) radiusValue.textContent = "30 km";
-        drawSearchRadiusCircle(currentSearchCenter, 30);
+        if (selectedPointA) {
+            selectedPointA.style.display = 'none';
+        }
+        
+        // Réafficher le geocoder
+        if (geocoderContainer) {
+            geocoderContainer.style.display = 'flex';
+        }
+        
+        if (pointASection) {
+            pointASection.style.borderColor = '#ddd';
+            pointASection.style.borderWidth = '1px';
+        }
+    }
+    
+    function updatePointBDisplay(properties) {
+        const selectedPointB = document.getElementById('selected-point-b');
+        const pointBName = document.getElementById('point-b-name');
+        const pointBSection = document.getElementById('point-b-section');
+        const geocoderContainerB = document.getElementById('geocoder-container-b');
+        const clearPointB = document.getElementById('clear-point-b');
+        
+        if (selectedPointB && pointBName) {
+            // Construire le nom de l'établissement
+            const name = properties['Nom du site'] || properties['Nom_du_site'] || 'Établissement sélectionné';
+            const ville = properties.Ville || '';
+            const displayName = ville ? `${name} - ${ville}` : name;
+            
+            // Afficher l'élément avec le nom
+            pointBName.textContent = displayName;
+            selectedPointB.style.display = 'block';
+            
+            // Cacher le geocoder B quand un point est sélectionné
+            if (geocoderContainerB) {
+                geocoderContainerB.style.display = 'none';
+            }
+            
+            // Ajouter l'event listener sur la croix
+            if (clearPointB) {
+                clearPointB.addEventListener('click', clearPointBSelection);
+            }
+            
+            // Ajouter une bordure colorée à la section Point B
+            if (pointBSection) {
+                pointBSection.style.borderColor = '#ffc107';
+                pointBSection.style.borderWidth = '2px';
+            }
+        }
+    }
+    
+    function clearPointBDisplay() {
+        const selectedPointB = document.getElementById('selected-point-b');
+        const pointBSection = document.getElementById('point-b-section');
+        const geocoderContainerB = document.getElementById('geocoder-container-b');
+        
+        if (selectedPointB) {
+            selectedPointB.style.display = 'none';
+        }
+        
+        // Réafficher le geocoder B
+        if (geocoderContainerB) {
+            geocoderContainerB.style.display = 'flex';
+        }
+        
+        if (pointBSection) {
+            pointBSection.style.borderColor = '#ddd';
+            pointBSection.style.borderWidth = '1px';
+        }
+    }
+    
+    function setFocusOnPointA() {
+        currentFocusedInput = 'A';
+        const pointASection = document.getElementById('point-a-section');
+        const pointBSection = document.getElementById('point-b-section');
+        
+        if (pointASection) {
+            pointASection.style.borderColor = '#1976d2';
+            pointASection.style.borderWidth = '3px';
+            pointASection.style.boxShadow = '0 2px 8px rgba(25, 118, 210, 0.3)';
+        }
+        
+        if (pointBSection) {
+            pointBSection.style.borderColor = '#ddd';
+            pointBSection.style.borderWidth = '1px';
+            pointBSection.style.boxShadow = 'none';
+        }
+        
+        console.log('Focus set to Point A with visual indicator');
+    }
+    
+    function setFocusOnPointB() {
+        currentFocusedInput = 'B';
+        const pointASection = document.getElementById('point-a-section');
+        const pointBSection = document.getElementById('point-b-section');
+        
+        if (pointASection) {
+            pointASection.style.borderColor = '#ddd';
+            pointASection.style.borderWidth = '1px';
+            pointASection.style.boxShadow = 'none';
+        }
+        
+        if (pointBSection) {
+            pointBSection.style.borderColor = '#ff9800';
+            pointBSection.style.borderWidth = '3px';
+            pointBSection.style.boxShadow = '0 2px 8px rgba(255, 152, 0, 0.3)';
+        }
+        
+        console.log('Focus set to Point B with visual indicator');
+    }
+    
+    function clearPointASelection() {
+        // Réinitialiser les variables
+        currentSearchCenter = null;
+        
+        // Cacher l'affichage du Point A sélectionné
+        clearPointADisplay();
+        
+        // Réafficher le geocoder A
+        const geocoderContainer = document.getElementById('geocoder-container');
+        if (geocoderContainer) {
+            geocoderContainer.style.display = 'flex';
+        }
+        
+        // Réinitialiser le geocoder A
+        if (geocoder) {
+            geocoder.clear();
+        }
+        
+        // Masquer le Point B et supprimer le trajet
+        hidePointB();
+        destinationCoords = null;
+        clearCurrentRoute();
+        
+        // Remettre le focus sur A
+        setFocusOnPointA();
+        
+        // Cacher le contrôle de rayon
+        const radiusControl = document.querySelector('.map-radius-control');
+        if (radiusControl) radiusControl.style.display = 'none';
+        
+        // Réinitialiser les filtres
         applyFilters();
-        map.flyTo({ center: coordinates, zoom: 17, pitch: 60, bearing: 30, speed: 1.2, essential: true });
+        
+        console.log('Point A selection cleared');
+    }
+    
+    function clearPointBSelection() {
+        // Réinitialiser la destination
+        destinationCoords = null;
+        
+        // Cacher l'affichage du Point B sélectionné
+        clearPointBDisplay();
+        
+        // Réafficher le geocoder B
+        const geocoderContainerB = document.getElementById('geocoder-container-b');
+        if (geocoderContainerB) {
+            geocoderContainerB.style.display = 'flex';
+        }
+        
+        // Réinitialiser le geocoder B
+        if (geocoderB) {
+            geocoderB.clear();
+        }
+        
+        // Supprimer le trajet actuel
+        clearCurrentRoute();
+        
+        console.log('Point B selection cleared');
+    }
+    
+    function areCoordinatesIdentical(coords1, coords2, tolerance = 0.00001) {
+        if (!coords1 || !coords2) return false;
+        return Math.abs(coords1[0] - coords2[0]) < tolerance && Math.abs(coords1[1] - coords2[1]) < tolerance;
+    }
+    
+    function showIdenticalPointsWarning() {
+        alert('Les points A et B ne peuvent pas être identiques. Veuillez choisir une destination différente.');
+    }
+    
+    function showSinglePopup(properties, coordinates) {
+        // Fermer tous les popups existants
         activePopups.forEach(p => p.remove());
         activePopups.length = 0;
-        const popup = createPopupContent(feature.properties, coordinates).setLngLat(coordinates).addTo(map);
+        
+        // Créer et afficher le nouveau popup
+        const popup = createPopupContent(properties, coordinates);
+        popup.setLngLat(coordinates).addTo(map);
+        
+        // Ajouter au tracking
         activePopups.push(popup);
         
-        // Si il y avait un centre de recherche précédent, afficher le trajet automatiquement
-        if (previousSearchCenter && previousSearchCenter !== coordinates) {
+        console.log('✅ Single popup shown for:', properties.UP || properties['Nom du site'] || 'Unknown');
+        
+        return popup;
+    }
+
+    function focusOnEstablishment(feature) {
+        console.log('🎯 focusOnEstablishment called for:', feature.properties);
+        console.log('Current focused input:', currentFocusedInput);
+        const coordinates = feature.geometry.coordinates;
+        
+        // Déterminer quel point mettre à jour selon le focus
+        if (currentFocusedInput === 'B') {
+            // Vérifier si les points ne sont pas identiques
+            if (areCoordinatesIdentical(currentSearchCenter, coordinates)) {
+                showIdenticalPointsWarning();
+                return;
+            }
+            
+            // Mettre à jour le Point B
+            destinationCoords = coordinates;
+            updatePointBDisplay(feature.properties);
+            
+            // Si Point A est défini, calculer l'itinéraire
+            if (currentSearchCenter && destinationCoords) {
+                console.log('🎯 Déclenchement calcul auto - Point B sélectionné:', {
+                    currentSearchCenter,
+                    destinationCoords,
+                    focusedInput: currentFocusedInput
+                });
+                setTimeout(() => {
+                    showRouteOnMap(currentSearchCenter, destinationCoords);
+                }, 500);
+            } else {
+                console.warn('⚠️ Calcul auto annulé - Variables manquantes:', {
+                    currentSearchCenter,
+                    destinationCoords
+                });
+            }
+        } else if (currentFocusedInput === 'A' || !currentSearchCenter) {
+            // Mettre à jour le Point A
+            currentSearchCenter = coordinates;
+            updatePointADisplay(feature.properties);
+            
+            // Afficher automatiquement le Point B après sélection du Point A
+            showPointB();
+            
+            // Changer automatiquement le focus vers B pour le prochain double-clic
+            setFocusOnPointB();
+            
+            // Afficher le sélecteur de rayon
+            showRadiusControl();
+            showRouteInterface();
+            
+            const radiusSlider = document.getElementById('radius-slider');
+            if (radiusSlider) radiusSlider.value = 80;
+            
+            const radiusValue = document.getElementById('radius-value');
+            if (radiusValue) radiusValue.textContent = "80 km";
+            drawSearchRadiusCircle(currentSearchCenter, 80);
+            applyFilters();
+        } else if (currentSearchCenter && !destinationCoords) {
+            // Vérifier si les points ne sont pas identiques
+            if (areCoordinatesIdentical(currentSearchCenter, coordinates)) {
+                showIdenticalPointsWarning();
+                return;
+            }
+            
+            // Si Point A est défini mais pas Point B, définir Point B
+            destinationCoords = coordinates;
+            updatePointBDisplay(feature.properties);
+            showPointB();
+            
+            // Calculer l'itinéraire
+            console.log('🎯 Déclenchement calcul auto - Point A défini, B nouveau:', {
+                currentSearchCenter,
+                destinationCoords,
+                source: 'focusOnEstablishment-case3'
+            });
             setTimeout(() => {
-                showRouteOnMap(previousSearchCenter, coordinates);
-            }, 1000); // Délai pour laisser la carte se centrer d'abord
+                showRouteOnMap(currentSearchCenter, destinationCoords);
+            }, 500);
+        } else {
+            // Vérifier si les points ne sont pas identiques
+            if (areCoordinatesIdentical(currentSearchCenter, coordinates)) {
+                showIdenticalPointsWarning();
+                return;
+            }
+            
+            // Si A et B sont définis, remplacer B par défaut
+            destinationCoords = coordinates;
+            updatePointBDisplay(feature.properties);
+            
+            // Recalculer l'itinéraire  
+            console.log('🎯 Déclenchement calcul auto - A et B définis, remplacement B:', {
+                currentSearchCenter,
+                destinationCoords,
+                source: 'focusOnEstablishment-case4'
+            });
+            setTimeout(() => {
+                showRouteOnMap(currentSearchCenter, destinationCoords);
+            }, 500);
         }
+        
+        // Zoom sur l'établissement
+        map.flyTo({ center: coordinates, zoom: 17, pitch: 60, bearing: 30, speed: 1.2, essential: true });
+        
+        // Utiliser showSinglePopup pour garantir qu'un seul popup soit visible
+        showSinglePopup(feature.properties, coordinates);
     }
     
     function updateSidebarBasedOnMapViewport() {
@@ -1938,34 +2890,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     });
 
     function initializeSearchAndFilters() {
-        const searchInput = document.getElementById('search-input');
-        const searchClear = document.getElementById('search-clear');
         
-        // Recherche en temps réel
-        searchInput.addEventListener('input', debounce(() => {
-            searchQuery = searchInput.value.trim().toLowerCase();
-            searchClear.style.display = searchQuery ? 'block' : 'none';
-            applyFilters();
-        }, 300));
-        
-        // Bouton effacer recherche
-        searchClear.addEventListener('click', () => {
-            searchInput.value = '';
-            searchQuery = '';
-            searchClear.style.display = 'none';
-            applyFilters();
-        });
-        
-        // Sauvegarder les préférences de filtre
-        const activityFilter = document.getElementById('activity-filter');
-        const savedActivity = localStorage.getItem('selectedActivity');
-        if (savedActivity) {
-            activityFilter.value = savedActivity;
-        }
-        
-        activityFilter.addEventListener('change', () => {
-            localStorage.setItem('selectedActivity', activityFilter.value);
-        });
     }
 
     function initializeMobileToggle() {
@@ -2008,20 +2933,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         });
     }
 
-    // Fonction pour filtrer par recherche textuelle
-    function filterBySearch(features) {
-        if (!searchQuery) return features;
-        
-        return features.filter(feature => {
-            const name = feature.properties.UP?.toLowerCase() || '';
-            const address = feature.properties.Adresse?.toLowerCase() || '';
-            const city = feature.properties.Ville?.toLowerCase() || '';
-            
-            return name.includes(searchQuery) || 
-                   address.includes(searchQuery) || 
-                   city.includes(searchQuery);
-        });
-    }
 
 </script>
 </body>
