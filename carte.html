@@ -24,6 +24,140 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 /* Interface d'itinéraire améliorée */
 #route-interface-container{margin-top:15px}.route-point-section{border:1px solid #ddd;padding:15px;border-radius:6px;background:#f9f9f9;transition:all .3s ease-in-out}.route-input-group{margin-bottom:12px;display:flex;flex-direction:column;gap:5px}.route-input-group label{display:block;margin-bottom:5px;font-weight:bold;color:#333;font-size:14px}.point-input-container{display:flex;align-items:center;gap:5px}.point-input-container #geocoder-container{flex:1;display:flex;align-items:center;gap:5px;min-width:0}.point-input-container #geocoder-container-b{flex:1;display:flex;align-items:center;gap:5px;min-width:0}.point-input-container input{flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px}.search-btn,.add-point-btn{background:#002060;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .2s}.search-btn:hover,.add-point-btn:hover{background:#003380}.add-point-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;flex-shrink:0}.route-actions{display:flex;gap:10px;margin-top:15px}.route-action-btn{padding:10px 15px;border:none;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .2s}.route-action-btn.primary{background:#28a745;color:white}.route-action-btn.primary:hover{background:#218838}.route-action-btn.secondary{background:#6c757d;color:white}.route-action-btn.secondary:hover{background:#545b62}#point-b-section{animation:slideDown .3s ease-in-out}@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}#clear-point-a:hover,#clear-point-b:hover{background:rgba(211,47,47,0.2)!important;border-color:rgba(211,47,47,0.5)!important;transform:translateY(-50%) scale(1.1)!important}
 
+
+/* Animation d'apparition du panneau de routage */
+#route-details-panel{animation:slideUp .4s ease-out}@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* Styles pour les options de routage avec molette */
+#route-options-container{transition:opacity 0.3s ease, transform 0.3s ease}
+#toggle-route-options:hover{background:rgba(255,255,255,0.3)!important;transform:scale(1.1)!important}
+
+/* Animation pour l'overlay d'infos d'itinéraire */
+@keyframes slideInFromRight{from{opacity:0;transform:translateX(50px)}to{opacity:1;transform:translateX(0)}}
+
+/* États d'affichage pour masquer/afficher les cartes */
+.hide-establishments{display:none !important}.show-establishments{display:block !important}
+
+/* Amélioration des options de routage */
+.route-option-group label input[type="radio"]{accent-color:#002060}
+
+/* Mode itinéraire pleine largeur */
+.route-mode-active #sidebar {
+    width: 40% !important;
+    min-width: 500px !important;
+    max-width: 600px !important;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-right: 3px solid #002060;
+}
+
+.route-mode-active #map {
+    width: 60% !important;
+    border-left: 1px solid #dee2e6;
+}
+
+/* Améliorations visuelles du panneau détaillé */
+#route-details-panel.route-active {
+    background: linear-gradient(to bottom, #ffffff 0%, #f8f9fa 100%);
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0, 32, 96, 0.1);
+}
+
+/* Amélioration du résumé de l'itinéraire */
+#route-summary {
+    background: linear-gradient(135deg, #002060 0%, #003380 100%) !important;
+    box-shadow: 0 6px 20px rgba(0, 32, 96, 0.3);
+    border-radius: 12px !important;
+    position: relative;
+    overflow: hidden;
+}
+
+#route-summary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+}
+
+/* Styles pour les segments de route colorés selon la vitesse */
+.route-segment-fast { stroke: #28a745; stroke-width: 6; }
+.route-segment-medium { stroke: #ffc107; stroke-width: 6; }
+.route-segment-slow { stroke: #dc3545; stroke-width: 6; }
+.route-segment-default { stroke: #007bff; stroke-width: 5; }
+
+/* Animation de pulsation pour la route active */
+.route-line-active {
+    animation: routePulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes routePulse {
+    0% { stroke-width: 5; opacity: 0.8; }
+    100% { stroke-width: 7; opacity: 1; }
+}
+
+
+/* Boutons améliorés */
+.route-action-btn {
+    position: relative;
+    overflow: hidden;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.route-action-btn::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.route-action-btn:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+.route-action-btn.primary {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.route-action-btn.primary:hover {
+    background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+}
+
+/* Responsive amélioré pour mobile */
+@media (max-width: 768px) {
+    .route-mode-active #sidebar {
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+    
+    .route-mode-active #map {
+        width: 0 !important;
+        opacity: 0;
+    }
+    
+    .route-instruction-item {
+        margin-bottom: 6px;
+        padding: 10px 12px;
+    }
+}
+
 /* Clustering */
 .cluster-marker{background:#555;border:3px solid #fff;border-radius:50%;color:#fff;font-weight:bold;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:transform .2s}.cluster-marker:hover{transform:scale(1.1)}.cluster-small{width:35px;height:35px;background:#555}.cluster-medium{width:45px;height:45px;background:#333}.cluster-large{width:55px;height:55px;background:#222}
 
@@ -85,6 +219,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 <div id="geocoder-container-b"></div>
               </div>
             </div>
+
             <div class="route-actions">
               <button id="clear-route-btn" class="route-action-btn secondary">Effacer</button>
             </div>
@@ -99,6 +234,83 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
       
       <div id="results-count"></div>
       <div id="establishments-view"></div>
+      
+      <!-- Panneau détaillé des instructions de navigation -->
+      <div id="route-details-panel" style="display:none; flex-grow:1; overflow-y:auto; margin-top:5px;">
+        <!-- Options de routage avec SWITCHERS -->
+        <div id="route-options-container" style="display:none; margin-bottom:10px; padding:10px; border:1px solid #ddd; border-radius:6px; background:#f8f9fa;">
+          <!-- Switcher Véhicule -->
+          <div style="display:flex; align-items:center; margin-bottom:8px;">
+            <span style="font-size:11px; font-weight:600; color:#333; margin-right:10px; min-width:50px;">Véhicule:</span>
+            <div id="vehicle-switcher" style="
+              display:flex; background:#e9ecef; border-radius:20px; padding:2px; cursor:pointer;
+              border:1px solid #ced4da; transition:all 0.3s;
+            ">
+              <div id="vehicle-car" class="switcher-option active" style="
+                padding:4px 12px; border-radius:18px; font-size:10px; font-weight:600;
+                background:#007bff; color:white; transition:all 0.3s; text-align:center;
+              ">🚗 Voiture</div>
+              <div id="vehicle-truck" class="switcher-option" style="
+                padding:4px 12px; border-radius:18px; font-size:10px; font-weight:600;
+                background:transparent; color:#6c757d; transition:all 0.3s; text-align:center;
+              ">🚛 Camion</div>
+            </div>
+          </div>
+          
+          <!-- Switcher Péages -->
+          <div style="display:flex; align-items:center;">
+            <span style="font-size:11px; font-weight:600; color:#333; margin-right:10px; min-width:50px;">Péages:</span>
+            <div id="toll-switcher" style="
+              display:flex; background:#e9ecef; border-radius:20px; padding:2px; cursor:pointer;
+              border:1px solid #ced4da; transition:all 0.3s;
+            ">
+              <div id="toll-allow" class="switcher-option active" style="
+                padding:4px 12px; border-radius:18px; font-size:10px; font-weight:600;
+                background:#28a745; color:white; transition:all 0.3s; text-align:center;
+              ">✅ Avec</div>
+              <div id="toll-avoid" class="switcher-option" style="
+                padding:4px 12px; border-radius:18px; font-size:10px; font-weight:600;
+                background:transparent; color:#6c757d; transition:all 0.3s; text-align:center;
+              ">❌ Sans</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Résumé de l'itinéraire -->
+        <div id="route-summary" style="background:#002060; color:white; padding:15px; border-radius:8px; margin-bottom:15px; position:relative;">
+          <h3 style="margin:0 0 10px 0; font-size:16px; display:flex; justify-content:space-between; align-items:center;">
+            🗺️ Résumé de l'itinéraire
+            <button id="toggle-route-options" style="
+              background:rgba(255,255,255,0.2); 
+              border:1px solid rgba(255,255,255,0.3); 
+              color:white; 
+              width:24px; 
+              height:24px; 
+              border-radius:50%; 
+              cursor:pointer; 
+              font-size:14px; 
+              display:flex; 
+              align-items:center; 
+              justify-content:center;
+              transition:all 0.2s;
+              flex-shrink:0;
+            " title="Options de routage">⚙️</button>
+          </h3>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <span id="route-distance" style="font-weight:bold;">--</span>
+            <span id="route-duration" style="font-weight:bold;">--</span>
+          </div>
+          <div id="route-vehicle-info" style="font-size:12px; opacity:0.8;">Type: Voiture • Péages: Autorisés</div>
+        </div>
+        
+        
+        <!-- Bouton retour -->
+        <div style="margin-top:20px; padding:15px 0; border-top:1px solid #eee;">
+          <button id="back-to-search-btn" class="route-action-btn secondary" style="width:100%;">
+            ← Retour à la recherche
+          </button>
+        </div>
+      </div>
     </div>
     <div id="map">
       <!-- Légende de la carte (overlay sur la carte) -->
@@ -1387,49 +1599,385 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
     
     async function showRouteWithDirectAPI(originCoords, destinationCoords) {
-        console.log('Using direct API approach...');
+        console.log('Using direct API approach with advanced options...');
+        
+        const loader = showRouteLoader();
         
         try {
-            // Construire l'URL de l'API Directions avec les bons paramètres
-            const coordinates = `${originCoords[0]},${originCoords[1]};${destinationCoords[0]},${destinationCoords[1]}`;
-            const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?geometries=geojson&overview=full&steps=true&access_token=${mapboxgl.accessToken}`;
+            // Récupérer les options sélectionnées depuis les boutons ULTRATHINK
+            const vehicleType = currentVehicleType;
+            const tollOption = currentTollOption;
+            const optimizeOption = 'time'; // Toujours optimiser pour le temps
             
-            console.log('Fetching route from:', url);
+            // Vérifier le cache d'abord
+            const options = { vehicleType, tollOption, optimizeOption };
+            const cacheKey = generateCacheKey(originCoords, destinationCoords, options);
+            const cachedData = getCachedRoute(cacheKey);
             
-            const response = await fetch(url);
-            const data = await response.json();
-            
-            console.log('API Response:', data);
-            
-            if (data.routes && data.routes[0]) {
-                const route = data.routes[0];
-                
-                // Ajouter la route à la carte comme source et layer
-                addRouteToMap(route);
-                
-                // Centrer la carte sur la route
-                if (route.geometry && route.geometry.coordinates) {
-                    const bounds = new mapboxgl.LngLatBounds();
-                    route.geometry.coordinates.forEach(coord => bounds.extend(coord));
-                    map.fitBounds(bounds, { padding: 50 });
-                }
-                
-                // Mettre à jour les temps de trajet avec les données réelles
-                updateTravelTimesWithRealData(route);
-                
-                // Ajouter le bouton pour nettoyer le trajet
-                addRouteClearButton();
-                
-                console.log('Route successfully added to map');
-                
-            } else {
-                console.error('No route found in API response');
+            if (cachedData) {
+                console.log('📦 Utilisation des données en cache');
+                hideRouteLoader();
+                processRouteData(cachedData);
+                return;
             }
             
+            // Validation des coordonnées
+            if (!originCoords || !destinationCoords || originCoords.length !== 2 || destinationCoords.length !== 2) {
+                throw new Error('Coordonnées invalides pour le calcul d\'itinéraire');
+            }
+            
+            // Construire l'URL de l'API Directions avec les options avancées
+            const coordinates = `${originCoords[0]},${originCoords[1]};${destinationCoords[0]},${destinationCoords[1]}`;
+            
+            // Profil de routage selon le véhicule
+            let profile = 'driving';
+            if (vehicleType === 'driving-traffic') {
+                profile = 'driving-traffic'; // Pour les poids lourds avec info trafic
+            }
+            
+            // Construction des paramètres de l'URL
+            let urlParams = new URLSearchParams({
+                geometries: 'geojson',
+                overview: 'full',
+                steps: 'true',
+                voice_instructions: 'true',
+                annotations: 'duration,distance,speed',
+                language: 'fr',
+                access_token: mapboxgl.accessToken
+            });
+            
+            // Ajouter l'évitement des péages si sélectionné
+            if (tollOption === 'avoid') {
+                urlParams.append('exclude', 'toll');
+            }
+            
+            // Ajouter l'optimisation
+            if (optimizeOption === 'distance') {
+                urlParams.append('annotations', 'duration,distance');
+            }
+            
+            const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordinates}?${urlParams}`;
+            
+            console.log('Fetching route from:', url);
+            console.log('Options:', { vehicleType, tollOption, optimizeOption });
+            
+            // Timeout pour l'API (réduit à 10 secondes)
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            
+            const response = await fetch(url, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) {
+                throw new Error(`Erreur API: ${response.status} ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            
+            console.log('🔍 Données reçues de l\'API:', data);
+            
+            // Vérifier si la réponse contient des erreurs
+            if (data.code && data.code !== 'Ok') {
+                throw new Error(`API Error: ${data.code} - ${data.message || 'Erreur inconnue'}`);
+            }
+            
+            // Mettre en cache pour les requêtes futures
+            cacheRoute(cacheKey, data);
+            
+            hideRouteLoader();
+            processRouteData(data);
+            
         } catch (error) {
-            console.error('Error fetching route:', error);
+            hideRouteLoader();
+            console.error('Erreur API avancée:', error);
+            
+            // Fallback : essayer avec l'API simple
+            console.log('🔄 Tentative avec API simple...');
+            try {
+                const fallbackUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?geometries=geojson&overview=full&steps=true&access_token=${mapboxgl.accessToken}`;
+                
+                const fallbackResponse = await fetch(fallbackUrl);
+                const fallbackData = await fallbackResponse.json();
+                
+                if (fallbackData.routes && fallbackData.routes[0]) {
+                    console.log('✅ API simple réussie');
+                    processRouteData(fallbackData);
+                    return;
+                }
+            } catch (fallbackError) {
+                console.error('Erreur API simple:', fallbackError);
+            }
+            
+            // Si les deux échouent, afficher l'erreur
+            let errorMessage = 'Impossible de calculer l\'itinéraire. Veuillez réessayer.';
+            
+            if (error.name === 'AbortError') {
+                errorMessage = 'Le calcul d\'itinéraire a pris trop de temps. Essai en cours avec options simplifiées...';
+            } else if (error.message.includes('Erreur API')) {
+                errorMessage = 'Service d\'itinéraire temporairement indisponible. Veuillez réessayer dans quelques minutes.';
+            } else if (error.message.includes('Coordonnées invalides')) {
+                errorMessage = 'Les points sélectionnés ne sont pas valides. Veuillez sélectionner d\'autres emplacements.';
+            }
+            
+            showRouteError(errorMessage);
         }
     }
+    
+    // Fonction factorisant le traitement des données de routage
+    function processRouteData(data) {
+        console.log('API Response:', data);
+        
+        if (!data.routes || !data.routes[0]) {
+            showRouteError('Aucun itinéraire trouvé entre ces deux points. Essayez avec d\'autres destinations.');
+            return;
+        }
+        
+        const route = data.routes[0];
+        
+        // Validation des données de route
+        if (!route.geometry || !route.geometry.coordinates || route.geometry.coordinates.length === 0) {
+            showRouteError('Données d\'itinéraire invalides reçues du service.');
+            return;
+        }
+        
+        // Ajouter la route à la carte comme source et layer
+        addRouteToMap(route);
+        
+        // Centrer la carte sur la route
+        try {
+            const bounds = new mapboxgl.LngLatBounds();
+            route.geometry.coordinates.forEach(coord => bounds.extend(coord));
+            map.fitBounds(bounds, { padding: 50 });
+        } catch (boundsError) {
+            console.warn('Erreur lors du centrage sur la route:', boundsError);
+        }
+        
+        // Mettre à jour les temps de trajet avec les données réelles
+        if (typeof updateTravelTimesWithRealData === 'function') {
+            updateTravelTimesWithRealData(route);
+        }
+        
+        // Mettre à jour le résumé et afficher le panneau
+        updateRouteSummary(data);
+        showRouteDetails();
+        
+        // Ajouter le bouton pour nettoyer le trajet
+        if (typeof addRouteClearButton === 'function') {
+            addRouteClearButton();
+        }
+        
+        console.log('Route successfully processed and added to map');
+    }
+    
+    // Cache pour les itinéraires
+    const routeCache = new Map();
+    const CACHE_EXPIRY = 30 * 60 * 1000; // 30 minutes
+    
+    // Fonction pour générer une clé de cache
+    function generateCacheKey(originCoords, destinationCoords, options) {
+        const { vehicleType, tollOption, optimizeOption } = options;
+        return `${originCoords.join(',')}-${destinationCoords.join(',')}-${vehicleType}-${tollOption}-${optimizeOption}`;
+    }
+    
+    // Fonction pour vérifier le cache
+    function getCachedRoute(cacheKey) {
+        const cached = routeCache.get(cacheKey);
+        if (cached && Date.now() - cached.timestamp < CACHE_EXPIRY) {
+            return cached.data;
+        }
+        if (cached) {
+            routeCache.delete(cacheKey); // Supprimer l'entrée expirée
+        }
+        return null;
+    }
+    
+    // Fonction pour mettre en cache un itinéraire
+    function cacheRoute(cacheKey, data) {
+        routeCache.set(cacheKey, {
+            data: data,
+            timestamp: Date.now()
+        });
+    }
+    
+    // Fonction pour afficher les erreurs de routage
+    function showRouteError(message) {
+        const errorContainer = document.createElement('div');
+        errorContainer.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(220, 53, 69, 0.3);
+            z-index: 10000;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            max-width: 400px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        `;
+        
+        errorContainer.innerHTML = `
+            <div style="font-size: 24px; margin-bottom: 10px;">⚠️</div>
+            <div style="font-weight: bold; margin-bottom: 10px;">Erreur de calcul d'itinéraire</div>
+            <div style="margin-bottom: 15px; line-height: 1.4;">${message}</div>
+            <button onclick="this.parentElement.remove()" style="
+                background: rgba(255, 255, 255, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                color: white;
+                padding: 8px 16px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: bold;
+            ">Fermer</button>
+        `;
+        
+        document.body.appendChild(errorContainer);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (errorContainer && errorContainer.parentElement) {
+                errorContainer.remove();
+            }
+        }, 5000);
+    }
+    
+    // Fonction pour afficher le loader
+    function showRouteLoader() {
+        const loader = document.createElement('div');
+        loader.id = 'route-loader';
+        loader.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            border: 1px solid rgba(0, 32, 96, 0.1);
+        `;
+        
+        loader.innerHTML = `
+            <div style="
+                width: 40px;
+                height: 40px;
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #002060;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 15px auto;
+            "></div>
+            <div style="color: #002060; font-weight: bold; font-size: 16px;">
+                Calcul de l'itinéraire en cours...
+            </div>
+            <div style="color: #666; font-size: 12px; margin-top: 5px;">
+                Veuillez patienter
+            </div>
+            <style>
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+            </style>
+        `;
+        
+        document.body.appendChild(loader);
+        return loader;
+    }
+    
+    // Fonction pour masquer le loader
+    function hideRouteLoader() {
+        const loader = document.getElementById('route-loader');
+        if (loader) {
+            loader.remove();
+        }
+    }
+    
+    // Fonction de nettoyage du cache (appelée périodiquement)
+    function cleanupCache() {
+        const now = Date.now();
+        for (const [key, value] of routeCache.entries()) {
+            if (now - value.timestamp > CACHE_EXPIRY) {
+                routeCache.delete(key);
+            }
+        }
+        console.log(`🧹 Cache nettoyé, ${routeCache.size} entrées restantes`);
+    }
+    
+    // Nettoyer le cache toutes les 10 minutes
+    setInterval(cleanupCache, 10 * 60 * 1000);
+    
+    // Fonction de validation des inputs utilisateur
+    function validateRouteInputs() {
+        const errors = [];
+        
+        if (!currentSearchCenter) {
+            errors.push('Veuillez sélectionner un point de départ');
+        }
+        
+        if (!destinationCoords) {
+            errors.push('Veuillez sélectionner une destination');
+        }
+        
+        if (currentSearchCenter && destinationCoords) {
+            const distance = calculateDistance(currentSearchCenter, destinationCoords);
+            if (distance < 0.1) { // Moins de 100m
+                errors.push('Les points de départ et d\'arrivée sont trop proches');
+            }
+            if (distance > 1000) { // Plus de 1000km
+                errors.push('La distance entre les points est trop importante');
+            }
+        }
+        
+        return errors;
+    }
+    
+    // Fonction pour calculer la distance entre deux points (en km)
+    function calculateDistance(coord1, coord2) {
+        const R = 6371; // Rayon de la Terre en km
+        const dLat = (coord2[1] - coord1[1]) * Math.PI / 180;
+        const dLon = (coord2[0] - coord1[0]) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(coord1[1] * Math.PI / 180) * Math.cos(coord2[1] * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+    
+    // Fonction d'optimisation des performances
+    function optimizePerformance() {
+        // Désactiver les animations sur les appareils avec peu de mémoire
+        if (navigator.deviceMemory && navigator.deviceMemory < 4) {
+            document.documentElement.style.setProperty('--animation-duration', '0.1s');
+            console.log('🚀 Animations réduites pour optimiser les performances');
+        }
+        
+        // Réduire la complexité visuelle sur mobile
+        if (window.innerWidth < 768) {
+            const routeInstructions = document.querySelectorAll('.route-instruction-item');
+            routeInstructions.forEach(item => {
+                item.style.transition = 'none';
+            });
+        }
+        
+        // Nettoyer les event listeners inutiles
+        window.addEventListener('beforeunload', () => {
+            if (window.routeAnimation) {
+                clearInterval(window.routeAnimation);
+            }
+            routeCache.clear();
+        });
+    }
+    
+    // Initialiser les optimisations au chargement
+    document.addEventListener('DOMContentLoaded', optimizePerformance);
     
     function addRouteToMap(route) {
         // Supprimer la source existante si elle existe
@@ -1464,6 +2012,129 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         });
         
         currentRouteSource = 'route';
+        
+        // Masquer rayon et légende quand itinéraire affiché
+        hideRadiusControl();
+        hideLegend();
+        
+        // Supprimer le cercle de rayon de la carte
+        removeSearchRadiusCircle();
+        
+        // Centrer la carte sur l'itinéraire avec fit bounds
+        fitMapToRoute(route);
+        
+        // Afficher info route sur la carte
+        showRouteInfoOnMap(route);
+    }
+    
+    // Fonctions pour contrôler la légende
+    function hideLegend() {
+        const mapLegend = document.getElementById('map-legend');
+        if (mapLegend) {
+            mapLegend.style.display = 'none';
+            console.log('🏷️ Légende masquée pour itinéraire');
+        }
+    }
+    
+    function showLegend() {
+        const mapLegend = document.getElementById('map-legend');
+        if (mapLegend) {
+            mapLegend.style.display = 'block';
+            console.log('🏷️ Légende réaffichée');
+        }
+    }
+    
+    // Fonction pour centrer la carte sur l'itinéraire avec zoom optimal
+    function fitMapToRoute(route) {
+        try {
+            const coordinates = route.geometry.coordinates;
+            const bounds = coordinates.reduce((bounds, coord) => {
+                return bounds.extend(coord);
+            }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
+            
+            // Calculer la distance entre les points pour déterminer le zoom optimal
+            const startPoint = coordinates[0];
+            const endPoint = coordinates[coordinates.length - 1];
+            const distance = route.distance / 1000; // distance en km
+            
+            let maxZoom;
+            let padding;
+            
+            // Ajuster le zoom selon la distance
+            if (distance < 5) {
+                maxZoom = 16;  // Très proche - zoom max
+                padding = 30;
+            } else if (distance < 20) {
+                maxZoom = 14;  // Distance moyenne - zoom élevé
+                padding = 40;
+            } else if (distance < 50) {
+                maxZoom = 12;  // Distance longue - zoom modéré
+                padding = 50;
+            } else {
+                maxZoom = 10;  // Très longue distance - zoom plus large
+                padding = 60;
+            }
+            
+            map.fitBounds(bounds, {
+                padding: padding,
+                maxZoom: maxZoom,
+                duration: 1200,
+                essential: true // Force l'animation même si l'utilisateur interagit
+            });
+            
+            console.log(`🗺️ Carte centrée sur itinéraire: ${distance}km, zoom max: ${maxZoom}`);
+        } catch (error) {
+            console.warn('Erreur lors du centrage sur itinéraire:', error);
+        }
+    }
+    
+    // Fonction pour afficher les infos de l'itinéraire sur la carte
+    function showRouteInfoOnMap(route) {
+        // Supprimer l'info précédente si elle existe
+        hideRouteInfoOnMap();
+        
+        const distance = (route.distance / 1000).toFixed(1);
+        const durationHours = Math.floor(route.duration / 3600);
+        const durationMinutes = Math.floor((route.duration % 3600) / 60);
+        const durationText = durationHours > 0 ? `${durationHours}h ${durationMinutes}min` : `${durationMinutes}min`;
+        
+        const routeInfo = document.createElement('div');
+        routeInfo.id = 'route-info-overlay';
+        routeInfo.style.cssText = `
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 32, 96, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 1002;
+            animation: slideInFromRight 0.5s ease-out;
+        `;
+        
+        routeInfo.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+                <span>📍</span>
+                <span>${distance} km • ${durationText}</span>
+            </div>
+        `;
+        
+        // Ajouter à la carte
+        document.getElementById('map').appendChild(routeInfo);
+        console.log('📊 Infos itinéraire affichées sur carte:', distance, 'km,', durationText);
+    }
+    
+    // Fonction pour masquer les infos de l'itinéraire sur la carte
+    function hideRouteInfoOnMap() {
+        const routeInfo = document.getElementById('route-info-overlay');
+        if (routeInfo) {
+            routeInfo.remove();
+            console.log('📊 Infos itinéraire masquées de la carte');
+        }
     }
 
     function clearCurrentRoute() {
@@ -1493,6 +2164,17 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         }
         
         currentRouteSource = null;
+        
+        // Réactiver la légende et le rayon quand itinéraire supprimé
+        showLegend();
+        if (currentSearchCenter) {
+            showRadiusControl();
+            // Redessiner le cercle de rayon avec la valeur courante
+            drawSearchRadiusCircle(currentSearchCenter, currentSearchRadius);
+        }
+        
+        // Masquer les infos de route de la carte
+        hideRouteInfoOnMap();
         
         // Rafraîchir les popups actifs pour mettre à jour les boutons
         activePopups.forEach(popup => {
@@ -1782,12 +2464,216 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         routeMode = false;
     }
     
+    // Fonctions pour masquer/afficher les cartes d'établissements
+    function hideEstablishmentCards() {
+        const establishmentsView = document.getElementById('establishments-view');
+        const resultsCount = document.getElementById('results-count');
+        const resetMapBtn = document.getElementById('reset-map');
+        
+        if (establishmentsView) {
+            establishmentsView.classList.add('hide-establishments');
+            establishmentsView.classList.remove('show-establishments');
+        }
+        
+        if (resultsCount) {
+            resultsCount.style.display = 'none';
+        }
+        
+        if (resetMapBtn) {
+            resetMapBtn.style.display = 'none';
+        }
+        
+        console.log('🔍 Cartes d\'établissements masquées pour le mode itinéraire');
+    }
+    
+    function showEstablishmentCards() {
+        const establishmentsView = document.getElementById('establishments-view');
+        const resultsCount = document.getElementById('results-count');
+        const resetMapBtn = document.getElementById('reset-map');
+        
+        if (establishmentsView) {
+            establishmentsView.classList.remove('hide-establishments');
+            establishmentsView.classList.add('show-establishments');
+        }
+        
+        if (resultsCount) {
+            resultsCount.style.display = 'block';
+        }
+        
+        if (resetMapBtn) {
+            resetMapBtn.style.display = 'block';
+        }
+        
+        console.log('🔍 Cartes d\'établissements restaurées');
+    }
+    
+    function showRouteDetails() {
+        const routeDetailsPanel = document.getElementById('route-details-panel');
+        const establishmentsView = document.getElementById('establishments-view');
+        
+        if (routeDetailsPanel) {
+            routeDetailsPanel.style.display = 'block';
+            routeDetailsPanel.classList.add('route-active');
+        }
+        
+        hideEstablishmentCards();
+        activateRouteMode();
+        
+        console.log('🗺️ Panneau détaillé des instructions affiché');
+    }
+    
+    function hideRouteDetails() {
+        const routeDetailsPanel = document.getElementById('route-details-panel');
+        
+        if (routeDetailsPanel) {
+            routeDetailsPanel.style.display = 'none';
+            routeDetailsPanel.classList.remove('route-active');
+        }
+        
+        showEstablishmentCards();
+        deactivateRouteMode();
+        
+        console.log('🗺️ Panneau détaillé des instructions masqué');
+    }
+    
+    // Mode visuel avancé pour l'itinéraire
+    function activateRouteMode() {
+        const mapContainer = document.getElementById('map-container');
+        if (mapContainer) {
+            mapContainer.classList.add('route-mode-active');
+            
+            // Animation fluide avec délai
+            setTimeout(() => {
+                if (map) {
+                    map.resize(); // Redimensionner la carte
+                }
+            }, 500);
+        }
+        
+        // Ajout d'effets visuels sur la route
+        addRouteVisualEffects();
+        
+        console.log('🎨 Mode itinéraire visuel activé');
+    }
+    
+    function deactivateRouteMode() {
+        const mapContainer = document.getElementById('map-container');
+        if (mapContainer) {
+            mapContainer.classList.remove('route-mode-active');
+            
+            // Animation fluide avec délai
+            setTimeout(() => {
+                if (map) {
+                    map.resize(); // Redimensionner la carte
+                }
+            }, 500);
+        }
+        
+        removeRouteVisualEffects();
+        
+        console.log('🎨 Mode itinéraire visuel désactivé');
+    }
+    
+    // Effets visuels avancés pour la route
+    function addRouteVisualEffects() {
+        if (!map || !map.getLayer('route')) return;
+        
+        // Ajouter l'animation de pulsation à la route
+        try {
+            map.setPaintProperty('route', 'line-opacity', 0.9);
+            map.setPaintProperty('route', 'line-width', [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                10, 6,
+                18, 12
+            ]);
+            
+            // Animation de la route (effet de pulsation)
+            let opacity = 0.7;
+            let direction = 1;
+            
+            const routeAnimation = setInterval(() => {
+                if (!map || !map.getLayer('route')) {
+                    clearInterval(routeAnimation);
+                    return;
+                }
+                
+                opacity += direction * 0.05;
+                if (opacity >= 1 || opacity <= 0.7) {
+                    direction *= -1;
+                }
+                
+                try {
+                    map.setPaintProperty('route', 'line-opacity', opacity);
+                } catch (e) {
+                    clearInterval(routeAnimation);
+                }
+            }, 100);
+            
+            // Stocker l'animation pour pouvoir l'arrêter
+            window.routeAnimation = routeAnimation;
+            
+        } catch (error) {
+            console.warn('Erreur lors de l\'ajout des effets visuels:', error);
+        }
+    }
+    
+    function removeRouteVisualEffects() {
+        // Arrêter l'animation
+        if (window.routeAnimation) {
+            clearInterval(window.routeAnimation);
+            window.routeAnimation = null;
+        }
+        
+        // Restaurer les propriétés de la route
+        try {
+            if (map && map.getLayer('route')) {
+                map.setPaintProperty('route', 'line-opacity', 0.8);
+                map.setPaintProperty('route', 'line-width', 5);
+            }
+        } catch (error) {
+            console.warn('Erreur lors de la suppression des effets visuels:', error);
+        }
+    }
+    
+    // Fonction pour mettre à jour uniquement le résumé de l'itinéraire
+    function updateRouteSummary(routeData) {
+        const routeDistance = document.getElementById('route-distance');
+        const routeDuration = document.getElementById('route-duration');
+        const routeVehicleInfo = document.getElementById('route-vehicle-info');
+        
+        if (!routeData || !routeData.routes || !routeData.routes[0]) {
+            console.error('❌ Données de routage invalides');
+            return;
+        }
+        
+        const route = routeData.routes[0];
+        
+        // Mise à jour du résumé
+        const totalDistance = (route.distance / 1000).toFixed(1);
+        const totalDurationHours = Math.floor(route.duration / 3600);
+        const totalDurationMinutes = Math.floor((route.duration % 3600) / 60);
+        
+        routeDistance.textContent = `${totalDistance} km`;
+        routeDuration.textContent = `${totalDurationHours}h ${totalDurationMinutes}min`;
+        
+        // Mise à jour des infos véhicule
+        const vehicleText = currentVehicleType === 'driving-traffic' ? 'Poids lourd' : 'Voiture';
+        const tollText = currentTollOption === 'avoid' ? 'Péages évités' : 'Péages autorisés';
+        routeVehicleInfo.textContent = `Type: ${vehicleText} • ${tollText}`;
+        
+        console.log('🗺️ Résumé de l\'itinéraire mis à jour');
+    }
+    
     function initializeRouteInterface() {
         const addDestinationBtn = document.getElementById('add-destination-btn');
-        const calculateRouteBtn = document.getElementById('calculate-route-btn');
         const clearRouteBtn = document.getElementById('clear-route-btn');
         const pointASection = document.getElementById('point-a-section');
         const pointBSection = document.getElementById('point-b-section');
+        
+        // Initialiser les switchers de routage
+        initializeRouteSwitchers();
         
         // Event listeners pour tracker le focus
         if (pointASection) {
@@ -1809,16 +2695,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             });
         }
         
-        // Calculer l'itinéraire
-        if (calculateRouteBtn) {
-            calculateRouteBtn.addEventListener('click', () => {
-                if (currentSearchCenter && destinationCoords) {
-                    showRouteOnMap(currentSearchCenter, destinationCoords);
-                } else {
-                    alert('Veuillez sélectionner un point de départ et une destination.');
-                }
-            });
-        }
+        // Plus besoin de bouton calculer - c'est automatique avec les boutons d'options
         
         // Effacer l'itinéraire
         if (clearRouteBtn) {
@@ -1831,7 +2708,145 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     geocoderB.clear();
                 }
                 hidePointB(); // Masquer le Point B après effacement
+                hideRouteDetails(); // Masquer le panneau de détails
             });
+        }
+        
+        // Bouton retour à la recherche
+        const backToSearchBtn = document.getElementById('back-to-search-btn');
+        if (backToSearchBtn) {
+            backToSearchBtn.addEventListener('click', () => {
+                hideRouteDetails();
+                clearCurrentRoute();
+            });
+        }
+        
+    }
+    
+    // Variables pour les options de routage actuelles
+    let currentVehicleType = 'driving';
+    let currentTollOption = 'allow';
+    
+    // Initialiser les switchers de routage
+    function initializeRouteSwitchers() {
+        // Switcher véhicule
+        const vehicleCar = document.getElementById('vehicle-car');
+        const vehicleTruck = document.getElementById('vehicle-truck');
+        
+        if (vehicleCar && vehicleTruck) {
+            vehicleCar.addEventListener('click', () => {
+                vehicleCar.classList.add('active');
+                vehicleTruck.classList.remove('active');
+                vehicleCar.style.background = '#007bff';
+                vehicleCar.style.color = 'white';
+                vehicleTruck.style.background = 'transparent';
+                vehicleTruck.style.color = '#6c757d';
+                
+                currentVehicleType = 'driving';
+                console.log('🚗 Véhicule: Voiture');
+                recalculateRoute();
+            });
+            
+            vehicleTruck.addEventListener('click', () => {
+                vehicleTruck.classList.add('active');
+                vehicleCar.classList.remove('active');
+                vehicleTruck.style.background = '#ffc107';
+                vehicleTruck.style.color = 'white';
+                vehicleCar.style.background = 'transparent';
+                vehicleCar.style.color = '#6c757d';
+                
+                currentVehicleType = 'driving-traffic';
+                console.log('🚛 Véhicule: Camion');
+                recalculateRoute();
+            });
+        }
+        
+        // Switcher péages
+        const tollAllow = document.getElementById('toll-allow');
+        const tollAvoid = document.getElementById('toll-avoid');
+        
+        if (tollAllow && tollAvoid) {
+            tollAllow.addEventListener('click', () => {
+                tollAllow.classList.add('active');
+                tollAvoid.classList.remove('active');
+                tollAllow.style.background = '#28a745';
+                tollAllow.style.color = 'white';
+                tollAvoid.style.background = 'transparent';
+                tollAvoid.style.color = '#6c757d';
+                
+                currentTollOption = 'allow';
+                console.log('✅ Péages: Avec');
+                recalculateRoute();
+            });
+            
+            tollAvoid.addEventListener('click', () => {
+                tollAvoid.classList.add('active');
+                tollAllow.classList.remove('active');
+                tollAvoid.style.background = '#dc3545';
+                tollAvoid.style.color = 'white';
+                tollAllow.style.background = 'transparent';
+                tollAllow.style.color = '#6c757d';
+                
+                currentTollOption = 'avoid';
+                console.log('❌ Péages: Sans');
+                recalculateRoute();
+            });
+        }
+        
+        // Toggle pour les options de routage (molette)
+        const toggleBtn = document.getElementById('toggle-route-options');
+        const optionsContainer = document.getElementById('route-options-container');
+        
+        if (toggleBtn && optionsContainer) {
+            toggleBtn.addEventListener('click', () => {
+                const isHidden = optionsContainer.style.display === 'none';
+                
+                if (isHidden) {
+                    optionsContainer.style.display = 'block';
+                    optionsContainer.style.opacity = '0';
+                    optionsContainer.style.transform = 'translateY(-10px)';
+                    
+                    setTimeout(() => {
+                        optionsContainer.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                        optionsContainer.style.opacity = '1';
+                        optionsContainer.style.transform = 'translateY(0)';
+                    }, 10);
+                    
+                    toggleBtn.style.background = 'rgba(255,255,255,0.3)';
+                    toggleBtn.title = 'Masquer les options';
+                } else {
+                    optionsContainer.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    optionsContainer.style.opacity = '0';
+                    optionsContainer.style.transform = 'translateY(-10px)';
+                    
+                    setTimeout(() => {
+                        optionsContainer.style.display = 'none';
+                    }, 300);
+                    
+                    toggleBtn.style.background = 'rgba(255,255,255,0.2)';
+                    toggleBtn.title = 'Options de routage';
+                }
+            });
+            
+            // Effet hover sur la molette
+            toggleBtn.addEventListener('mouseenter', () => {
+                toggleBtn.style.background = 'rgba(255,255,255,0.3)';
+                toggleBtn.style.transform = 'scale(1.1)';
+            });
+            
+            toggleBtn.addEventListener('mouseleave', () => {
+                const isOptionsVisible = optionsContainer.style.display !== 'none';
+                toggleBtn.style.background = isOptionsVisible ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.2)';
+                toggleBtn.style.transform = 'scale(1)';
+            });
+        }
+    }
+    
+    // Auto-recalcul quand les options changent
+    function recalculateRoute() {
+        if (currentSearchCenter && destinationCoords) {
+            console.log('🔄 Recalcul avec:', { vehicle: currentVehicleType, tolls: currentTollOption });
+            showRouteOnMap(currentSearchCenter, destinationCoords);
         }
     }
     

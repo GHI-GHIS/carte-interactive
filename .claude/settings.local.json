@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(start carte.html)",
-      "Bash(start test-route.html)"
+      "Bash(start test-route.html)",
+      "Bash(start \"C:\\Users\\ghislain.levrat\\OneDrive - VICAT\\Documents\\GitHub\\carte-interactive\\carte.html\")",
+      "WebFetch(domain:docs.mapbox.com)",
+      "WebSearch",
+      "WebFetch(domain:tollguru.com)"
     ],
     "deny": [],
     "ask": []
