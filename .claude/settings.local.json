@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(start carte.html)",
+      "Bash(start test-route.html)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
