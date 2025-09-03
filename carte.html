@@ -2586,6 +2586,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Déterminer quel point mettre à jour selon le focus
         if (currentFocusedInput === 'B') {
             
+            // Double vérification pour le Point B avant mise à jour
+            if (currentPointACoords && areCoordinatesIdentical(currentPointACoords, coordinates)) {
+                showIdenticalPointsWarning();
+                return;
+            }
+            
             // Mettre à jour le Point B
             destinationCoords = coordinates;
             updatePointBDisplay(feature.properties);
@@ -2645,6 +2651,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }
         } else if (currentSearchCenter && !destinationCoords) {
             // Si Point A est défini mais pas Point B, définir Point B
+            // Vérification supplémentaire pour éviter les doublons
+            if (areCoordinatesIdentical(currentSearchCenter, coordinates)) {
+                showIdenticalPointsWarning();
+                return;
+            }
             destinationCoords = coordinates;
             updatePointBDisplay(feature.properties);
             showPointB();
@@ -2676,6 +2687,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }, 500);
         } else {
             // Si A et B sont définis, remplacer B par défaut
+            // Vérification finale pour éviter les doublons lors du remplacement de B
+            if (currentPointACoords && areCoordinatesIdentical(currentPointACoords, coordinates)) {
+                showIdenticalPointsWarning();
+                return;
+            }
             destinationCoords = coordinates;
             updatePointBDisplay(feature.properties);
             
@@ -3043,7 +3059,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 map.getSource('radius-circle-source').setData(circleGeoJSON);
             } else {
                 map.addSource('radius-circle-source', { type: 'geojson', data: circleGeoJSON });
-                map.addLayer({ id: 'radius-circle-layer', type: 'line', source: 'radius-circle-source', layout: {}, paint: { 'line-color': '#007cbf', 'line-width': 2, 'line-dasharray': [2, 2] } });
+                map.addLayer({ id: 'radius-circle-layer', type: 'line', source: 'radius-circle-source', layout: {}, paint: { 'line-color': '#555', 'line-width': 2, 'line-dasharray': [2, 2] } });
             }
         } catch (e) { console.error("Erreur lors de la création du cercle:", e); }
     }
