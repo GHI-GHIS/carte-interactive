@@ -390,6 +390,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     let currentFocusedInput = 'A'; // Track which input (A or B) has focus
     let geocoderB = null; // Geocoder pour le Point B
     let realRouteData = null; // Stocker les données réelles de routage (distance et temps)
+    let isRouteMode = false; // Tracker si on est en mode itinéraire pour contrôler l'affichage du rayon
     
     // Variables pour stocker les features des points sélectionnés
     let currentPointAFeature = null; // Feature complète du Point A
@@ -2012,6 +2013,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         });
         
         currentRouteSource = 'route';
+        isRouteMode = true; // Activer le mode itinéraire
         
         // Masquer rayon et légende quand itinéraire affiché
         hideRadiusControl();
@@ -2044,45 +2046,51 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         }
     }
     
-    // Fonction pour centrer la carte sur l'itinéraire avec zoom optimal
+    // Fonction pour centrer la carte sur l'itinéraire avec zoom optimal sur les deux points
     function fitMapToRoute(route) {
         try {
             const coordinates = route.geometry.coordinates;
-            const bounds = coordinates.reduce((bounds, coord) => {
-                return bounds.extend(coord);
-            }, new mapboxgl.LngLatBounds(coordinates[0], coordinates[0]));
-            
-            // Calculer la distance entre les points pour déterminer le zoom optimal
             const startPoint = coordinates[0];
             const endPoint = coordinates[coordinates.length - 1];
             const distance = route.distance / 1000; // distance en km
             
+            // Créer bounds uniquement avec les points de départ et d'arrivée pour zoom maximum
+            const bounds = new mapboxgl.LngLatBounds()
+                .extend(startPoint)
+                .extend(endPoint);
+            
             let maxZoom;
             let padding;
             
-            // Ajuster le zoom selon la distance
-            if (distance < 5) {
-                maxZoom = 16;  // Très proche - zoom max
+            // Zoom plus agressif avec padding minimal pour voir les deux points au maximum
+            if (distance < 2) {
+                maxZoom = 18;  // Très proche - zoom ultra-max
+                padding = 10;
+            } else if (distance < 5) {
+                maxZoom = 17;  // Très proche - zoom très élevé
+                padding = 15;
+            } else if (distance < 15) {
+                maxZoom = 15;  // Distance courte - zoom élevé
+                padding = 20;
+            } else if (distance < 40) {
+                maxZoom = 13;  // Distance moyenne - zoom modéré-élevé
+                padding = 25;
+            } else if (distance < 100) {
+                maxZoom = 11;  // Distance longue - zoom modéré
                 padding = 30;
-            } else if (distance < 20) {
-                maxZoom = 14;  // Distance moyenne - zoom élevé
-                padding = 40;
-            } else if (distance < 50) {
-                maxZoom = 12;  // Distance longue - zoom modéré
-                padding = 50;
             } else {
-                maxZoom = 10;  // Très longue distance - zoom plus large
-                padding = 60;
+                maxZoom = 9;   // Très longue distance - zoom large
+                padding = 40;
             }
             
             map.fitBounds(bounds, {
                 padding: padding,
                 maxZoom: maxZoom,
-                duration: 1200,
+                duration: 1500,
                 essential: true // Force l'animation même si l'utilisateur interagit
             });
             
-            console.log(`🗺️ Carte centrée sur itinéraire: ${distance}km, zoom max: ${maxZoom}`);
+            console.log(`🗺️ Carte centrée sur deux points: ${distance}km, zoom max: ${maxZoom}, padding: ${padding}px`);
         } catch (error) {
             console.warn('Erreur lors du centrage sur itinéraire:', error);
         }
@@ -2164,6 +2172,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         }
         
         currentRouteSource = null;
+        isRouteMode = false; // Désactiver le mode itinéraire
         
         // Réactiver la légende et le rayon quand itinéraire supprimé
         showLegend();
@@ -3477,23 +3486,25 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Remettre le focus sur A
         setFocusOnPointA();
         
-        // Gérer le rayon intelligemment selon la présence de Point B
-        const pointBCoords = getCurrentPointBCoords();
-        if (pointBCoords) {
-            // Si Point B existe, l'utiliser comme nouveau centre pour le rayon
-            currentSearchCenter = pointBCoords;
-            console.log('🎯 Point B devient le nouveau centre de rayon:', pointBCoords);
-            
-            // Maintenir le contrôle de rayon visible et redessiner le cercle
-            const radiusControl = document.querySelector('.map-radius-control');
-            if (radiusControl) radiusControl.style.display = 'block';
-            
-            drawSearchRadiusCircle(pointBCoords, currentSearchRadius);
-        } else {
-            // Si Point B n'existe pas, comportement normal (cacher le rayon)
-            const radiusControl = document.querySelector('.map-radius-control');
-            if (radiusControl) radiusControl.style.display = 'none';
-            removeSearchRadiusCircle();
+        // Gérer le rayon intelligemment selon la présence de Point B (sauf en mode itinéraire)
+        if (!isRouteMode) {
+            const pointBCoords = getCurrentPointBCoords();
+            if (pointBCoords) {
+                // Si Point B existe, l'utiliser comme nouveau centre pour le rayon
+                currentSearchCenter = pointBCoords;
+                console.log('🎯 Point B devient le nouveau centre de rayon:', pointBCoords);
+                
+                // Maintenir le contrôle de rayon visible et redessiner le cercle
+                const radiusControl = document.querySelector('.map-radius-control');
+                if (radiusControl) radiusControl.style.display = 'block';
+                
+                drawSearchRadiusCircle(pointBCoords, currentSearchRadius);
+            } else {
+                // Si Point B n'existe pas, comportement normal (cacher le rayon)
+                const radiusControl = document.querySelector('.map-radius-control');
+                if (radiusControl) radiusControl.style.display = 'none';
+                removeSearchRadiusCircle();
+            }
         }
         
         // Réappliquer les filtres avec le nouveau contexte
