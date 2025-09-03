@@ -179,6 +179,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     let geocoderB = null; // Geocoder pour le Point B
     let realRouteData = null; // Stocker les données réelles de routage (distance et temps)
     
+    // Variables pour stocker les features des points sélectionnés
+    let currentPointAFeature = null; // Feature complète du Point A
+    let currentPointBFeature = null; // Feature complète du Point B
+    
     // Fonction pour mapper les activités vers les types de légende
     function getActivityType(activity) {
         const activityLower = activity?.toLowerCase() || '';
@@ -2039,6 +2043,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         currentSearchRadius = 80;
         destinationCoords = null;
         currentFocusedInput = 'A'; // Remettre le focus sur A
+        currentPointAFeature = null;
+        currentPointBFeature = null;
         
         removeSearchRadiusCircle();
         clearPointADisplay();
@@ -2426,6 +2432,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     function clearPointASelection() {
         // Réinitialiser les variables
         currentSearchCenter = null;
+        currentPointAFeature = null;
         
         // Cacher l'affichage du Point A sélectionné
         clearPointADisplay();
@@ -2483,6 +2490,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     function clearPointBSelection() {
         // Réinitialiser la destination
         destinationCoords = null;
+        currentPointBFeature = null;
         
         // Cacher l'affichage du Point B sélectionné
         clearPointBDisplay();
@@ -2507,6 +2515,29 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     function areCoordinatesIdentical(coords1, coords2, tolerance = 0.00001) {
         if (!coords1 || !coords2) return false;
         return Math.abs(coords1[0] - coords2[0]) < tolerance && Math.abs(coords1[1] - coords2[1]) < tolerance;
+    }
+    
+    function areEstablishmentsIdentical(feature1, feature2) {
+        // Vérification robuste pour identifier si deux établissements sont identiques
+        if (!feature1 || !feature2) return false;
+        
+        // Comparaison par propriété UP (identifiant principal)
+        const up1 = feature1.properties?.UP;
+        const up2 = feature2.properties?.UP;
+        if (up1 && up2 && up1 === up2) {
+            console.log('🚫 Établissements identiques détectés par UP:', up1);
+            return true;
+        }
+        
+        // Comparaison par coordonnées en fallback
+        const coords1 = feature1.geometry?.coordinates;
+        const coords2 = feature2.geometry?.coordinates;
+        if (coords1 && coords2 && areCoordinatesIdentical(coords1, coords2)) {
+            console.log('🚫 Établissements identiques détectés par coordonnées:', coords1);
+            return true;
+        }
+        
+        return false;
     }
     
     function showIdenticalPointsWarning() {
@@ -2565,145 +2596,44 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
 
     function focusOnEstablishment(feature) {
-        console.log('🎯 focusOnEstablishment called for:', feature.properties);
-        console.log('Current focused input:', currentFocusedInput);
+        console.log('🎯 focusOnEstablishment called for:', feature.properties.UP || 'Unknown');
+        console.log('📍 Current state - A:', currentPointAFeature?.properties?.UP || 'none', 'B:', currentPointBFeature?.properties?.UP || 'none');
+        console.log('🎯 Focus:', currentFocusedInput);
+        
         const coordinates = feature.geometry.coordinates;
         
-        // Vérification globale d'identité des points avant toute action
-        const currentPointACoords = getCurrentPointACoords();
-        const currentPointBCoords = getCurrentPointBCoords();
-        
-        // Vérifier si les coordonnées sont identiques à un point existant
-        if (currentPointACoords && areCoordinatesIdentical(currentPointACoords, coordinates)) {
+        // 🔍 ÉTAPE 1: Vérification anti-doublon robuste
+        if (currentPointAFeature && areEstablishmentsIdentical(currentPointAFeature, feature)) {
+            console.log('🚫 Tentative de sélection du même établissement pour A et B');
             showIdenticalPointsWarning();
             return;
         }
-        if (currentPointBCoords && areCoordinatesIdentical(currentPointBCoords, coordinates)) {
+        if (currentPointBFeature && areEstablishmentsIdentical(currentPointBFeature, feature)) {
+            console.log('🚫 Tentative de sélection du même établissement pour A et B');
             showIdenticalPointsWarning();
             return;
         }
         
-        // Déterminer quel point mettre à jour selon le focus
-        if (currentFocusedInput === 'B') {
+        // 🎯 ÉTAPE 2: Logique de sélection basée sur l'état actuel
+        if (!currentPointAFeature) {
+            // CAS 1: Aucun Point A → Sélectionner comme Point A
+            console.log('📍 CAS 1: Sélection Point A (aucun point A existant)');
+            selectAsPointA(feature);
             
-            // Double vérification pour le Point B avant mise à jour
-            if (currentPointACoords && areCoordinatesIdentical(currentPointACoords, coordinates)) {
-                showIdenticalPointsWarning();
-                return;
-            }
+        } else if (!currentPointBFeature) {
+            // CAS 2: Point A existe, pas de Point B → Sélectionner comme Point B
+            console.log('📍 CAS 2: Sélection Point B (Point A existe, pas de Point B)');
+            selectAsPointB(feature);
             
-            // Mettre à jour le Point B
-            destinationCoords = coordinates;
-            updatePointBDisplay(feature.properties);
-            
-            // Si Point A est défini, calculer l'itinéraire
-            const realPointACoords = getCurrentPointACoords();
-            if (realPointACoords && destinationCoords) {
-                console.log('🎯 Déclenchement calcul auto - Point B sélectionné:', {
-                    realPointACoords,
-                    destinationCoords,
-                    focusedInput: currentFocusedInput
-                });
-                setTimeout(() => {
-                    showRouteOnMap(realPointACoords, destinationCoords);
-                }, 500);
-            } else {
-                console.warn('⚠️ Calcul auto annulé - Variables manquantes:', {
-                    realPointACoords,
-                    destinationCoords,
-                    currentSearchCenter
-                });
-            }
-        } else if (currentFocusedInput === 'A' || !currentSearchCenter) {
-            // Mettre à jour le Point A
-            currentSearchCenter = coordinates;
-            updatePointADisplay(feature.properties);
-            
-            // Afficher automatiquement le Point B après sélection du Point A
-            showPointB();
-            
-            // Changer automatiquement le focus vers B pour le prochain double-clic
-            setFocusOnPointB();
-            
-            // Afficher le sélecteur de rayon
-            showRadiusControl();
-            showRouteInterface();
-            
-            const radiusSlider = document.getElementById('radius-slider');
-            if (radiusSlider) radiusSlider.value = 80;
-            
-            const radiusValue = document.getElementById('radius-value');
-            if (radiusValue) radiusValue.textContent = "80 km";
-            drawSearchRadiusCircle(currentSearchCenter, 80);
-            applyFilters();
-            
-            // Vérifier si Point B existe déjà et calculer le trajet dans ce cas
-            const existingPointBCoords = getCurrentPointBCoords();
-            if (existingPointBCoords) {
-                console.log('🎯 Déclenchement calcul auto - Point A sélectionné avec Point B existant:', {
-                    currentSearchCenter,
-                    existingPointBCoords,
-                    source: 'focusOnEstablishment-A-with-existing-B'
-                });
-                setTimeout(() => {
-                    showRouteOnMap(currentSearchCenter, existingPointBCoords);
-                }, 500);
-            }
-        } else if (currentSearchCenter && !destinationCoords) {
-            // Si Point A est défini mais pas Point B, définir Point B
-            // Vérification supplémentaire pour éviter les doublons
-            if (areCoordinatesIdentical(currentSearchCenter, coordinates)) {
-                showIdenticalPointsWarning();
-                return;
-            }
-            destinationCoords = coordinates;
-            updatePointBDisplay(feature.properties);
-            showPointB();
-            
-            // Calculer l'itinéraire
-            console.log('🎯 Déclenchement calcul auto - Point A défini, B nouveau:', {
-                currentSearchCenter,
-                destinationCoords,
-                source: 'focusOnEstablishment-case3'
-            });
-            setTimeout(() => {
-                showRouteOnMap(currentSearchCenter, destinationCoords);
-            }, 500);
-        } else if (!currentSearchCenter && getCurrentPointBCoords()) {
-            // Cas spécial : Point A a été désélectionné mais Point B existe encore
-            // Définir le nouveau point comme Point A
-            currentSearchCenter = coordinates;
-            updatePointADisplay(feature.properties);
-            
-            // Calculer l'itinéraire avec le Point B existant
-            const existingPointBCoords = getCurrentPointBCoords();
-            console.log('🎯 Déclenchement calcul auto - A redéfini, B existant:', {
-                currentSearchCenter,
-                destinationCoords: existingPointBCoords,
-                source: 'focusOnEstablishment-case-special'
-            });
-            setTimeout(() => {
-                showRouteOnMap(currentSearchCenter, existingPointBCoords);
-            }, 500);
         } else {
-            // Si A et B sont définis, remplacer B par défaut
-            // Vérification finale pour éviter les doublons lors du remplacement de B
-            if (currentPointACoords && areCoordinatesIdentical(currentPointACoords, coordinates)) {
-                showIdenticalPointsWarning();
-                return;
+            // CAS 3: A et B existent → Utiliser le focus pour déterminer lequel remplacer
+            if (currentFocusedInput === 'A') {
+                console.log('📍 CAS 3A: Remplacement Point A (focus sur A)');
+                selectAsPointA(feature);
+            } else {
+                console.log('📍 CAS 3B: Remplacement Point B (focus sur B ou défaut)');
+                selectAsPointB(feature);
             }
-            destinationCoords = coordinates;
-            updatePointBDisplay(feature.properties);
-            
-            // Recalculer l'itinéraire  
-            console.log('🎯 Déclenchement calcul auto - A et B définis, remplacement B:', {
-                currentSearchCenter,
-                destinationCoords,
-                source: 'focusOnEstablishment-case4'
-            });
-            setTimeout(() => {
-                showRouteOnMap(currentSearchCenter, destinationCoords);
-            }, 500);
         }
         
         // Zoom sur l'établissement
@@ -2711,6 +2641,63 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         // Utiliser showSinglePopup pour garantir qu'un seul popup soit visible
         showSinglePopup(feature.properties, coordinates);
+    }
+    
+    function selectAsPointA(feature) {
+        console.log('🅰️ Sélection Point A:', feature.properties.UP || 'Unknown');
+        
+        const coordinates = feature.geometry.coordinates;
+        
+        // Mettre à jour les variables globales
+        currentSearchCenter = coordinates;
+        currentPointAFeature = feature;
+        
+        // Mettre à jour l'affichage
+        updatePointADisplay(feature.properties);
+        
+        // Configuration de l'interface
+        showPointB();
+        setFocusOnPointB();
+        showRadiusControl();
+        showRouteInterface();
+        
+        // Configuration du rayon
+        const radiusSlider = document.getElementById('radius-slider');
+        if (radiusSlider) radiusSlider.value = 80;
+        const radiusValue = document.getElementById('radius-value');
+        if (radiusValue) radiusValue.textContent = "80 km";
+        drawSearchRadiusCircle(currentSearchCenter, 80);
+        applyFilters();
+        
+        // Si Point B existe déjà, calculer l'itinéraire
+        if (currentPointBFeature && destinationCoords) {
+            console.log('🎯 Calcul auto - Point A sélectionné avec Point B existant');
+            setTimeout(() => {
+                showRouteOnMap(currentSearchCenter, destinationCoords);
+            }, 500);
+        }
+    }
+    
+    function selectAsPointB(feature) {
+        console.log('🅱️ Sélection Point B:', feature.properties.UP || 'Unknown');
+        
+        const coordinates = feature.geometry.coordinates;
+        
+        // Mettre à jour les variables globales
+        destinationCoords = coordinates;
+        currentPointBFeature = feature;
+        
+        // Mettre à jour l'affichage
+        updatePointBDisplay(feature.properties);
+        showPointB();
+        
+        // Si Point A existe, calculer l'itinéraire
+        if (currentPointAFeature && currentSearchCenter) {
+            console.log('🎯 Calcul auto - Point B sélectionné avec Point A existant');
+            setTimeout(() => {
+                showRouteOnMap(currentSearchCenter, destinationCoords);
+            }, 500);
+        }
     }
     
     function updateSidebarBasedOnMapViewport() {
