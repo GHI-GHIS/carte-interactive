@@ -2,6 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Carte des Établissements</title>
   <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
@@ -196,7 +197,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             <div class="route-input-group">
               <label>Point A (origine):</label>
               <div id="selected-point-a" style="display:none; padding: 8px 40px 8px 8px; background: #e3f2fd; border-radius: 4px; margin-bottom: 8px; font-size: 14px; color: #1976d2; position: relative;">
-                <strong>📍 </strong><span id="point-a-name"></span>
+                <strong>[Point A] </strong><span id="point-a-name"></span>
                 <button id="clear-point-a" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; background: rgba(211, 47, 47, 0.1); color: #d32f2f; border: 1px solid rgba(211, 47, 47, 0.3); width: 20px; height: 20px; border-radius: 50%; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="Désélectionner">×</button>
               </div>
               <div class="point-input-container">
@@ -212,7 +213,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             <div class="route-input-group">
               <label>Point B (destination):</label>
               <div id="selected-point-b" style="display:none; padding: 8px 40px 8px 8px; background: #fff3cd; border-radius: 4px; margin-bottom: 8px; font-size: 14px; color: #856404; position: relative;">
-                <strong>📍 </strong><span id="point-b-name"></span>
+                <strong>[Point B] </strong><span id="point-b-name"></span>
                 <button id="clear-point-b" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); cursor: pointer; background: rgba(211, 47, 47, 0.1); color: #d32f2f; border: 1px solid rgba(211, 47, 47, 0.3); width: 20px; height: 20px; border-radius: 50%; font-size: 12px; font-weight: bold; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" title="Désélectionner">×</button>
               </div>
               <div class="point-input-container">
@@ -249,7 +250,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
               <div id="vehicle-car" class="switcher-option active" style="
                 padding:4px 12px; border-radius:18px; font-size:10px; font-weight:600;
                 background:#007bff; color:white; transition:all 0.3s; text-align:center;
-              ">🚗 Voiture</div>
+              ">[CAR] Voiture</div>
               <div id="vehicle-truck" class="switcher-option" style="
                 padding:4px 12px; border-radius:18px; font-size:10px; font-weight:600;
                 background:transparent; color:#6c757d; transition:all 0.3s; text-align:center;
@@ -407,8 +408,57 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         return 'ciment'; // Par défaut
     }
     
-    // Données des établissements
-    const establishmentsData = {
+    // Fonction pour convertir les caractères accentués en Unicode dans les données
+    function convertToUnicodeEscapes(obj) {
+        if (typeof obj === 'string') {
+            // Remplacer tous les caractères accentués par leurs codes Unicode
+            return obj
+                .replace(/é/g, '\u00E9')
+                .replace(/É/g, '\u00C9')
+                .replace(/è/g, '\u00E8')
+                .replace(/È/g, '\u00C8')
+                .replace(/à/g, '\u00E0')
+                .replace(/À/g, '\u00C0')
+                .replace(/ù/g, '\u00F9')
+                .replace(/Ù/g, '\u00D9')
+                .replace(/ô/g, '\u00F4')
+                .replace(/Ô/g, '\u00D4')
+                .replace(/ç/g, '\u00E7')
+                .replace(/Ç/g, '\u00C7')
+                .replace(/â/g, '\u00E2')
+                .replace(/Â/g, '\u00C2')
+                .replace(/ê/g, '\u00EA')
+                .replace(/Ê/g, '\u00CA')
+                .replace(/î/g, '\u00EE')
+                .replace(/Î/g, '\u00CE')
+                .replace(/û/g, '\u00FB')
+                .replace(/Û/g, '\u00DB')
+                .replace(/ï/g, '\u00EF')
+                .replace(/Ï/g, '\u00CF')
+                .replace(/ë/g, '\u00EB')
+                .replace(/Ë/g, '\u00CB')
+                .replace(/ü/g, '\u00FC')
+                .replace(/Ü/g, '\u00DC')
+                .replace(/œ/g, '\u0153')
+                .replace(/Œ/g, '\u0152')
+                .replace(/æ/g, '\u00E6')
+                .replace(/Æ/g, '\u00C6');
+        } else if (Array.isArray(obj)) {
+            return obj.map(item => convertToUnicodeEscapes(item));
+        } else if (obj !== null && typeof obj === 'object') {
+            const result = {};
+            for (const key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    result[key] = convertToUnicodeEscapes(obj[key]);
+                }
+            }
+            return result;
+        }
+        return obj;
+    }
+
+    // Données des établissements (seront converties automatiquement)
+    const establishmentsDataRaw = {
       "type": "FeatureCollection",
       "features": [
         { "type": "Feature", "properties": { "UP": "Béton VICAT - LUXEUIL", "Adresse": "4 Rue des Prés", "Ville": "Saint-Sauveur", "Code postal": "70300", "Phone": "03 84 40 36 82", "Email": "beton.luxeuil@vicat.fr", "activity": "beton" }, "geometry": { "type": "Point", "coordinates": [6.8278029, 47.7370072] } },
@@ -588,7 +638,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         { "type": "Feature", "properties": { "UP": "Cimenterie de Peille", "Adresse": "2693 quart Grave de, 06440 Blausasc", "Ville": "Blausasc", "Code postal": "06440", "activity": "ciment" }, "geometry": { "type": "Point", "coordinates": [7.374574415562, 43.790325370506] } },
         { "type": "Feature", "properties": { "UP": "Cimenterie de Saint Egreve", "Adresse": "1 Rue du Lac", "Ville": "Saint-Egrève", "Code postal": "38120", "activity": "ciment" }, "geometry": { "type": "Point", "coordinates": [5.669908982548, 45.234425005147] } }
     ]
-    }
+    };
+    
+    // Convertir automatiquement tous les caractères accentués en Unicode
+    const establishmentsData = convertToUnicodeEscapes(establishmentsDataRaw);
 
     // Ajouter des IDs uniques aux features
     establishmentsData.features.forEach((feature, index) => {
@@ -605,9 +658,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
     function decodeHTMLEntities(text) {
         if (typeof text !== 'string') return text;
-        const textarea = document.createElement('textarea');
-        textarea.innerHTML = text;
-        return textarea.value;
+        // Retourner le texte directement sans décoder les entités HTML
+        // car les données sont déjà en UTF-8 et non en entités HTML
+        return text;
     }
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
         const R = 6371;
@@ -618,7 +671,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
 
     function localUPGeocoder(query) {
-        console.log('🔍 localUPGeocoder called with query:', query);
         const matchingFeatures = [];
         const queryLower = query.toLowerCase();
         establishmentsData.features.forEach((feature) => {
@@ -634,13 +686,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     center: feature.geometry.coordinates, geometry: feature.geometry
                 };
                 
-                console.log('✅ Found UP match:', upResult);
                 matchingFeatures.push(upResult);
             }
         });
         
         const results = matchingFeatures.slice(0, 5);
-        console.log('📋 localUPGeocoder returning:', results.length, 'results');
         return results;
     }
 
@@ -683,8 +733,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
 
     function addClusterLayers() {
-        console.log('Ajout des couches de clustering...');
-        
         // Cluster circles
         map.addLayer({
             id: 'clusters',
@@ -749,8 +797,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
     
     function loadMarkerImages(callback) {
-        console.log('Chargement des vraies images des marqueurs...');
-        
         const markers = {
             'beton-marker': '/sites/default/files/2024-09/point-interet-beton.png',
             'granulats-marker': '/sites/default/files/2024-09/point-interet-granulats.png',
@@ -763,31 +809,23 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         const checkComplete = () => {
             loadedCount++;
-            console.log(`Image ${loadedCount}/${markerIds.length} traitée`);
             if (loadedCount === markerIds.length && callback) {
-                console.log('Toutes les images de marqueurs ont été chargées');
                 callback();
             }
         };
         
         Object.entries(markers).forEach(([id, url]) => {
-            console.log(`Chargement de ${id} depuis ${url}`);
-            
             // Utiliser map.loadImage() directement (pas de problème CORS sur solutions-vicat.fr)
             map.loadImage(url, (error, image) => {
                 if (error) {
-                    console.error(`Erreur de chargement de l'image ${id}:`, error);
                     // Fallback avec icône SVG
                     createSVGMarkerIcon(id, getColorForMarker(id), getSymbolForMarker(id));
                 } else {
-                    console.log(`Image ${id} chargée avec succès (taille: ${image.data ? image.data.width + 'x' + image.data.height : 'inconnue'})`);
-                    
                     // Redimensionner l'image si elle est trop grande
                     const resizedImage = resizeImageForMap(image, 32, 32);
                     
                     if (!map.hasImage(id)) {
                         map.addImage(id, resizedImage);
-                        console.log(`Image ${id} redimensionnée et ajoutée à la carte`);
                     }
                 }
                 checkComplete();
@@ -836,7 +874,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             return resizedImageData;
             
         } catch (e) {
-            console.error('Erreur lors du redimensionnement:', e);
             // Retourner l'image originale en cas d'erreur
             return image;
         }
@@ -900,7 +937,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const imageData = ctx.getImageData(0, 0, size, size);
         if (!map.hasImage(id)) {
             map.addImage(id, imageData);
-            console.log(`Icône SVG fallback ${id} créée (${size}x${size})`);
         }
     }
     
@@ -947,13 +983,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         const imageData = ctx.getImageData(0, 0, size, size);
         if (!map.hasImage(id)) {
-            console.log(`Marqueur de base créé pour ${id}`);
             map.addImage(id, imageData);
         }
     }
     
     function createColoredMarkerForMapbox(id, color) {
-        console.log(`Création d'un marqueur coloré pour ${id} avec la couleur ${color}`);
         const size = 30;
         const canvas = document.createElement('canvas');
         canvas.width = size;
@@ -1051,10 +1085,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
 
     function updateLegendCountsFromViewport() {
-        console.log('updateLegendCountsFromViewport called');
-        
         if (!map.isStyleLoaded() || !primaryFilteredFeatures) {
-            console.log('Map not loaded or no features available');
             return;
         }
 
@@ -1079,8 +1110,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }
         }
 
-        console.log('Features to count:', featuresToCount.length);
-
         // Compter par type d'activité
         const counts = { beton: 0, granulats: 0, ciment: 0, 'ciment-prompt': 0 };
         
@@ -1090,8 +1119,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 counts[activity]++;
             }
         });
-
-        console.log('Counts:', counts);
 
         // Mettre à jour les éléments de la légende
         const betonCountElement = document.getElementById('beton-count');
@@ -1118,9 +1145,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const mapLegend = document.getElementById('map-legend');
         if (mapLegend) {
             mapLegend.style.display = 'block';
-            console.log('Legend updated with viewport counts');
         } else {
-            console.error('map-legend element not found');
         }
     }
 
@@ -1156,8 +1181,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
     // Fonction pour ajouter les bâtiments 3D et monuments
     function add3DBuildingsAndMonuments() {
-        console.log('🏢 Adding 3D buildings and monuments...');
-        
         // Ajouter les bâtiments 3D
         const layers = map.getStyle().layers;
         const labelLayerId = layers.find(
@@ -1244,7 +1267,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }
         });
 
-        console.log('✅ 3D buildings and monuments added successfully');
     }
 
     function onMapLoad() {
@@ -1287,19 +1309,23 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Ajouter les événements pour mise à jour temps réel de la légende
         setupMapViewportListeners();
         
-        // S'assurer que la légende s'affiche (remplacement par la nouvelle fonction)
-        setTimeout(() => {
-            console.log('Calling updateLegendCountsFromViewport...');
+        // Attendre que la carte soit complètement chargée et rendue
+        map.once('idle', () => {
+            // Affichage initial des cartes et de la légende
+            updateSidebarBasedOnMapViewport();
             updateLegendCountsFromViewport();
-        }, 500);
+        });
+        
+        // Fallback au cas où 'idle' ne se déclenche pas
+        setTimeout(() => {
+            updateSidebarBasedOnMapViewport();
+            updateLegendCountsFromViewport();
+        }, 1000);
     }
 
     function setupMapViewportListeners() {
-        console.log('Setting up map viewport listeners for real-time updates...');
-        
         // Créer une fonction debounced pour mettre à jour la sidebar ET la légende
         const debouncedViewportUpdate = debounce(() => {
-            console.log('Map viewport changed, updating sidebar and legend...');
             updateSidebarBasedOnMapViewport();
         }, 250); // Réduit légèrement le délai pour plus de réactivité
         
@@ -1312,24 +1338,18 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Écouter les changements de taille de fenêtre
         map.on('resize', debouncedViewportUpdate);
         
-        console.log('Map viewport listeners setup complete (sidebar + legend)');
     }
 
     function initializeGeocoder() {
-       console.log('🔧 Initializing geocoder...');
        geocoder = new MapboxGeocoder({
             accessToken: mapboxgl.accessToken, mapboxgl: mapboxgl,
             placeholder: 'Rechercher ville ou U.P.',
             countries: 'fr', localGeocoder: localUPGeocoder, localGeocoderOnly: false, language: 'fr'
        });
-       console.log('✅ Geocoder created:', geocoder);
        document.getElementById('geocoder-container').appendChild(geocoder.onAdd(map));
-       console.log('✅ Geocoder added to DOM');
        // Événement principal 'result'
        geocoder.on('result', (e) => {
-            console.log('🎯 Geocoder result event triggered:', e.result);
             currentSearchCenter = e.result.center || e.result.geometry.coordinates;
-            console.log('📍 Current search center set to:', currentSearchCenter);
             // Point A sélectionné - afficher automatiquement le Point B
             showRouteInterface();
             showPointB();
@@ -1364,11 +1384,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }
             
             // Afficher le contrôle de rayon quand une UP est sélectionnée
-            console.log('🔄 About to call showRadiusControl()...');
             showRadiusControl();
             applyFilters();
             if (e.result.properties && e.result.properties.UP) {
-                console.log('🏭 UP detected, flying to location');
                 map.flyTo({ center: e.result.center, zoom: 14, pitch: 45, essential: true });
             }
        });
@@ -1379,13 +1397,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             placeholder: 'Rechercher ville ou U.P.',
             countries: 'fr', localGeocoder: localUPGeocoder, localGeocoderOnly: false, language: 'fr'
        });
-       console.log('✅ Geocoder B created:', geocoderB);
        document.getElementById('geocoder-container-b').appendChild(geocoderB.onAdd(map));
-       console.log('✅ Geocoder B added to DOM');
-       
        // Événement 'result' pour Point B
        geocoderB.on('result', (e) => {
-            console.log('🎯 Geocoder B result event triggered:', e.result);
             const newDestinationCoords = e.result.center || e.result.geometry.coordinates;
             
             // Vérifier si les points ne sont pas identiques
@@ -1396,8 +1410,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }
             
             destinationCoords = newDestinationCoords;
-            console.log('📍 Destination set to:', destinationCoords);
-            
             // Mettre à jour l'affichage
             if (e.result.properties && e.result.properties['Nom du site']) {
                 updatePointBDisplay(e.result.properties);
@@ -1432,42 +1444,28 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             
             // Si A et B sont définis, calculer automatiquement l'itinéraire
             if (currentSearchCenter && destinationCoords) {
-                console.log('🎯 Déclenchement calcul auto - Geocoder B:', {
-                    currentSearchCenter,
-                    destinationCoords,
-                    source: 'geocoder-B'
-                });
                 setTimeout(() => {
                     showRouteOnMap(currentSearchCenter, destinationCoords);
                 }, 500);
             } else {
-                console.warn('⚠️ Calcul auto annulé - Geocoder B variables manquantes:', {
-                    currentSearchCenter,
-                    destinationCoords
-                });
             }
        });
        
        // Événements supplémentaires pour debug
        geocoder.on('loading', (e) => {
-            console.log('🔄 Geocoder loading:', e);
        });
        
        geocoder.on('results', (e) => {
-            console.log('📋 Geocoder results:', e.features);
        });
        
        geocoder.on('error', (e) => {
-            console.log('❌ Geocoder error:', e);
        });
        
        // Nouvel événement pour capturer les sélections (alternative)
        geocoder.on('response', (e) => {
-            console.log('📡 Geocoder response:', e);
        });
        
        geocoder.on('clear', () => {
-            console.log('🧹 Geocoder cleared');
             currentSearchCenter = null; 
             
             // Ne cacher l'interface de routage que si Point B n'est pas sélectionné
@@ -1486,37 +1484,25 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
     
     function setupGeocoderDOMWatcher() {
-        console.log('🔧 Setting up geocoder DOM watcher...');
-        
         // Surveiller les changements dans le container du geocoder
         setTimeout(() => {
             const geocoderContainer = document.querySelector('.mapboxgl-ctrl-geocoder');
             if (geocoderContainer) {
-                console.log('✅ Geocoder container found, adding DOM watcher');
-                
                 // Surveiller les clics sur les suggestions
                 geocoderContainer.addEventListener('click', (e) => {
-                    console.log('🖱️ Click detected in geocoder:', e.target);
-                    
                     // Vérifier si c'est un clic sur une suggestion
                     const suggestion = e.target.closest('.mapboxgl-ctrl-geocoder--suggestion');
                     if (suggestion) {
-                        console.log('🎯 Suggestion clicked:', suggestion);
-                        
                         // Attendre un peu pour que le geocoder traite le clic
                         setTimeout(() => {
                             const inputValue = geocoderContainer.querySelector('.mapboxgl-ctrl-geocoder--input').value;
-                            console.log('📝 Input value after click:', inputValue);
-                            
                             // Si l'input contient quelque chose qui ressemble à une UP, déclencher showRadiusControl
                             if (inputValue && inputValue.includes(',')) {
-                                console.log('🏭 Detected UP-like format, triggering radius control...');
                                 // Essayer de trouver les coordonnées depuis les données
                                 const matchingUP = establishmentsData.features.find(f => 
                                     f.properties.UP && inputValue.includes(f.properties.UP)
                                 );
                                 if (matchingUP) {
-                                    console.log('✅ Found matching UP:', matchingUP);
                                     currentSearchCenter = matchingUP.geometry.coordinates;
                                     showRadiusControl();
                                     applyFilters();
@@ -1526,15 +1512,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     }
                 });
             } else {
-                console.log('❌ Geocoder container not found, retrying...');
                 setTimeout(setupGeocoderDOMWatcher, 1000);
             }
         }, 500);
     }
 
     function initializeDirections() {
-        console.log('Initializing Directions service...');
-        
         // Initialiser le service Mapbox Directions
         directions = new MapboxDirections({
             accessToken: mapboxgl.accessToken,
@@ -1549,12 +1532,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             flyTo: false // Empêcher le zoom automatique
         });
         
-        console.log('Directions service created:', directions);
-        
         // Ajouter le contrôle à la carte
         map.addControl(directions, 'top-right');
-        console.log('Directions control added to map');
-        
         // Masquer seulement l'interface utilisateur, pas les routes
         setTimeout(() => {
             const directionsControl = document.querySelector('.mapbox-directions-component');
@@ -1566,31 +1545,19 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 if (inputs) inputs.style.display = 'none';
                 if (inputContainer) inputContainer.style.display = 'none';
                 
-                console.log('Directions UI hidden');
             }
         }, 100);
     }
 
     function showRouteOnMap(originCoords, destinationCoords) {
-        console.log('🚗 showRouteOnMap called with:', { 
-            originCoords, 
-            destinationCoords,
-            currentSearchCenter: currentSearchCenter,
-            destinationCoordsVar: destinationCoords
-        });
-        
         if (!originCoords || !destinationCoords) {
-            console.error('❌ Missing coordinates:', { originCoords, destinationCoords });
             return;
         }
         
         // Vérifier que les coordonnées sont valides
         if (!Array.isArray(originCoords) || !Array.isArray(destinationCoords)) {
-            console.error('❌ Invalid coordinate format:', { originCoords, destinationCoords });
             return;
         }
-        
-        console.log('✅ Route calculation starting...');
         
         // Nettoyer la route précédente
         clearCurrentRoute();
@@ -1600,8 +1567,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
     
     async function showRouteWithDirectAPI(originCoords, destinationCoords) {
-        console.log('Using direct API approach with advanced options...');
-        
         const loader = showRouteLoader();
         
         try {
@@ -1616,7 +1581,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             const cachedData = getCachedRoute(cacheKey);
             
             if (cachedData) {
-                console.log('📦 Utilisation des données en cache');
                 hideRouteLoader();
                 processRouteData(cachedData);
                 return;
@@ -1659,9 +1623,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             
             const url = `https://api.mapbox.com/directions/v5/mapbox/${profile}/${coordinates}?${urlParams}`;
             
-            console.log('Fetching route from:', url);
-            console.log('Options:', { vehicleType, tollOption, optimizeOption });
-            
             // Timeout pour l'API (réduit à 10 secondes)
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -1674,8 +1635,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }
             
             const data = await response.json();
-            
-            console.log('🔍 Données reçues de l\'API:', data);
             
             // Vérifier si la réponse contient des erreurs
             if (data.code && data.code !== 'Ok') {
@@ -1690,10 +1649,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             
         } catch (error) {
             hideRouteLoader();
-            console.error('Erreur API avancée:', error);
-            
             // Fallback : essayer avec l'API simple
-            console.log('🔄 Tentative avec API simple...');
             try {
                 const fallbackUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?geometries=geojson&overview=full&steps=true&access_token=${mapboxgl.accessToken}`;
                 
@@ -1701,12 +1657,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 const fallbackData = await fallbackResponse.json();
                 
                 if (fallbackData.routes && fallbackData.routes[0]) {
-                    console.log('✅ API simple réussie');
                     processRouteData(fallbackData);
                     return;
                 }
             } catch (fallbackError) {
-                console.error('Erreur API simple:', fallbackError);
             }
             
             // Si les deux échouent, afficher l'erreur
@@ -1726,8 +1680,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     
     // Fonction factorisant le traitement des données de routage
     function processRouteData(data) {
-        console.log('API Response:', data);
-        
         if (!data.routes || !data.routes[0]) {
             showRouteError('Aucun itinéraire trouvé entre ces deux points. Essayez avec d\'autres destinations.');
             return;
@@ -1750,7 +1702,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             route.geometry.coordinates.forEach(coord => bounds.extend(coord));
             map.fitBounds(bounds, { padding: 50 });
         } catch (boundsError) {
-            console.warn('Erreur lors du centrage sur la route:', boundsError);
         }
         
         // Mettre à jour les temps de trajet avec les données réelles
@@ -1767,7 +1718,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             addRouteClearButton();
         }
         
-        console.log('Route successfully processed and added to map');
     }
     
     // Cache pour les itinéraires
@@ -1820,20 +1770,31 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             border: 2px solid rgba(255, 255, 255, 0.2);
         `;
         
-        errorContainer.innerHTML = `
-            <div style="font-size: 24px; margin-bottom: 10px;">⚠️</div>
-            <div style="font-weight: bold; margin-bottom: 10px;">Erreur de calcul d'itinéraire</div>
-            <div style="margin-bottom: 15px; line-height: 1.4;">${message}</div>
-            <button onclick="this.parentElement.remove()" style="
-                background: rgba(255, 255, 255, 0.2);
-                border: 1px solid rgba(255, 255, 255, 0.3);
-                color: white;
-                padding: 8px 16px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-weight: bold;
-            ">Fermer</button>
-        `;
+        // Créer les éléments sans innerHTML pour éviter les problèmes d'iframe
+        const errorIcon = document.createElement('div');
+        errorIcon.style.fontSize = '24px';
+        errorIcon.style.marginBottom = '10px';
+        errorIcon.textContent = '[!]';
+        
+        const errorTitle = document.createElement('div');
+        errorTitle.style.fontWeight = 'bold';
+        errorTitle.style.marginBottom = '10px';
+        errorTitle.textContent = 'Erreur de calcul d\'itin\u00E9raire';
+        
+        const errorMessage = document.createElement('div');
+        errorMessage.style.marginBottom = '15px';
+        errorMessage.style.lineHeight = '1.4';
+        errorMessage.textContent = message;
+        
+        const closeButton = document.createElement('button');
+        closeButton.textContent = 'Fermer';
+        closeButton.style.cssText = 'background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold;';
+        closeButton.onclick = () => errorContainer.remove();
+        
+        errorContainer.appendChild(errorIcon);
+        errorContainer.appendChild(errorTitle);
+        errorContainer.appendChild(errorMessage);
+        errorContainer.appendChild(closeButton);
         
         document.body.appendChild(errorContainer);
         
@@ -1865,29 +1826,29 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             border: 1px solid rgba(0, 32, 96, 0.1);
         `;
         
-        loader.innerHTML = `
-            <div style="
-                width: 40px;
-                height: 40px;
-                border: 4px solid #f3f3f3;
-                border-top: 4px solid #002060;
-                border-radius: 50%;
-                animation: spin 1s linear infinite;
-                margin: 0 auto 15px auto;
-            "></div>
-            <div style="color: #002060; font-weight: bold; font-size: 16px;">
-                Calcul de l'itinéraire en cours...
-            </div>
-            <div style="color: #666; font-size: 12px; margin-top: 5px;">
-                Veuillez patienter
-            </div>
-            <style>
-                @keyframes spin {
-                    0% { transform: rotate(0deg); }
-                    100% { transform: rotate(360deg); }
-                }
-            </style>
-        `;
+        // Ajouter l'animation CSS si elle n'existe pas déjà
+        if (!document.getElementById('spin-animation-style')) {
+            const styleElement = document.createElement('style');
+            styleElement.id = 'spin-animation-style';
+            styleElement.textContent = '@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }';
+            document.head.appendChild(styleElement);
+        }
+        
+        // Créer les éléments du loader
+        const spinner = document.createElement('div');
+        spinner.style.cssText = 'width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #002060; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 15px auto;';
+        
+        const mainText = document.createElement('div');
+        mainText.style.cssText = 'color: #002060; font-weight: bold; font-size: 16px;';
+        mainText.textContent = 'Calcul de l\'itin\u00E9raire en cours...';
+        
+        const subText = document.createElement('div');
+        subText.style.cssText = 'color: #666; font-size: 12px; margin-top: 5px;';
+        subText.textContent = 'Veuillez patienter';
+        
+        loader.appendChild(spinner);
+        loader.appendChild(mainText);
+        loader.appendChild(subText);
         
         document.body.appendChild(loader);
         return loader;
@@ -1909,7 +1870,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 routeCache.delete(key);
             }
         }
-        console.log(`🧹 Cache nettoyé, ${routeCache.size} entrées restantes`);
     }
     
     // Nettoyer le cache toutes les 10 minutes
@@ -1957,7 +1917,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Désactiver les animations sur les appareils avec peu de mémoire
         if (navigator.deviceMemory && navigator.deviceMemory < 4) {
             document.documentElement.style.setProperty('--animation-duration', '0.1s');
-            console.log('🚀 Animations réduites pour optimiser les performances');
         }
         
         // Réduire la complexité visuelle sur mobile
@@ -2034,7 +1993,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const mapLegend = document.getElementById('map-legend');
         if (mapLegend) {
             mapLegend.style.display = 'none';
-            console.log('🏷️ Légende masquée pour itinéraire');
         }
     }
     
@@ -2042,7 +2000,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const mapLegend = document.getElementById('map-legend');
         if (mapLegend) {
             mapLegend.style.display = 'block';
-            console.log('🏷️ Légende réaffichée');
         }
     }
     
@@ -2090,9 +2047,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 essential: true // Force l'animation même si l'utilisateur interagit
             });
             
-            console.log(`🗺️ Carte centrée sur deux points: ${distance}km, zoom max: ${maxZoom}, padding: ${padding}px`);
         } catch (error) {
-            console.warn('Erreur lors du centrage sur itinéraire:', error);
         }
     }
     
@@ -2124,16 +2079,22 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             animation: slideInFromRight 0.5s ease-out;
         `;
         
-        routeInfo.innerHTML = `
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span>📍</span>
-                <span>${distance} km • ${durationText}</span>
-            </div>
-        `;
+        // Créer les éléments sans innerHTML pour éviter les problèmes d'iframe
+        const infoContainer = document.createElement('div');
+        infoContainer.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+        
+        const pinSpan = document.createElement('span');
+        pinSpan.textContent = '[PIN]';
+        
+        const distanceSpan = document.createElement('span');
+        distanceSpan.textContent = distance + ' km • ' + durationText;
+        
+        infoContainer.appendChild(pinSpan);
+        infoContainer.appendChild(distanceSpan);
+        routeInfo.appendChild(infoContainer);
         
         // Ajouter à la carte
         document.getElementById('map').appendChild(routeInfo);
-        console.log('📊 Infos itinéraire affichées sur carte:', distance, 'km,', durationText);
     }
     
     // Fonction pour masquer les infos de l'itinéraire sur la carte
@@ -2141,13 +2102,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const routeInfo = document.getElementById('route-info-overlay');
         if (routeInfo) {
             routeInfo.remove();
-            console.log('📊 Infos itinéraire masquées de la carte');
         }
     }
 
     function clearCurrentRoute() {
-        console.log('Clearing current route...');
-        
         // Réinitialiser les données réelles de routage
         realRouteData = null;
         
@@ -2205,20 +2163,17 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     }
                 }
             } catch (error) {
-                console.warn('Error refreshing popup:', error);
             }
         });
         
         // Rafraîchir la barre latérale pour mettre à jour les boutons
         updateSidebarBasedOnMapViewport();
         
-        console.log('Route cleared');
     }
 
     function updateTravelTimesWithRealData(route) {
         // Vérifier que la route contient les données attendues
         if (!route || typeof route.duration === 'undefined' || typeof route.distance === 'undefined') {
-            console.warn('Route data incomplete:', route);
             return;
         }
         
@@ -2328,29 +2283,23 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     
     // Fonction pour initialiser les contrôles de zoom personnalisés
     function initializeCustomZoomControls() {
-        console.log('🎛️ Initializing custom zoom controls...');
-        
         const zoomInBtn = document.getElementById('zoom-in-btn');
         const zoomOutBtn = document.getElementById('zoom-out-btn');
         
         if (zoomInBtn && zoomOutBtn) {
             zoomInBtn.addEventListener('click', () => {
-                console.log('🔍 Zoom in clicked');
                 if (map) {
                     map.zoomIn();
                 }
             });
             
             zoomOutBtn.addEventListener('click', () => {
-                console.log('🔍 Zoom out clicked');
                 if (map) {
                     map.zoomOut();
                 }
             });
             
-            console.log('✅ Custom zoom controls initialized');
         } else {
-            console.error('❌ Zoom buttons not found!');
         }
     }
     
@@ -2420,7 +2369,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     function showRouteInterface() {
         // Ne plus afficher automatiquement le Point B - seulement s'assurer que le Point A est visible
         // Le Point A est toujours visible maintenant
-        console.log('✅ Point A interface ready');
     }
     
     function showPointB() {
@@ -2430,7 +2378,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             pointBSection.style.display = 'block';
             addBtn.textContent = '−';
             addBtn.title = 'Masquer la destination';
-            console.log('✅ Point B section expanded');
         }
     }
     
@@ -2449,7 +2396,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 geocoderB.clear();
             }
             removeDestinationMarker();
-            console.log('✅ Point B section collapsed');
         }
     }
     
@@ -2492,7 +2438,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             resetMapBtn.style.display = 'none';
         }
         
-        console.log('🔍 Cartes d\'établissements masquées pour le mode itinéraire');
     }
     
     function showEstablishmentCards() {
@@ -2513,7 +2458,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             resetMapBtn.style.display = 'block';
         }
         
-        console.log('🔍 Cartes d\'établissements restaurées');
     }
     
     function showRouteDetails() {
@@ -2528,7 +2472,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         hideEstablishmentCards();
         activateRouteMode();
         
-        console.log('🗺️ Panneau détaillé des instructions affiché');
     }
     
     function hideRouteDetails() {
@@ -2542,7 +2485,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         showEstablishmentCards();
         deactivateRouteMode();
         
-        console.log('🗺️ Panneau détaillé des instructions masqué');
     }
     
     // Mode visuel avancé pour l'itinéraire
@@ -2562,7 +2504,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Ajout d'effets visuels sur la route
         addRouteVisualEffects();
         
-        console.log('🎨 Mode itinéraire visuel activé');
     }
     
     function deactivateRouteMode() {
@@ -2580,7 +2521,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         removeRouteVisualEffects();
         
-        console.log('🎨 Mode itinéraire visuel désactivé');
     }
     
     // Effets visuels avancés pour la route
@@ -2624,7 +2564,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             window.routeAnimation = routeAnimation;
             
         } catch (error) {
-            console.warn('Erreur lors de l\'ajout des effets visuels:', error);
         }
     }
     
@@ -2642,7 +2581,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 map.setPaintProperty('route', 'line-width', 5);
             }
         } catch (error) {
-            console.warn('Erreur lors de la suppression des effets visuels:', error);
         }
     }
     
@@ -2653,7 +2591,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const routeVehicleInfo = document.getElementById('route-vehicle-info');
         
         if (!routeData || !routeData.routes || !routeData.routes[0]) {
-            console.error('❌ Données de routage invalides');
             return;
         }
         
@@ -2672,7 +2609,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const tollText = currentTollOption === 'avoid' ? 'Péages évités' : 'Péages autorisés';
         routeVehicleInfo.textContent = `Type: ${vehicleText} • ${tollText}`;
         
-        console.log('🗺️ Résumé de l\'itinéraire mis à jour');
     }
     
     function initializeRouteInterface() {
@@ -2752,7 +2688,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 vehicleTruck.style.color = '#6c757d';
                 
                 currentVehicleType = 'driving';
-                console.log('🚗 Véhicule: Voiture');
                 recalculateRoute();
             });
             
@@ -2765,7 +2700,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 vehicleCar.style.color = '#6c757d';
                 
                 currentVehicleType = 'driving-traffic';
-                console.log('🚛 Véhicule: Camion');
                 recalculateRoute();
             });
         }
@@ -2784,7 +2718,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 tollAvoid.style.color = '#6c757d';
                 
                 currentTollOption = 'allow';
-                console.log('✅ Péages: Avec');
                 recalculateRoute();
             });
             
@@ -2797,7 +2730,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 tollAllow.style.color = '#6c757d';
                 
                 currentTollOption = 'avoid';
-                console.log('❌ Péages: Sans');
                 recalculateRoute();
             });
         }
@@ -2854,7 +2786,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     // Auto-recalcul quand les options changent
     function recalculateRoute() {
         if (currentSearchCenter && destinationCoords) {
-            console.log('🔄 Recalcul avec:', { vehicle: currentVehicleType, tolls: currentTollOption });
             showRouteOnMap(currentSearchCenter, destinationCoords);
         }
     }
@@ -2892,7 +2823,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 alert('Aucun résultat trouvé pour cette adresse.');
             }
         } catch (error) {
-            console.error('Erreur lors de la recherche de destination:', error);
             alert('Erreur lors de la recherche. Veuillez réessayer.');
         }
     }
@@ -2922,42 +2852,58 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     
     // Fonctions pour contrôler l'affichage du sélecteur de rayon
     function showRadiusControl() {
-        console.log('🔍 showRadiusControl() appelée');
         let radiusControl = document.getElementById('map-radius-control-overlay');
         
         if (!radiusControl) {
-            console.log('🔧 Création dynamique du contrôle de rayon');
             // Créer l'élément dynamiquement
             radiusControl = document.createElement('div');
             radiusControl.id = 'map-radius-control-overlay';
             radiusControl.className = 'map-radius-control';
             radiusControl.style.cssText = 'position:absolute;bottom:220px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:1001;font-size:13px;display:block;';
             
-            // Créer le contenu HTML
-            radiusControl.innerHTML = `
-                <h4 style="margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold;">Rayon de recherche</h4>
-                <div style="display:flex;align-items:center;gap:10px;">
-                    <label style="font-size:13px;color:#333;white-space:nowrap;">Rayon:</label>
-                    <input type="range" id="radius-slider" value="80" min="1" max="200" step="1" style="flex:1;min-width:120px;">
-                    <span id="radius-value" style="font-weight:bold;color:#002060;min-width:50px;font-size:13px;">80 km</span>
-                </div>
-            `;
+            // Créer le contenu sans innerHTML pour éviter les problèmes d'iframe
+            const h4 = document.createElement('h4');
+            h4.style.cssText = 'margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold;';
+            h4.textContent = 'Rayon de recherche';
+            
+            const controlDiv = document.createElement('div');
+            controlDiv.style.cssText = 'display:flex;align-items:center;gap:10px;';
+            
+            const label = document.createElement('label');
+            label.style.cssText = 'font-size:13px;color:#333;white-space:nowrap;';
+            label.textContent = 'Rayon:';
+            
+            const slider = document.createElement('input');
+            slider.type = 'range';
+            slider.id = 'radius-slider';
+            slider.value = '80';
+            slider.min = '1';
+            slider.max = '200';
+            slider.step = '1';
+            slider.style.cssText = 'flex:1;min-width:120px;';
+            
+            const valueSpan = document.createElement('span');
+            valueSpan.id = 'radius-value';
+            valueSpan.style.cssText = 'font-weight:bold;color:#002060;min-width:50px;font-size:13px;';
+            valueSpan.textContent = '80 km';
+            
+            controlDiv.appendChild(label);
+            controlDiv.appendChild(slider);
+            controlDiv.appendChild(valueSpan);
+            
+            radiusControl.appendChild(h4);
+            radiusControl.appendChild(controlDiv);
             
             // Ajouter à la carte
             const mapContainer = document.getElementById('map');
             if (mapContainer) {
                 mapContainer.appendChild(radiusControl);
-                console.log('✅ Contrôle de rayon ajouté au conteneur map');
             } else {
-                console.error('❌ Conteneur map non trouvé');
                 return;
             }
         } else {
-            console.log('✅ Élément trouvé, affichage du contrôle de rayon');
             radiusControl.style.display = 'block';
         }
-        
-        console.log('📍 Style après modification:', radiusControl.style.cssText);
         
         // Ajouter les event listeners maintenant que l'élément est visible
         initializeRadiusControlListeners();
@@ -2973,8 +2919,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const radiusValue = document.getElementById('radius-value');
         
         if (radiusSlider && radiusValue) {
-            console.log('🎛️ Initialisation des event listeners du contrôle de rayon');
-            
             radiusSlider.addEventListener('input', () => {
                 radiusValue.textContent = `${radiusSlider.value} km`;
             });
@@ -2984,20 +2928,15 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }, 300));
             
             radiusControlListenersInitialized = true;
-            console.log('✅ Event listeners du contrôle de rayon initialisés');
         } else {
-            console.error('❌ Éléments radius-slider ou radius-value non trouvés dans initializeRadiusControlListeners');
         }
     }
     
     function hideRadiusControl() {
-        console.log('🔍 hideRadiusControl() appelée');
         const radiusControl = document.getElementById('map-radius-control-overlay');
         if (radiusControl) {
-            console.log('✅ Élément trouvé, masquage du contrôle de rayon');
             radiusControl.style.display = 'none';
         } else {
-            console.log('ℹ️ Élément map-radius-control-overlay non trouvé (normal si pas encore créé)');
         }
     }
     
@@ -3267,7 +3206,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Téléphone
         const phoneP = document.createElement('p');
         const phoneStrong = document.createElement('strong');
-        phoneStrong.textContent = 'Téléphone: ';
+        phoneStrong.textContent = 'T\u00E9l\u00E9phone: ';
         phoneP.appendChild(phoneStrong);
         if (phone) {
             const phoneLink = document.createElement('a');
@@ -3312,7 +3251,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         if (selectedPointA && pointAName) {
             // Construire le nom de l'établissement
-            const name = properties['Nom du site'] || properties['Nom_du_site'] || 'Établissement sélectionné';
+            const name = properties['Nom du site'] || properties['Nom_du_site'] || '\u00C9tablissement s\u00E9lectionn\u00E9';
             const ville = properties.Ville || '';
             const displayName = ville ? `${name} - ${ville}` : name;
             
@@ -3367,7 +3306,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         if (selectedPointB && pointBName) {
             // Construire le nom de l'établissement
-            const name = properties['Nom du site'] || properties['Nom_du_site'] || 'Établissement sélectionné';
+            const name = properties['Nom du site'] || properties['Nom_du_site'] || '\u00C9tablissement s\u00E9lectionn\u00E9';
             const ville = properties.Ville || '';
             const displayName = ville ? `${name} - ${ville}` : name;
             
@@ -3430,7 +3369,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             pointBSection.style.boxShadow = 'none';
         }
         
-        console.log('Focus set to Point A with visual indicator');
     }
     
     function setFocusOnPointB() {
@@ -3450,7 +3388,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             pointBSection.style.boxShadow = '0 2px 8px rgba(255, 152, 0, 0.3)';
         }
         
-        console.log('Focus set to Point B with visual indicator');
     }
     
     function clearPointASelection() {
@@ -3492,8 +3429,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             if (pointBCoords) {
                 // Si Point B existe, l'utiliser comme nouveau centre pour le rayon
                 currentSearchCenter = pointBCoords;
-                console.log('🎯 Point B devient le nouveau centre de rayon:', pointBCoords);
-                
                 // Maintenir le contrôle de rayon visible et redessiner le cercle
                 const radiusControl = document.querySelector('.map-radius-control');
                 if (radiusControl) radiusControl.style.display = 'block';
@@ -3510,7 +3445,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Réappliquer les filtres avec le nouveau contexte
         applyFilters();
         
-        console.log('Point A selection cleared');
     }
     
     function clearPointBSelection() {
@@ -3535,7 +3469,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Supprimer le trajet actuel
         clearCurrentRoute();
         
-        console.log('Point B selection cleared');
     }
     
     function areCoordinatesIdentical(coords1, coords2, tolerance = 0.00001) {
@@ -3551,7 +3484,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const up1 = feature1.properties?.UP;
         const up2 = feature2.properties?.UP;
         if (up1 && up2 && up1 === up2) {
-            console.log('🚫 Établissements identiques détectés par UP:', up1);
             return true;
         }
         
@@ -3559,7 +3491,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const coords1 = feature1.geometry?.coordinates;
         const coords2 = feature2.geometry?.coordinates;
         if (coords1 && coords2 && areCoordinatesIdentical(coords1, coords2)) {
-            console.log('🚫 Établissements identiques détectés par coordonnées:', coords1);
             return true;
         }
         
@@ -3616,48 +3547,36 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Ajouter au tracking
         activePopups.push(popup);
         
-        console.log('✅ Single popup shown for:', properties.UP || properties['Nom du site'] || 'Unknown');
-        
         return popup;
     }
 
     function focusOnEstablishment(feature) {
-        console.log('🎯 focusOnEstablishment called for:', feature.properties.UP || 'Unknown');
-        console.log('📍 Current state - A:', currentPointAFeature?.properties?.UP || 'none', 'B:', currentPointBFeature?.properties?.UP || 'none');
-        console.log('🎯 Focus:', currentFocusedInput);
-        
         const coordinates = feature.geometry.coordinates;
         
         // 🔍 ÉTAPE 1: Vérification anti-doublon robuste
         if (currentPointAFeature && areEstablishmentsIdentical(currentPointAFeature, feature)) {
-            console.log('🚫 Tentative de sélection du même établissement pour A et B');
             showIdenticalPointsWarning();
             return;
         }
         if (currentPointBFeature && areEstablishmentsIdentical(currentPointBFeature, feature)) {
-            console.log('🚫 Tentative de sélection du même établissement pour A et B');
             showIdenticalPointsWarning();
             return;
         }
         
-        // 🎯 ÉTAPE 2: Logique de sélection basée sur l'état actuel
+        // [TARGET] ÉTAPE 2: Logique de sélection basée sur l'état actuel
         if (!currentPointAFeature) {
             // CAS 1: Aucun Point A → Sélectionner comme Point A
-            console.log('📍 CAS 1: Sélection Point A (aucun point A existant)');
             selectAsPointA(feature);
             
         } else if (!currentPointBFeature) {
             // CAS 2: Point A existe, pas de Point B → Sélectionner comme Point B
-            console.log('📍 CAS 2: Sélection Point B (Point A existe, pas de Point B)');
             selectAsPointB(feature);
             
         } else {
             // CAS 3: A et B existent → Utiliser le focus pour déterminer lequel remplacer
             if (currentFocusedInput === 'A') {
-                console.log('📍 CAS 3A: Remplacement Point A (focus sur A)');
                 selectAsPointA(feature);
             } else {
-                console.log('📍 CAS 3B: Remplacement Point B (focus sur B ou défaut)');
                 selectAsPointB(feature);
             }
         }
@@ -3670,8 +3589,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
     
     function selectAsPointA(feature) {
-        console.log('🅰️ Sélection Point A:', feature.properties.UP || 'Unknown');
-        
         const coordinates = feature.geometry.coordinates;
         
         // Mettre à jour les variables globales
@@ -3697,7 +3614,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         // Si Point B existe déjà, calculer l'itinéraire
         if (currentPointBFeature && destinationCoords) {
-            console.log('🎯 Calcul auto - Point A sélectionné avec Point B existant');
             setTimeout(() => {
                 showRouteOnMap(currentSearchCenter, destinationCoords);
             }, 500);
@@ -3705,8 +3621,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
     
     function selectAsPointB(feature) {
-        console.log('🅱️ Sélection Point B:', feature.properties.UP || 'Unknown');
-        
         const coordinates = feature.geometry.coordinates;
         
         // Mettre à jour les variables globales
@@ -3719,7 +3633,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         // Si Point A existe, calculer l'itinéraire
         if (currentPointAFeature && currentSearchCenter) {
-            console.log('🎯 Calcul auto - Point B sélectionné avec Point A existant');
             setTimeout(() => {
                 showRouteOnMap(currentSearchCenter, destinationCoords);
             }, 500);
@@ -3727,11 +3640,16 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
     
     function updateSidebarBasedOnMapViewport() {
-        console.log('updateSidebarBasedOnMapViewport called, layout mode:', currentLayoutMode);
+        if (!map.isStyleLoaded()) { 
+            // Au lieu de retourner vide, essayer d'afficher avec les données disponibles
+            if (!primaryFilteredFeatures) {
+                primaryFilteredFeatures = [...establishmentsData.features];
+            }
+        }
         
-        if (!map.isStyleLoaded()||!primaryFilteredFeatures) { 
-            updateSidebarCards([]); 
-            return; 
+        // Si primaryFilteredFeatures n'est pas encore défini, utiliser toutes les données
+        if (!primaryFilteredFeatures) {
+            primaryFilteredFeatures = [...establishmentsData.features];
         }
         
         let featuresToDisplay=[];
@@ -3739,21 +3657,27 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         if (currentLayoutMode==='sidebarFull') {
             // En mode sidebar complet, afficher tous les établissements filtrés
             featuresToDisplay=[...primaryFilteredFeatures];
-            console.log('Sidebar full mode: showing all filtered features');
         } else if (currentLayoutMode==='mapFull') {
             // En mode carte complet, ne rien afficher dans la sidebar
             featuresToDisplay=[];
-            console.log('Map full mode: hiding sidebar');
         } else {
             // En mode dual, afficher SEULEMENT les établissements visibles sur la carte
             if (primaryFilteredFeatures.length > 0) {
-                const mapBounds = map.getBounds();
-                featuresToDisplay = primaryFilteredFeatures.filter(feature => {
-                    if (!feature.geometry||!feature.geometry.coordinates) return false;
-                    return mapBounds.contains(feature.geometry.coordinates);
-                });
-                
-                console.log(`Dual mode: showing ${featuresToDisplay.length} visible features out of ${primaryFilteredFeatures.length} filtered features`);
+                try {
+                    const mapBounds = map.getBounds();
+                    if (mapBounds) {
+                        featuresToDisplay = primaryFilteredFeatures.filter(feature => {
+                            if (!feature.geometry||!feature.geometry.coordinates) return false;
+                            return mapBounds.contains(feature.geometry.coordinates);
+                        });
+                    } else {
+                        // Si getBounds() ne fonctionne pas, afficher tous les établissements
+                        featuresToDisplay = [...primaryFilteredFeatures];
+                    }
+                } catch (e) {
+                    // En cas d'erreur, afficher tous les établissements
+                    featuresToDisplay = [...primaryFilteredFeatures];
+                }
             }
         }
         
@@ -3772,7 +3696,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             sidebar.innerHTML = '';
             
             if (features.length === 0) {
-                sidebar.innerHTML = '<p>Aucun établissement trouvé pour les critères sélectionnés ou dans la vue actuelle.</p>';
+                const noResultsP = document.createElement('p');
+                noResultsP.textContent = 'Aucun \u00E9tablissement trouv\u00E9 pour les crit\u00E8res s\u00E9lectionn\u00E9s ou dans la vue actuelle.';
+                sidebar.appendChild(noResultsP);
                 updateResultsCount(0);
                 sidebar.style.opacity = '1';
                 return;
@@ -3944,6 +3870,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         // Restaurer l'opacité après le rendu
         sidebar.style.opacity = '1';
+        
+        // Corriger les entités HTML dans les cards après leur création
+        setTimeout(() => {
+            fixCardEntities();
+        }, 100);
+        
         }, 50); // Délai court pour l'effet de transition
     }
     
@@ -3954,7 +3886,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             
             if (currentLayoutMode === 'sidebarFull') {
                 // En mode sidebar complet, on affiche tous les établissements filtrés
-                message = `${visibleCount} établissement(s) trouvé(s).`;
+                message = `${visibleCount} \u00E9tablissement(s) trouv\u00E9(s).`;
             } else if (currentLayoutMode === 'mapFull') {
                 // En mode carte complet, pas de message dans la sidebar
                 message = '';
@@ -3962,19 +3894,18 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 // En mode dual, préciser "visibles" et donner le contexte
                 const totalFiltered = primaryFilteredFeatures ? primaryFilteredFeatures.length : 0;
                 if (visibleCount === 0) {
-                    message = `Aucun établissement visible dans cette zone.`;
+                    message = `Aucun \u00E9tablissement visible dans cette zone.`;
                     if (totalFiltered > 0) {
-                        message += ` (${totalFiltered} au total - zoomez ou déplacez la carte)`;
+                        message += ` (${totalFiltered} au total - zoomez ou d\u00E9placez la carte)`;
                     }
                 } else if (visibleCount === totalFiltered) {
-                    message = `${visibleCount} établissement(s) trouvé(s).`;
+                    message = `${visibleCount} \u00E9tablissement(s) trouv\u00E9(s).`;
                 } else {
-                    message = `${visibleCount} établissement(s) visible(s) sur ${totalFiltered} au total.`;
+                    message = `${visibleCount} \u00E9tablissement(s) visible(s) sur ${totalFiltered} au total.`;
                 }
             }
             
             resultsCountElement.textContent = message;
-            console.log('Results count updated:', message);
         }
     }
     
@@ -4017,7 +3948,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     // Téléphone
                     const phoneP = document.createElement('p');
                     const phoneStrong = document.createElement('strong');
-                    phoneStrong.textContent = 'Téléphone: ';
+                    phoneStrong.textContent = 'T\u00E9l\u00E9phone: ';
                     phoneP.appendChild(phoneStrong);
                     if (phone) {
                         const phoneLink = document.createElement('a');
@@ -4047,18 +3978,19 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     // Activité
                     const activityP = document.createElement('p');
                     const activityStrong = document.createElement('strong');
-                    activityStrong.textContent = 'Activité: ';
+                    activityStrong.textContent = 'Activit\u00E9: ';
                     activityP.appendChild(activityStrong);
                     activityP.appendChild(document.createTextNode(activity));
                     modalInfo.appendChild(activityP);
                 } catch (e) {
-                    console.error("Erreur lors de l'analyse des données de la carte : ", e);
                     modalInfo.innerHTML = '';
                     const errorP = document.createElement('p');
                     errorP.textContent = "Impossible d'afficher les informations.";
                     modalInfo.appendChild(errorP);
                 }
                 modal.style.display = 'block';
+                // Corriger les entités HTML dans la modal
+                setTimeout(fixCardEntities, 100);
             });
         });
     }
@@ -4139,12 +4071,209 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         setTimeout(()=>{if(map){map.resize();updateSidebarBasedOnMapViewport();}},550);
     }
 
+    // Solution: Utiliser des caractères Unicode directement pour éviter la transformation par Drupal
+    function safeText(text) {
+        // Si on est dans un iframe, utiliser des caractères Unicode échappés
+        if (window.self !== window.top) {
+            return text
+                .replace(/é/g, '\u00E9')
+                .replace(/É/g, '\u00C9')
+                .replace(/è/g, '\u00E8')
+                .replace(/È/g, '\u00C8')
+                .replace(/à/g, '\u00E0')
+                .replace(/À/g, '\u00C0')
+                .replace(/ù/g, '\u00F9')
+                .replace(/Ù/g, '\u00D9')
+                .replace(/ô/g, '\u00F4')
+                .replace(/Ô/g, '\u00D4')
+                .replace(/ç/g, '\u00E7')
+                .replace(/Ç/g, '\u00C7')
+                .replace(/â/g, '\u00E2')
+                .replace(/Â/g, '\u00C2')
+                .replace(/ê/g, '\u00EA')
+                .replace(/Ê/g, '\u00CA')
+                .replace(/î/g, '\u00EE')
+                .replace(/Î/g, '\u00CE')
+                .replace(/û/g, '\u00FB')
+                .replace(/Û/g, '\u00DB')
+                .replace(/ï/g, '\u00EF')
+                .replace(/Ï/g, '\u00CF')
+                .replace(/ë/g, '\u00EB')
+                .replace(/Ë/g, '\u00CB')
+                .replace(/•/g, '\u2022');
+        }
+        return text;
+    }
+    
+    // Alternative: Créer des text nodes avec createTextNode qui échappe au traitement HTML
+    function createSafeTextNode(text) {
+        // Créer un noeud texte qui ne sera pas interprété comme HTML
+        const textNode = document.createTextNode(text);
+        return textNode;
+    }
+    
+    // Fonction pour corriger les entités HTML dans les cards et modals
+    function fixCardEntities() {
+        const entityMap = {
+            '&eacute;': 'é', '&Eacute;': 'É',
+            '&egrave;': 'è', '&Egrave;': 'È',
+            '&agrave;': 'à', '&Agrave;': 'À',
+            '&ugrave;': 'ù', '&Ugrave;': 'Ù',
+            '&ocirc;': 'ô', '&Ocirc;': 'Ô',
+            '&ccedil;': 'ç', '&Ccedil;': 'Ç',
+            '&acirc;': 'â', '&Acirc;': 'Â',
+            '&ecirc;': 'ê', '&Ecirc;': 'Ê',
+            '&icirc;': 'î', '&Icirc;': 'Î',
+            '&ucirc;': 'û', '&Ucirc;': 'Û',
+            '&uuml;': 'ü', '&Uuml;': 'Ü',
+            '&nbsp;': ' ', '&bull;': '•',
+            '&#233;': 'é', '&#201;': 'É',
+            '&#232;': 'è', '&#200;': 'È',
+            '&#224;': 'à', '&#192;': 'À'
+        };
+        
+        const fixText = (text) => {
+            if (!text) return text;
+            let fixed = text;
+            for (const [entity, char] of Object.entries(entityMap)) {
+                fixed = fixed.replace(new RegExp(entity, 'gi'), char);
+            }
+            return fixed;
+        };
+        
+        // Corriger toutes les cards
+        document.querySelectorAll('.establishment-card').forEach(card => {
+            // Parcourir tous les nœuds de texte dans la card
+            const walker = document.createTreeWalker(
+                card,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            let node;
+            while (node = walker.nextNode()) {
+                if (node.nodeValue && node.nodeValue.includes('&')) {
+                    node.nodeValue = fixText(node.nodeValue);
+                }
+            }
+        });
+        
+        // Corriger la modal si elle est ouverte
+        const modalInfo = document.getElementById('modal-info');
+        if (modalInfo && modalInfo.innerHTML) {
+            const walker = document.createTreeWalker(
+                modalInfo,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            let node;
+            while (node = walker.nextNode()) {
+                if (node.nodeValue && node.nodeValue.includes('&')) {
+                    node.nodeValue = fixText(node.nodeValue);
+                }
+            }
+        }
+        
+        // Corriger les popups Mapbox
+        document.querySelectorAll('.mapboxgl-popup-content').forEach(popup => {
+            const walker = document.createTreeWalker(
+                popup,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            let node;
+            while (node = walker.nextNode()) {
+                if (node.nodeValue && node.nodeValue.includes('&')) {
+                    node.nodeValue = fixText(node.nodeValue);
+                }
+            }
+        });
+    }
+    
+    // Fonction pour surveiller et corriger les cards
+    function setupCardEntityFix() {
+        // Observer uniquement les changements dans le container des cards
+        const establishmentsView = document.getElementById('establishments-view');
+        const modalContainer = document.getElementById('modal');
+        
+        if (establishmentsView) {
+            const observer = new MutationObserver((mutations) => {
+                // Vérifier si des cards ont été ajoutées
+                let hasNewCards = false;
+                for (const mutation of mutations) {
+                    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                        for (const node of mutation.addedNodes) {
+                            if (node.nodeType === Node.ELEMENT_NODE && 
+                                (node.classList && node.classList.contains('establishment-card') ||
+                                 node.querySelector && node.querySelector('.establishment-card'))) {
+                                hasNewCards = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                if (hasNewCards) {
+                    // Corriger après un court délai pour laisser Drupal faire sa transformation
+                    setTimeout(fixCardEntities, 100);
+                    setTimeout(fixCardEntities, 500);
+                    setTimeout(fixCardEntities, 1000);
+                }
+            });
+            
+            observer.observe(establishmentsView, {
+                childList: true,
+                subtree: false
+            });
+        }
+        
+        // Observer aussi la modal
+        if (modalContainer) {
+            const modalObserver = new MutationObserver(() => {
+                if (modalContainer.style.display === 'block') {
+                    setTimeout(fixCardEntities, 100);
+                }
+            });
+            
+            modalObserver.observe(modalContainer, {
+                attributes: true,
+                attributeFilter: ['style']
+            });
+        }
+        
+        // Correction initiale après un délai
+        setTimeout(fixCardEntities, 1500);
+        setTimeout(fixCardEntities, 3000);
+    }
+
     // Démarrage de l'application
     document.addEventListener('DOMContentLoaded', function() {
         initializeMap();
         initializeSearchAndFilters();
         initializeMobileToggle();
         initializeKeyboardNavigation();
+        
+        // Configurer la correction des entités HTML pour les cards
+        setupCardEntityFix();
+        
+        // Corriger spécifiquement le bouton reset si nécessaire
+        const resetButton = document.getElementById('reset-map');
+        if (resetButton && resetButton.textContent.includes('\\u')) {
+            resetButton.textContent = 'Réinitialiser la carte';
+        }
+        
+        // Corriger si Drupal transforme en entités HTML
+        setTimeout(() => {
+            const resetBtn = document.getElementById('reset-map');
+            if (resetBtn && (resetBtn.textContent.includes('&') || resetBtn.textContent.includes('\\u'))) {
+                resetBtn.textContent = 'Réinitialiser la carte';
+            }
+        }, 1000);
     });
 
     function initializeSearchAndFilters() {

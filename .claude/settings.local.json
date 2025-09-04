@@ -6,7 +6,10 @@
       "Bash(start \"C:\\Users\\ghislain.levrat\\OneDrive - VICAT\\Documents\\GitHub\\carte-interactive\\carte.html\")",
       "WebFetch(domain:docs.mapbox.com)",
       "WebSearch",
-      "WebFetch(domain:tollguru.com)"
+      "WebFetch(domain:tollguru.com)",
+      "Bash(python:*)",
+      "Bash(del remove_console_logs.py)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
