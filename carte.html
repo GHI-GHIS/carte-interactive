@@ -15,7 +15,76 @@
   <script src='https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js'></script>
   
 <style>
-body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:hidden}#map-container{display:flex;height:85vh;width:100vw;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:20}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:10}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}.geolocate-btn{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>') center/18px no-repeat;width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon{display:none!important}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px}.establishment-card{background:#fff;margin:6px 8px 10px 7px;padding:11px 15px 0 20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.38);cursor:pointer;transition:transform .2s,box-shadow .2s;font-family:Arial,sans-serif}.establishment-card:hover{transform:scale(1.02);box-shadow:0 4px 8px rgba(0,0,0,.15)}.establishment-card h3{font-size:16px;color:#002060;margin:0 0 5px 0}.establishment-card p{font-size:14px;color:#333;margin:0 0 12px 0}.establishment-card a{color:#002060;text-decoration:none}.establishment-card a:hover{text-decoration:underline}.establishment-card .more-info{font-size:12px;color:#ff9900;margin-top:10px;display:block}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:9999;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}.mapboxgl-popup-content{width:max-content;font-family:Arial,sans-serif;padding:15px!important;max-width:280px!important}.mapboxgl-popup-content h3{color:#002060;margin:0 0 10px 0;font-size:16px}.mapboxgl-popup-content p{margin:0 0 5px 0;line-height:1.4;font-size:14px}.mapboxgl-popup-content p strong{color:#333;font-weight:bold}#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-right,#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-left{display:none}.modal{display:none;position:fixed;z-index:1001;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.4)}.modal-content{background-color:#fefefe;margin:15% auto;padding:20px;border:1px solid #888;width:80%;max-width:600px;border-radius:8px}.close-button{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}.close-button:hover,.close-button:focus{color:#000;text-decoration:none}.view-switcher{position:fixed;top:83px;right:28px;z-index:1005;padding:10px 15px;background-color:#002060;color:#fff;border:0;border-radius:5px;cursor:pointer;font-size:14px;box-shadow:0 2px 5px rgba(0,0,0,.2);display:none;transition:background-color .3s}.view-switcher:hover{background-color:#003380}#map-container.layout-dual #sidebar{width:30%;min-width:415px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,415px));opacity:1}#map-container.layout-sidebar-full{height:100vh}#map-container.layout-sidebar-full #sidebar{width:94%;min-width:94%;opacity:1;transform:translateX(0)}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-map-full{height:100vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none}#map-container.layout-map-full #map{width:100%;opacity:1}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:415px}#map-container.layout-dual #map{width:calc(100% - 415px)}}@media (max-width:600px){#map-container.layout-sidebar-full #sidebar{width:100%;min-width:88%}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
+body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:hidden}#map-container{display:flex;height:85vh;width:100vw;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:20}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:10}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}.geolocate-btn{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>') center/18px no-repeat;width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon{display:none!important}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px}.establishment-card{background:#fff;margin:6px 8px 10px 7px;padding:11px 15px 0 20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.38);cursor:pointer;transition:transform .2s,box-shadow .2s;font-family:Arial,sans-serif}.establishment-card:hover{transform:scale(1.02);box-shadow:0 4px 8px rgba(0,0,0,.15)}.establishment-card h3{font-size:16px;color:#002060;margin:0 0 5px 0}.establishment-card p{font-size:14px;color:#333;margin:0 0 12px 0}.establishment-card a{color:#002060;text-decoration:none}.establishment-card a:hover{text-decoration:underline}.establishment-card .more-info{font-size:12px;color:#ff9900;margin-top:10px;display:inline-block}.establishment-card .view-btn{font-size:12px;color:#17a2b8;margin-top:10px;margin-left:15px;display:inline-block;cursor:pointer;transition:color .2s}.establishment-card .view-btn:hover{color:#138496;text-decoration:underline}.establishment-card .view-btn.back-mode{color:#28a745}.establishment-card .view-btn.back-mode:hover{color:#218838}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:9999;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}.mapboxgl-popup-content{width:max-content;font-family:Arial,sans-serif;padding:15px!important;max-width:280px!important}.mapboxgl-popup-content h3{color:#002060;margin:0 0 10px 0;font-size:16px}.mapboxgl-popup-content p{margin:0 0 5px 0;line-height:1.4;font-size:14px}.mapboxgl-popup-content p strong{color:#333;font-weight:bold}.mapboxgl-popup-content .popup-actions{display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid #eee}.mapboxgl-popup-content .popup-view-btn{flex:1;padding:5px 10px;background-color:#17a2b8;color:#fff;border:none;border-radius:4px;cursor:pointer;text-align:center;font-size:12px;transition:background-color .2s}.mapboxgl-popup-content .popup-view-btn:hover{background-color:#138496}#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-right,#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-left{display:none}.modal{display:none;position:fixed;z-index:1001;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.4)}.modal-content{background-color:#fefefe;margin:15% auto;padding:20px;border:1px solid #888;width:80%;max-width:600px;border-radius:8px}.close-button{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}.close-button:hover,.close-button:focus{color:#000;text-decoration:none}.view-switcher{position:fixed;top:83px;right:28px;z-index:1005;padding:10px 15px;background-color:#002060;color:#fff;border:0;border-radius:5px;cursor:pointer;font-size:14px;box-shadow:0 2px 5px rgba(0,0,0,.2);display:none;transition:background-color .3s}.view-switcher:hover{background-color:#003380}#map-container.layout-dual #sidebar{width:30%;min-width:415px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,415px));opacity:1}#map-container.layout-sidebar-full{height:100vh}#map-container.layout-sidebar-full #sidebar{width:94%;min-width:94%;opacity:1;transform:translateX(0)}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-map-full{height:100vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none}#map-container.layout-map-full #map{width:100%;opacity:1}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:415px}#map-container.layout-dual #map{width:calc(100% - 415px)}}@media (max-width:600px){#map-container.layout-sidebar-full #sidebar{width:100%;min-width:88%}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
+/* Mode Switcher Styles */
+.mode-switcher-container {
+    padding: 15px 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.mode-switcher {
+    display: flex;
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 4px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.mode-btn {
+    flex: 1;
+    padding: 10px 15px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.mode-btn:hover {
+    background: rgba(255,255,255,0.5);
+}
+
+.mode-btn.active {
+    background: white;
+    color: #002060;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    font-weight: 600;
+}
+
+.mode-btn .mode-icon {
+    font-size: 18px;
+}
+
+.mode-btn .mode-label {
+    font-size: 14px;
+}
+
+/* Mode Interface Containers */
+.mode-interface {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#normal-mode-interface .search-container {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#normal-geocoder-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
 /* Légende de la carte */
 .map-legend{position:absolute;bottom:30px;left:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:100;font-size:13px}.map-legend h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold}.legend-item{display:flex;align-items:center;margin:6px 0;cursor:pointer;padding:4px;border-radius:4px;transition:background-color .2s}.legend-item:hover{background-color:#f0f8ff}.legend-item.inactive{opacity:.4}.legend-item.inactive:hover{opacity:.6}.legend-marker{width:30px;height:30px;margin-right:8px;background-size:contain;background-repeat:no-repeat;background-position:center}.legend-marker.beton{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-beton.png')}.legend-marker.granulats{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-granulats.png')}.legend-marker.ciment{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-ciment.png')}.legend-marker.ciment-prompt{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-12/ciment-prompt-naturel.png')}
 
@@ -185,11 +254,37 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
   <div id="map-container">
     <div id="sidebar">
+      
+      <!-- Mode Switcher -->
+      <div class="mode-switcher-container">
+        <div class="mode-switcher">
+          <button id="mode-normal" class="mode-btn active" data-mode="normal">
+            <span class="mode-icon">🗺️</span>
+            <span class="mode-label">Vue normale</span>
+          </button>
+          <button id="mode-route" class="mode-btn" data-mode="route">
+            <span class="mode-icon">🚗</span>
+            <span class="mode-label">Itinéraires</span>
+          </button>
+        </div>
+      </div>
 
-      <div class="filter-section">
-        <h2>Recherche et itinéraire</h2>
-        
-        <!-- Interface d'itinéraire avec Points A et B -->
+      <!-- Mode Normal Interface -->
+      <div id="normal-mode-interface" class="mode-interface">
+        <div class="filter-section">
+          <h2>Rechercher une ville ou UP</h2>
+          <div id="normal-geocoder-container" class="search-container">
+            <button id="normal-geolocate" class="geolocate-btn" title="Utiliser ma position"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode Route Interface -->
+      <div id="route-mode-interface" class="mode-interface" style="display:none;">
+        <div class="filter-section">
+          <h2>Calculer un itinéraire</h2>
+          
+          <!-- Interface d'itinéraire avec Points A et B -->
         <div id="route-interface-container">
           <!-- Point A (origine) -->
           <div class="route-point-section" id="point-a-section" style="position: relative;">
@@ -227,8 +322,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
           </div>
         </div>
       </div>
+      </div>
 
-
+      <!-- Common Elements for Both Modes -->
       <div class="filter-section">
         <button id="reset-map">Réinitialiser la carte</button>
       </div>
@@ -367,6 +463,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
     // Variables globales
     let map;
+    let currentView3DCoordinates = null; // Pour tracker l'UP actuellement en vue 3D
+    let zoomingToCoordinates = null; // Pour tracker vers quelle UP on est en train de zoomer
     let geocoder;
     let directions;
     let currentSearchCenter = null;
@@ -798,10 +896,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     
     function loadMarkerImages(callback) {
         const markers = {
-            'beton-marker': '/sites/default/files/2024-09/point-interet-beton.png',
-            'granulats-marker': '/sites/default/files/2024-09/point-interet-granulats.png',
-            'ciment-marker': '/sites/default/files/2024-09/point-interet-ciment.png',
-            'ciment-prompt-marker': '/sites/default/files/2024-12/ciment-prompt-naturel.png'
+            'beton-marker': 'https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-beton.png',
+            'granulats-marker': 'https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-granulats.png',
+            'ciment-marker': 'https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-ciment.png',
+            'ciment-prompt-marker': 'https://www.solutions-vicat.fr/sites/default/files/2024-12/ciment-prompt-naturel.png'
         };
         
         const markerIds = Object.keys(markers);
@@ -1053,18 +1151,40 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
             
+            // Si on est en vue zoomée (même manuellement), considérer cette UP comme active
+            const currentPitch = map.getPitch();
+            const currentZoom = map.getZoom();
+            const mapCenter = map.getCenter();
+            const distance = turf.distance(
+                turf.point([mapCenter.lng, mapCenter.lat]),
+                turf.point(coordinates),
+                { units: 'kilometers' }
+            );
+            
+            // Si on est très zoomé ET proche de cette UP, la considérer comme en vue 3D
+            if ((currentPitch > 45 && currentZoom >= 16) || (currentZoom >= 15 && distance < 1)) {
+                currentView3DCoordinates = coordinates;
+            }
+            
             // Utiliser showSinglePopup pour garantir qu'un seul popup soit visible
             showSinglePopup(properties, coordinates);
         });
         
-        // Double-click event for individual points - focus on establishment
+        // Double-click event for individual points
         map.on('dblclick', 'unclustered-point', (e) => {
             e.preventDefault();
             const feature = {
                 geometry: e.features[0].geometry,
                 properties: e.features[0].properties
             };
-            focusOnEstablishment(feature);
+            
+            // En mode normal, sélectionner l'UP et afficher le rayon
+            if (window.currentAppMode === 'normal') {
+                selectUPAndShowRadius(feature);
+            } else {
+                // En mode itinéraire, comportement normal
+                focusOnEstablishment(feature);
+            }
         });
 
         // Change cursor to pointer when hovering over clusters or points
@@ -3233,9 +3353,103 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         }
         popupDiv.appendChild(emailP);
         
-        // Bouton trajet (si applicable)
+        // Ajout du bouton approprié selon le contexte
+        const currentZoom = map.getZoom();
+        const currentPitch = map.getPitch();
+        const mapCenter = map.getCenter();
         
-        // Bouton nettoyer le trajet supprimé - non nécessaire dans les tooltips
+        // Calculer la distance entre le centre de la carte et cette UP
+        const centerDistance = turf.distance(
+            turf.point([mapCenter.lng, mapCenter.lat]),
+            turf.point(coordinates),
+            { units: 'kilometers' }
+        );
+        
+        // Déterminer si on est en vue "zoomée" sur cette UP
+        // Inclure aussi si on est en train de zoomer vers cette UP
+        const isCurrentlyZoomingHere = zoomingToCoordinates && 
+            Math.abs(zoomingToCoordinates[0] - coordinates[0]) < 0.0001 &&
+            Math.abs(zoomingToCoordinates[1] - coordinates[1]) < 0.0001;
+            
+        const isZoomedOnThisUP = isCurrentlyZoomingHere || (
+            (currentPitch > 45 && currentZoom >= 16 && centerDistance < 2) || // Vue 3D
+            (currentZoom >= 16 && centerDistance < 0.5) || // Vue très zoomée et très proche
+            (currentZoom >= 15 && centerDistance < 0.2) // Vue zoomée et extrêmement proche
+        );
+        
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'popup-actions';
+        
+        const viewBtn = document.createElement('button');
+        viewBtn.className = 'popup-view-btn';
+        
+        if (isZoomedOnThisUP) {
+            // Bouton "Retour à la carte" car on est zoomé sur cette UP
+            viewBtn.textContent = 'Retour à la carte';
+            viewBtn.style.backgroundColor = '#28a745';
+            viewBtn.onclick = function() {
+                // Réinitialiser les variables de tracking
+                currentView3DCoordinates = null;
+                zoomingToCoordinates = null;
+                
+                map.flyTo({
+                    center: coordinates,
+                    zoom: 12,
+                    pitch: 0,
+                    bearing: 0,
+                    speed: 1.2,
+                    essential: true
+                });
+                
+                // Rafraîchir le popup ET les cards après le retour
+                setTimeout(() => {
+                    // Fermer le popup actuel et le recréer avec le bon bouton
+                    activePopups.forEach(p => p.remove());
+                    activePopups.length = 0;
+                    // Recréer le popup avec le bouton "Voir en 3D"
+                    const refreshedPopup = createPopupContent(props, coordinates);
+                    refreshedPopup.setLngLat(coordinates).addTo(map);
+                    activePopups.push(refreshedPopup);
+                    // Rafraîchir aussi les cards
+                    updateSidebarBasedOnMapViewport();
+                }, 1300);
+            };
+        } else {
+            // Bouton "Voir en 3D" car on n'est pas zoomé sur cette UP
+            viewBtn.textContent = 'Voir en 3D';
+            viewBtn.onclick = function() {
+                // Marquer qu'on est en train de zoomer vers cette UP
+                zoomingToCoordinates = coordinates;
+                currentView3DCoordinates = coordinates;
+                
+                map.flyTo({
+                    center: coordinates,
+                    zoom: 17,
+                    pitch: 60,
+                    bearing: 30,
+                    speed: 1.2,
+                    essential: true
+                });
+                
+                // Fermer le popup actuel et en rouvrir un avec le bon bouton
+                setTimeout(() => {
+                    activePopups.forEach(p => p.remove());
+                    activePopups.length = 0;
+                    // Recréer le popup avec les mêmes propriétés
+                    const refreshedPopup = createPopupContent(props, coordinates);
+                    refreshedPopup.setLngLat(coordinates).addTo(map);
+                    activePopups.push(refreshedPopup);
+                    updateSidebarBasedOnMapViewport();
+                    // Réinitialiser APRÈS avoir recréé le popup
+                    setTimeout(() => {
+                        zoomingToCoordinates = null; // Zoom terminé
+                    }, 100);
+                }, 1300);
+            };
+        }
+        
+        actionsDiv.appendChild(viewBtn);
+        popupDiv.appendChild(actionsDiv);
         
         popup.setDOMContent(popupDiv);
         
@@ -3550,9 +3764,74 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         return popup;
     }
 
+    // Fonction pour sélectionner une UP et afficher le rayon en mode normal
+    function selectUPAndShowRadius(feature) {
+        const coordinates = feature.geometry.coordinates;
+        
+        // Définir le centre de recherche actuel
+        currentSearchCenter = coordinates;
+        
+        // Marquer qu'on zoome vers cette UP (pour le cas du double-clic)
+        zoomingToCoordinates = coordinates;
+        currentView3DCoordinates = coordinates;
+        
+        // Zoomer sur l'UP
+        map.flyTo({
+            center: coordinates,
+            zoom: 12,
+            duration: 1500
+        });
+        
+        // Afficher le contrôle de rayon
+        showRadiusControl();
+        
+        // Dessiner le cercle de rayon
+        drawSearchRadiusCircle(coordinates, currentSearchRadius);
+        
+        // Attendre que le zoom soit terminé avant d'afficher le popup
+        setTimeout(() => {
+            showSinglePopup(feature.properties, coordinates);
+            // Réinitialiser après affichage
+            setTimeout(() => {
+                zoomingToCoordinates = null;
+            }, 100);
+        }, 1600);
+        
+        // Appliquer les filtres avec le nouveau centre
+        applyFilters();
+    }
+
     function focusOnEstablishment(feature) {
         const coordinates = feature.geometry.coordinates;
         
+        // Vérifier si on est en mode normal - ne pas faire de calcul d'itinéraire
+        if (window.currentAppMode === 'normal') {
+            // Marquer qu'on est en train de zoomer vers cette UP
+            zoomingToCoordinates = coordinates;
+            currentView3DCoordinates = coordinates;
+            
+            // En mode normal, zoomer avec vue 3D sur l'établissement
+            map.flyTo({
+                center: coordinates,
+                zoom: 17,
+                pitch: 60,
+                bearing: 30,
+                speed: 1.2,
+                essential: true
+            });
+            
+            // Attendre que le zoom 3D soit terminé avant d'afficher le popup
+            setTimeout(() => {
+                showSinglePopup(feature.properties, coordinates);
+                // Réinitialiser APRÈS avoir affiché le popup
+                setTimeout(() => {
+                    zoomingToCoordinates = null; // Zoom terminé
+                }, 100);
+            }, 1300);
+            return;
+        }
+        
+        // Mode itinéraire - comportement original
         // 🔍 ÉTAPE 1: Vérification anti-doublon robuste
         if (currentPointAFeature && areEstablishmentsIdentical(currentPointAFeature, feature)) {
             showIdenticalPointsWarning();
@@ -3768,49 +4047,58 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             // Titre
             const title = document.createElement('h3');
             title.textContent = name;
-            if (distanceHTML) {
-                // Créer les badges de distance de manière sécurisée
-                title.textContent = name + ' ';
-                if (currentSearchCenter) {
-                    let distance, travelTime;
+            card.appendChild(title);
+            
+            // Informations de distance (sur une ligne séparée après le titre)
+            if (currentSearchCenter) {
+                let distance, travelTime;
+                
+                // Vérifier si c'est l'établissement de destination avec données réelles
+                const isDestination = destinationCoords && 
+                    Math.abs(feature.geometry.coordinates[0] - destinationCoords[0]) < 0.0001 &&
+                    Math.abs(feature.geometry.coordinates[1] - destinationCoords[1]) < 0.0001;
+                
+                if (isDestination && realRouteData) {
+                    distance = parseFloat(realRouteData.distance);
+                    travelTime = realRouteData.travelTime;
+                } else {
+                    distance = getDistanceFromLatLonInKm(
+                        currentSearchCenter[1], currentSearchCenter[0],
+                        feature.geometry.coordinates[1], feature.geometry.coordinates[0]
+                    );
+                    travelTime = calculateTravelTime(distance);
+                }
+                
+                // Ne pas afficher les badges si distance = 0 ou temps = "0 min"
+                const distanceValue = distance.toFixed ? distance.toFixed(1) : distance;
+                if (parseFloat(distanceValue) > 0 && travelTime !== "0 min") {
+                    // Créer un conteneur pour les badges sur une ligne séparée
+                    const distanceContainer = document.createElement('div');
+                    distanceContainer.style.cssText = 'margin-top: 5px; margin-bottom: 8px;';
                     
-                    // Vérifier si c'est l'établissement de destination avec données réelles
-                    const isDestination = destinationCoords && 
-                        Math.abs(feature.geometry.coordinates[0] - destinationCoords[0]) < 0.0001 &&
-                        Math.abs(feature.geometry.coordinates[1] - destinationCoords[1]) < 0.0001;
+                    const distanceBadge = document.createElement('span');
+                    distanceBadge.className = 'distance-badge';
+                    distanceBadge.textContent = distanceValue + ' km';
+                    distanceContainer.appendChild(distanceBadge);
                     
-                    if (isDestination && realRouteData) {
-                        distance = parseFloat(realRouteData.distance);
-                        travelTime = realRouteData.travelTime;
-                    } else {
-                        distance = getDistanceFromLatLonInKm(
-                            currentSearchCenter[1], currentSearchCenter[0],
-                            feature.geometry.coordinates[1], feature.geometry.coordinates[0]
-                        );
-                        travelTime = calculateTravelTime(distance);
-                    }
+                    const timeBadge = document.createElement('span');
+                    timeBadge.className = 'time-badge';
+                    timeBadge.textContent = travelTime;
+                    distanceContainer.appendChild(timeBadge);
                     
-                    // Ne pas afficher les badges si distance = 0 ou temps = "0 min"
-                    const distanceValue = distance.toFixed ? distance.toFixed(1) : distance;
-                    if (parseFloat(distanceValue) > 0 && travelTime !== "0 min") {
-                        const distanceBadge = document.createElement('span');
-                        distanceBadge.className = 'distance-badge';
-                        distanceBadge.textContent = distanceValue + ' km';
-                        title.appendChild(distanceBadge);
-                        
-                        const timeBadge = document.createElement('span');
-                        timeBadge.className = 'time-badge';
-                        timeBadge.textContent = travelTime;
-                        title.appendChild(timeBadge);
-                    }
+                    // Ajouter après le titre
+                    card.appendChild(distanceContainer);
                 }
             }
-            card.appendChild(title);
             
             // Adresse
             const addressEl = document.createElement('p');
             addressEl.textContent = address + ', ' + city + ' ' + postalCode;
             card.appendChild(addressEl);
+            
+            // Conteneur pour les liens
+            const linksContainer = document.createElement('div');
+            linksContainer.style.cssText = 'display: flex; align-items: center; gap: 15px;';
             
             // Lien "Plus d'informations"
             const moreInfoLink = document.createElement('a');
@@ -3820,7 +4108,95 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             moreInfoLink.setAttribute('tabindex', '0');
             // Stocker les données de manière sécurisée
             moreInfoLink.setAttribute('data-feature', encodeURIComponent(JSON.stringify(props)));
-            card.appendChild(moreInfoLink);
+            
+            // Vérifier si cette UP est actuellement en vue zoomée
+            const currentZoom = map.getZoom();
+            const currentPitch = map.getPitch();
+            const mapCenter = map.getCenter();
+            const centerDistance = turf.distance(
+                turf.point([mapCenter.lng, mapCenter.lat]),
+                turf.point(feature.geometry.coordinates),
+                { units: 'kilometers' }
+            );
+            
+            // Mêmes conditions que dans le popup pour la cohérence
+            const isCurrently3D = (
+                (currentPitch > 45 && currentZoom >= 16 && centerDistance < 2) ||
+                (currentZoom >= 16 && centerDistance < 0.5) ||
+                (currentZoom >= 15 && centerDistance < 0.2)
+            );
+            
+            // Créer le bouton approprié
+            const viewBtn = document.createElement('a');
+            viewBtn.className = 'view-btn';
+            viewBtn.href = '#';
+            
+            if (isCurrently3D) {
+                // Bouton "Retour à la carte"
+                viewBtn.textContent = 'Retour à la carte';
+                viewBtn.style.color = '#28a745'; // Couleur verte pour indiquer l'état actif
+                
+                viewBtn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    // Retour à la vue normale
+                    map.flyTo({
+                        center: feature.geometry.coordinates,
+                        zoom: 12,
+                        pitch: 0,
+                        bearing: 0,
+                        speed: 1.2,
+                        essential: true
+                    });
+                    // Réinitialiser les variables de tracking
+                    currentView3DCoordinates = null;
+                    zoomingToCoordinates = null;
+                    // Rafraîchir les cards
+                    setTimeout(() => {
+                        updateSidebarBasedOnMapViewport();
+                    }, 1300);
+                });
+            } else {
+                // Bouton "Voir en 3D"
+                viewBtn.textContent = 'Voir en 3D';
+                
+                viewBtn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    // Marquer qu'on est en train de zoomer vers cette UP
+                    zoomingToCoordinates = feature.geometry.coordinates;
+                    currentView3DCoordinates = feature.geometry.coordinates;
+                    
+                    // Zoom 3D sur l'établissement
+                    map.flyTo({
+                        center: feature.geometry.coordinates,
+                        zoom: 17,
+                        pitch: 60,
+                        bearing: 30,
+                        speed: 1.2,
+                        essential: true
+                    });
+                    
+                    // Attendre un peu que le zoom soit appliqué avant d'afficher le popup
+                    setTimeout(() => {
+                        // Afficher le popup après que la vue 3D soit activée
+                        showSinglePopup(feature.properties, feature.geometry.coordinates);
+                        // Rafraîchir les cards
+                        updateSidebarBasedOnMapViewport();
+                        // Réinitialiser APRÈS avoir affiché le popup
+                        setTimeout(() => {
+                            zoomingToCoordinates = null; // Zoom terminé
+                        }, 100);
+                    }, 1300);
+                });
+            }
+            
+            viewBtn.setAttribute('tabindex', '0');
+            
+            linksContainer.appendChild(moreInfoLink);
+            linksContainer.appendChild(viewBtn);
+            
+            card.appendChild(linksContainer);
             
             // Boutons d'action (créés avec DOM)
             const hasRouteButton = currentSearchCenter && feature.geometry && feature.geometry.coordinates;
@@ -3851,10 +4227,16 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }
             
             card.addEventListener('click', () => {
-                focusOnEstablishment(feature);
+                if (window.currentAppMode === 'normal') {
+                    // En mode normal, même comportement que double-clic sur UP : sélection + rayon
+                    selectUPAndShowRadius(feature);
+                } else if (window.currentAppMode === 'route') {
+                    // En mode itinéraire, sélectionner pour le calcul de route
+                    focusOnEstablishment(feature);
+                }
             });
 
-            card.querySelectorAll('.action-btn, .more-info').forEach(button => {
+            card.querySelectorAll('.action-btn, .more-info, .view-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
                     event.stopPropagation();
                 });
@@ -4257,6 +4639,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         initializeSearchAndFilters();
         initializeMobileToggle();
         initializeKeyboardNavigation();
+        initializeModeSwitcher();
         
         // Configurer la correction des entités HTML pour les cards
         setupCardEntityFix();
@@ -4318,6 +4701,193 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 activePopups.length = 0;
             }
         });
+    }
+
+    // Initialisation du mode switcher
+    function initializeModeSwitcher() {
+        const modeNormalBtn = document.getElementById('mode-normal');
+        const modeRouteBtn = document.getElementById('mode-route');
+        const normalInterface = document.getElementById('normal-mode-interface');
+        const routeInterface = document.getElementById('route-mode-interface');
+        
+        // Exposer le mode actuel globalement pour que d'autres fonctions puissent le vérifier
+        window.currentAppMode = 'normal';
+        let normalGeocoder = null;
+
+        // Fonction pour basculer vers le mode normal
+        function switchToNormalMode() {
+            window.currentAppMode = 'normal';
+            
+            // Mise à jour des boutons
+            modeNormalBtn.classList.add('active');
+            modeRouteBtn.classList.remove('active');
+            
+            // Afficher/Masquer les interfaces
+            normalInterface.style.display = 'block';
+            routeInterface.style.display = 'none';
+            
+            // Masquer le bouton d'ajout de destination
+            const addDestBtn = document.getElementById('add-destination-btn');
+            if (addDestBtn) addDestBtn.style.display = 'none';
+            
+            // Masquer la section point B si elle était visible
+            const pointBSection = document.getElementById('point-b-section');
+            if (pointBSection) pointBSection.style.display = 'none';
+            
+            // Effacer les routes si elles existent
+            clearRoute();
+            
+            // Réinitialiser les sélections d'itinéraire
+            clearRoutePoints();
+            
+            // Rafraîchir les cards pour mettre à jour le style de curseur
+            updateSidebarBasedOnMapViewport();
+        }
+
+        // Fonction pour basculer vers le mode itinéraire
+        function switchToRouteMode() {
+            window.currentAppMode = 'route';
+            
+            // Mise à jour des boutons
+            modeNormalBtn.classList.remove('active');
+            modeRouteBtn.classList.add('active');
+            
+            // Afficher/Masquer les interfaces
+            normalInterface.style.display = 'none';
+            routeInterface.style.display = 'block';
+            
+            // Afficher le bouton d'ajout de destination en mode route
+            const addDestBtn = document.getElementById('add-destination-btn');
+            if (addDestBtn) addDestBtn.style.display = 'block';
+            
+            // Rafraîchir les cards pour mettre à jour le style de curseur
+            updateSidebarBasedOnMapViewport();
+        }
+
+        // Fonction pour effacer les points de route
+        function clearRoutePoints() {
+            // Réinitialiser point A
+            const selectedPointA = document.getElementById('selected-point-a');
+            const pointAName = document.getElementById('point-a-name');
+            if (selectedPointA) selectedPointA.style.display = 'none';
+            if (pointAName) pointAName.textContent = '';
+            if (window.pointAData) window.pointAData = null;
+            
+            // Réinitialiser point B
+            const selectedPointB = document.getElementById('selected-point-b');
+            const pointBName = document.getElementById('point-b-name');
+            if (selectedPointB) selectedPointB.style.display = 'none';
+            if (pointBName) pointBName.textContent = '';
+            if (window.pointBData) window.pointBData = null;
+        }
+
+        // Fonction pour effacer la route de la carte
+        function clearRoute() {
+            if (map && map.getSource('route')) {
+                if (map.getLayer('route')) {
+                    map.removeLayer('route');
+                }
+                map.removeSource('route');
+            }
+            
+            // Supprimer les markers de route s'ils existent
+            if (window.routeMarkers) {
+                window.routeMarkers.forEach(marker => marker.remove());
+                window.routeMarkers = [];
+            }
+        }
+
+        // Initialiser le geocoder pour le mode normal après le chargement de la carte
+        function initializeNormalGeocoder() {
+            if (!map || normalGeocoder) return;
+            
+            const geocoderContainer = document.getElementById('normal-geocoder-container');
+            if (!geocoderContainer) return;
+            
+            normalGeocoder = new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                mapboxgl: mapboxgl,
+                placeholder: 'Rechercher une ville ou UP...',
+                countries: 'fr',
+                language: 'fr',
+                limit: 5
+            });
+            
+            // Ajouter le geocoder avant le bouton de géolocalisation
+            const geolocateBtn = document.getElementById('normal-geolocate');
+            if (geolocateBtn && geolocateBtn.parentNode) {
+                geolocateBtn.parentNode.insertBefore(normalGeocoder.onAdd(map), geolocateBtn);
+            } else {
+                geocoderContainer.appendChild(normalGeocoder.onAdd(map));
+            }
+            
+            // Gérer les résultats de recherche
+            normalGeocoder.on('result', function(e) {
+                if (e.result && e.result.geometry) {
+                    map.flyTo({
+                        center: e.result.geometry.coordinates,
+                        zoom: 12,
+                        duration: 1500
+                    });
+                    
+                    // Mettre à jour les établissements visibles
+                    setTimeout(() => {
+                        updateSidebarBasedOnMapViewport();
+                    }, 1600);
+                }
+            });
+        }
+
+        // Attendre que la carte soit initialisée
+        const checkMapInterval = setInterval(() => {
+            if (window.map) {
+                clearInterval(checkMapInterval);
+                initializeNormalGeocoder();
+            }
+        }, 100);
+
+        // Event listeners pour les boutons
+        modeNormalBtn.addEventListener('click', switchToNormalMode);
+        modeRouteBtn.addEventListener('click', switchToRouteMode);
+
+        // Géolocalisation pour le mode normal
+        const normalGeolocateBtn = document.getElementById('normal-geolocate');
+        if (normalGeolocateBtn) {
+            normalGeolocateBtn.addEventListener('click', function() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            const userLocation = [position.coords.longitude, position.coords.latitude];
+                            
+                            // Centrer la carte sur la position de l'utilisateur
+                            map.flyTo({
+                                center: userLocation,
+                                zoom: 12,
+                                duration: 1500
+                            });
+                            
+                            // Ajouter un marker pour la position de l'utilisateur
+                            new mapboxgl.Marker({ color: '#FF0000' })
+                                .setLngLat(userLocation)
+                                .addTo(map);
+                            
+                            // Mettre à jour les établissements visibles
+                            setTimeout(() => {
+                                updateSidebarBasedOnMapViewport();
+                            }, 1600);
+                        },
+                        function(error) {
+                            alert('Impossible de récupérer votre position: ' + error.message);
+                        }
+                    );
+                } else {
+                    alert('La géolocalisation n\'est pas supportée par votre navigateur');
+                }
+            });
+        }
+
+        // Initialiser en mode normal par défaut
+        switchToNormalMode();
     }
 
 
