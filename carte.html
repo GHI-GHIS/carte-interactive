@@ -4151,9 +4151,22 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     // Réinitialiser les variables de tracking
                     currentView3DCoordinates = null;
                     zoomingToCoordinates = null;
-                    // Rafraîchir les cards
+                    // Rafraîchir les cards ET fermer/recréer les popups
                     setTimeout(() => {
                         updateSidebarBasedOnMapViewport();
+                        // Si un popup est ouvert sur cette UP, le rafraîchir
+                        if (activePopups.length > 0) {
+                            const currentPopup = activePopups[0];
+                            const popupLngLat = currentPopup.getLngLat();
+                            // Vérifier si le popup est sur cette UP
+                            if (Math.abs(popupLngLat.lng - feature.geometry.coordinates[0]) < 0.0001 &&
+                                Math.abs(popupLngLat.lat - feature.geometry.coordinates[1]) < 0.0001) {
+                                // Fermer et recréer le popup
+                                activePopups.forEach(p => p.remove());
+                                activePopups.length = 0;
+                                showSinglePopup(feature.properties, feature.geometry.coordinates);
+                            }
+                        }
                     }, 1300);
                 });
             } else {
