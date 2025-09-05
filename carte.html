@@ -15,7 +15,97 @@
   <script src='https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js'></script>
   
 <style>
-body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:hidden}#map-container{display:flex;height:85vh;width:100vw;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:20}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:10}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}.geolocate-btn{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>') center/18px no-repeat;width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon{display:none!important}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px}.establishment-card{background:#fff;margin:6px 8px 10px 7px;padding:11px 15px 0 20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.38);cursor:pointer;transition:transform .2s,box-shadow .2s;font-family:Arial,sans-serif}.establishment-card:hover{transform:scale(1.02);box-shadow:0 4px 8px rgba(0,0,0,.15)}.establishment-card h3{font-size:16px;color:#002060;margin:0 0 5px 0}.establishment-card p{font-size:14px;color:#333;margin:0 0 12px 0}.establishment-card a{color:#002060;text-decoration:none}.establishment-card a:hover{text-decoration:underline}.establishment-card .more-info{font-size:12px;color:#ff9900;margin-top:10px;display:inline-block}.establishment-card .view-btn{font-size:12px;color:#17a2b8;margin-top:10px;margin-left:15px;display:inline-block;cursor:pointer;transition:color .2s}.establishment-card .view-btn:hover{color:#138496;text-decoration:underline}.establishment-card .view-btn.back-mode{color:#28a745}.establishment-card .view-btn.back-mode:hover{color:#218838}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:9999;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}.mapboxgl-popup-content{width:max-content;font-family:Arial,sans-serif;padding:15px!important;max-width:280px!important}.mapboxgl-popup-content h3{color:#002060;margin:0 0 10px 0;font-size:16px}.mapboxgl-popup-content p{margin:0 0 5px 0;line-height:1.4;font-size:14px}.mapboxgl-popup-content p strong{color:#333;font-weight:bold}.mapboxgl-popup-content .popup-actions{display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid #eee}.mapboxgl-popup-content .popup-view-btn{flex:1;padding:5px 10px;background-color:#17a2b8;color:#fff;border:none;border-radius:4px;cursor:pointer;text-align:center;font-size:12px;transition:background-color .2s}.mapboxgl-popup-content .popup-view-btn:hover{background-color:#138496}#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-right,#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-left{display:none}.modal{display:none;position:fixed;z-index:1001;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.4)}.modal-content{background-color:#fefefe;margin:15% auto;padding:20px;border:1px solid #888;width:80%;max-width:600px;border-radius:8px}.close-button{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}.close-button:hover,.close-button:focus{color:#000;text-decoration:none}.view-switcher{position:fixed;top:83px;right:28px;z-index:1005;padding:10px 15px;background-color:#002060;color:#fff;border:0;border-radius:5px;cursor:pointer;font-size:14px;box-shadow:0 2px 5px rgba(0,0,0,.2);display:none;transition:background-color .3s}.view-switcher:hover{background-color:#003380}#map-container.layout-dual #sidebar{width:30%;min-width:415px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,415px));opacity:1}#map-container.layout-sidebar-full{height:100vh}#map-container.layout-sidebar-full #sidebar{width:94%;min-width:94%;opacity:1;transform:translateX(0)}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-map-full{height:100vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none}#map-container.layout-map-full #map{width:100%;opacity:1}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:415px}#map-container.layout-dual #map{width:calc(100% - 415px)}}@media (max-width:600px){#map-container.layout-sidebar-full #sidebar{width:100%;min-width:88%}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
+body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:hidden}
+/* Style pour les UP dans l'autocompl\u00e9tion */
+.mapboxgl-ctrl-geocoder--suggestion.is-up{background:linear-gradient(to right,#f0f7ff 0%,#ffffff 100%)!important;border-left:3px solid #002060!important}
+.mapboxgl-ctrl-geocoder--suggestion.is-up .mapboxgl-ctrl-geocoder--suggestion-title{color:#002060!important;font-weight:600}#map-container{display:flex;height:85vh;width:100vw;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:20}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:10}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}.geolocate-btn{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>') center/18px no-repeat;width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon{display:none!important}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px}/* Nouvelle version compacte et moderne des cards */
+.establishment-card{background:#fff;margin:4px 6px;padding:10px 12px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.1);cursor:pointer;transition:all .2s ease;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;position:relative;border-left:3px solid transparent}
+.establishment-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.15);border-left-color:#002060}
+.establishment-card:active{transform:translateY(1px);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+
+/* Header de la card avec nom et badges */
+.card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.establishment-card h3{font-size:14px;font-weight:600;color:#002060;margin:0;line-height:1.3;flex:1}
+
+/* Badges compacts */
+.card-badges{display:flex;gap:4px;margin-left:8px;flex-shrink:0}
+.distance-badge,.time-badge{padding:2px 6px;border-radius:10px;font-size:10px;font-weight:600;white-space:nowrap}
+.distance-badge{background:#e3f2fd;color:#1565c0}
+.time-badge{background:#e8f5e9;color:#2e7d32}
+
+/* Adresse */
+.card-address{font-size:12px;color:#666;margin-bottom:8px;line-height:1.3}
+
+/* Actions compactes avec icônes */
+.card-actions-compact{display:flex;gap:4px;border-top:1px solid #f0f0f0;padding-top:8px;margin-top:8px}
+.card-action-icon{flex:1;display:flex;align-items:center;justify-content:center;padding:6px;border-radius:4px;background:#f8f9fa;transition:all .15s;cursor:pointer;border:none;min-height:32px}
+.card-action-icon:hover{background:#002060;color:white}
+.card-action-icon svg{width:16px;height:16px;fill:currentColor}
+.card-action-icon.phone:hover{background:#28a745}
+.card-action-icon.route:hover{background:#17a2b8}
+.card-action-icon.info:hover{background:#ff9900}
+.card-action-icon.view3d:hover{background:#6f42c1}
+.card-action-icon.view3d.active{background:#28a745;color:white}
+
+/* État actif/focus pour accessibilité */
+.establishment-card:focus-visible{outline:2px solid #002060;outline-offset:2px}
+.card-action-icon:focus-visible{outline:2px solid #002060;outline-offset:-2px}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:9999;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}.mapboxgl-popup-content{width:max-content;font-family:Arial,sans-serif;padding:15px!important;max-width:280px!important}.mapboxgl-popup-content h3{color:#002060;margin:0 0 10px 0;font-size:16px}.mapboxgl-popup-content p{margin:0 0 5px 0;line-height:1.4;font-size:14px}.mapboxgl-popup-content p strong{color:#333;font-weight:bold}.mapboxgl-popup-content .popup-actions{display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid #eee}.mapboxgl-popup-content .popup-view-btn{flex:1;padding:5px 10px;background-color:#17a2b8;color:#fff;border:none;border-radius:4px;cursor:pointer;text-align:center;font-size:12px;transition:background-color .2s}.mapboxgl-popup-content .popup-view-btn:hover{background-color:#138496}#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-right,#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-left{display:none}/* Modal moderne */
+.modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.6);backdrop-filter:blur(4px);animation:fadeIn 0.3s ease}
+
+.modal-content{background:#fff;margin:5% auto;padding:0;border:none;width:90%;max-width:500px;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.2);animation:slideUp 0.3s ease;overflow:hidden}
+
+/* Header de la modal */
+.modal-header{background:linear-gradient(135deg,#002060 0%,#003380 100%);color:white;padding:20px 24px;position:relative}
+
+.modal-header h3{margin:0;font-size:20px;font-weight:600;padding-right:30px}
+
+.close-button{position:absolute;right:20px;top:50%;transform:translateY(-50%);color:white;font-size:24px;font-weight:300;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all 0.2s;background:rgba(255,255,255,0.1)}
+
+.close-button:hover{background:rgba(255,255,255,0.2);transform:translateY(-50%) rotate(90deg)}
+
+/* Body de la modal */
+.modal-body{padding:24px}
+
+.modal-info-row{display:flex;padding:12px 0;border-bottom:1px solid #f0f0f0}
+
+.modal-info-row:last-child{border-bottom:none}
+
+.modal-info-label{font-weight:600;color:#666;min-width:100px;font-size:14px}
+
+.modal-info-value{flex:1;color:#333;font-size:14px;line-height:1.4}
+
+.modal-info-value a{color:#002060;text-decoration:none;transition:color 0.2s}
+
+.modal-info-value a:hover{color:#17a2b8;text-decoration:underline}
+
+/* Badge pour l'activité */
+.activity-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#e3f2fd;color:#1565c0}
+
+/* Footer de la modal avec actions */
+.modal-footer{padding:16px 24px;background:#f8f9fa;border-top:1px solid #e0e0e0;display:flex;gap:12px}
+
+.modal-action-btn{flex:1;padding:10px;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+
+.modal-action-btn.primary{background:#002060;color:white}
+
+.modal-action-btn.primary:hover{background:#003380;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,32,96,0.3)}
+
+.modal-action-btn.secondary{background:#e0e0e0;color:#333}
+
+.modal-action-btn.secondary:hover{background:#d0d0d0}
+
+/* Animations */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0}}
+@keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes slideDown{from{transform:translateY(0);opacity:1}to{transform:translateY(50px);opacity:0}}
+
+/* Responsive */
+@media (max-width:600px){
+    .modal-content{width:95%;margin:10% auto}
+    .modal-info-row{flex-direction:column;gap:4px}
+    .modal-info-label{min-width:unset}
+}.view-switcher{position:fixed;top:83px;right:28px;z-index:1005;padding:10px 15px;background-color:#002060;color:#fff;border:0;border-radius:5px;cursor:pointer;font-size:14px;box-shadow:0 2px 5px rgba(0,0,0,.2);display:none;transition:background-color .3s}.view-switcher:hover{background-color:#003380}#map-container.layout-dual #sidebar{width:30%;min-width:415px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,415px));opacity:1}#map-container.layout-sidebar-full{height:100vh}#map-container.layout-sidebar-full #sidebar{width:94%;min-width:94%;opacity:1;transform:translateX(0)}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-map-full{height:100vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none}#map-container.layout-map-full #map{width:100%;opacity:1}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:415px}#map-container.layout-dual #map{width:calc(100% - 415px)}}@media (max-width:600px){#map-container.layout-sidebar-full #sidebar{width:100%;min-width:88%}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
 /* Mode Switcher Styles */
 /* Mode Switcher sur la carte */
 .mode-switcher-container {
@@ -108,7 +198,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
 
 /* Animation d'apparition du panneau de routage */
-#route-details-panel{animation:slideUp .4s ease-out}@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+#route-details-panel{animation:slideUpRoute .4s ease-out}@keyframes slideUpRoute{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
 /* Styles pour les options de routage avec molette */
 #route-options-container{transition:opacity 0.3s ease, transform 0.3s ease}
@@ -782,27 +872,94 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
     }
 
-    function localUPGeocoder(query) {
-        const matchingFeatures = [];
-        const queryLower = query.toLowerCase();
+    function findNearbyUPs(coordinates, radiusKm) {
+        const nearbyUPs = [];
+        if (!establishmentsData || !establishmentsData.features) return nearbyUPs;
+        
         establishmentsData.features.forEach((feature) => {
-            if (feature.properties.UP && feature.properties.UP.toLowerCase().includes(queryLower)) {
-                const decodedUP = decodeHTMLEntities(feature.properties.UP);
-                const decodedAdresse = decodeHTMLEntities(feature.properties.Adresse || '');
-                const decodedVille = decodeHTMLEntities(feature.properties.Ville || '');
-                const placeName = `${decodedUP}, ${decodedAdresse}, ${decodedVille}`;
-
-                const upResult = {
-                    id: `up_${feature.properties.id}`, type: 'Feature', place_type: ['place'], relevance: 0.99,
-                    properties: feature.properties, text: decodedUP, place_name: placeName,
-                    center: feature.geometry.coordinates, geometry: feature.geometry
-                };
-                
-                matchingFeatures.push(upResult);
+            const distance = calculateDistance(
+                coordinates[1], coordinates[0],
+                feature.geometry.coordinates[1], feature.geometry.coordinates[0]
+            );
+            
+            if (distance <= radiusKm) {
+                nearbyUPs.push({
+                    feature: feature,
+                    distance: distance
+                });
             }
         });
         
-        const results = matchingFeatures.slice(0, 5);
+        // Trier par distance
+        nearbyUPs.sort((a, b) => a.distance - b.distance);
+        
+        return nearbyUPs;
+    }
+    
+    function localUPGeocoder(query) {
+        if (!query || query.length < 2) {
+            return [];
+        }
+        
+        if (!establishmentsData || !establishmentsData.features) {
+            return [];
+        }
+        
+        const results = [];
+        const queryLower = query.toLowerCase();
+        
+        // Chercher dans les UP
+        establishmentsData.features.forEach((feature, index) => {
+            if (results.length >= 5) return;
+            
+            if (feature.properties.UP && feature.properties.UP.toLowerCase().includes(queryLower)) {
+                const upName = decodeHTMLEntities(feature.properties.UP);
+                const address = decodeHTMLEntities(feature.properties.Adresse || '');
+                const city = decodeHTMLEntities(feature.properties.Ville || '');
+                
+                results.push({
+                    id: `local-up-${index}`,
+                    type: 'Feature',
+                    place_type: ['place'],
+                    relevance: 1.0,
+                    text: `[UP] ${upName}`,
+                    place_name: `📍 ${upName}, ${address}, ${city}`,
+                    center: feature.geometry.coordinates,
+                    geometry: feature.geometry,
+                    properties: feature.properties,
+                    context: []
+                });
+            }
+        });
+        
+        // Chercher dans les villes si pas assez de résultats
+        if (results.length < 3) {
+            establishmentsData.features.forEach((feature, index) => {
+                if (results.length >= 5) return;
+                
+                if (feature.properties.Ville && 
+                    feature.properties.Ville.toLowerCase().includes(queryLower) &&
+                    !results.some(r => r.properties && r.properties.UP === feature.properties.UP)) {
+                    
+                    const upName = decodeHTMLEntities(feature.properties.UP);
+                    const city = decodeHTMLEntities(feature.properties.Ville || '');
+                    
+                    results.push({
+                        id: `local-city-${index}`,
+                        type: 'Feature',
+                        place_type: ['place'],
+                        relevance: 0.8,
+                        text: `[UP] ${upName}`,
+                        place_name: `📍 ${upName} • ${city}`,
+                        center: feature.geometry.coordinates,
+                        geometry: feature.geometry,
+                        properties: feature.properties,
+                        context: []
+                    });
+                }
+            });
+        }
+        
         return results;
     }
 
@@ -1504,6 +1661,24 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             countries: 'fr', localGeocoder: localUPGeocoder, localGeocoderOnly: false, language: 'fr'
        });
        document.getElementById('geocoder-container').appendChild(geocoder.onAdd(map));
+       
+       // Observer pour styliser les suggestions UP
+       const observerConfig = { childList: true, subtree: true };
+       const observerCallback = function(mutationsList) {
+           for(let mutation of mutationsList) {
+               if (mutation.addedNodes.length > 0) {
+                   // Chercher les suggestions contenant [UP]
+                   document.querySelectorAll('.mapboxgl-ctrl-geocoder--suggestion').forEach(suggestion => {
+                       const title = suggestion.querySelector('.mapboxgl-ctrl-geocoder--suggestion-title');
+                       if (title && title.textContent.includes('[UP]')) {
+                           suggestion.classList.add('is-up');
+                       }
+                   });
+               }
+           }
+       };
+       const observer = new MutationObserver(observerCallback);
+       observer.observe(document.body, observerConfig);
        // Événement principal 'result'
        geocoder.on('result', (e) => {
             currentSearchCenter = e.result.center || e.result.geometry.coordinates;
@@ -1540,9 +1715,22 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 }
             }
             
-            // Afficher le contrôle de rayon quand une UP est sélectionnée
+            // Afficher le contrôle de rayon et définir à 80 km
             showRadiusControl();
+            
+            // Définir le rayon à 80 km
+            currentSearchRadius = 80;
+            const radiusSlider = document.getElementById('radius-slider');
+            if (radiusSlider) radiusSlider.value = 80;
+            const radiusValue = document.getElementById('radius-value');
+            if (radiusValue) radiusValue.textContent = "80 km";
+            
+            // Dessiner le cercle de 80 km autour du point sélectionné
+            drawSearchRadiusCircle(currentSearchCenter, 80);
+            
+            // Appliquer les filtres avec le rayon de 80 km
             applyFilters();
+            
             if (e.result.properties && e.result.properties.UP) {
                 map.flyTo({ center: e.result.center, zoom: 14, pitch: 45, essential: true });
             }
@@ -3208,7 +3396,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Cacher le contrôle de rayon
         hideRadiusControl();
         
+        // Vider les geocoders
         if (geocoder && typeof geocoder.clear === 'function') { geocoder.clear(); }
+        if (geocoderB && typeof geocoderB.clear === 'function') { geocoderB.clear(); }
+        if (window.normalGeocoder && typeof window.normalGeocoder.clear === 'function') { 
+            window.normalGeocoder.clear(); 
+        }
         
         checkAndSetLayout();
         map.flyTo({ center: [2.2137, 46.2276], zoom: 5, pitch: 0, bearing: 0, essential: true });
@@ -4096,14 +4289,18 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 }
             }
 
-            // Créer les éléments DOM de manière sécurisée
+            // Nouvelle structure compacte de la card
+            
+            // Header avec titre et badges sur la même ligne
+            const cardHeader = document.createElement('div');
+            cardHeader.className = 'card-header';
             
             // Titre
             const title = document.createElement('h3');
             title.textContent = name;
-            card.appendChild(title);
+            cardHeader.appendChild(title);
             
-            // Informations de distance (sur une ligne séparée après le titre)
+            // Badges de distance et temps (si disponibles)
             if (currentSearchCenter) {
                 let distance, travelTime;
                 
@@ -4123,45 +4320,88 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     travelTime = calculateTravelTime(distance);
                 }
                 
-                // Ne pas afficher les badges si distance = 0 ou temps = "0 min"
                 const distanceValue = distance.toFixed ? distance.toFixed(1) : distance;
                 if (parseFloat(distanceValue) > 0 && travelTime !== "0 min") {
-                    // Créer un conteneur pour les badges sur une ligne séparée
-                    const distanceContainer = document.createElement('div');
-                    distanceContainer.style.cssText = 'margin-top: 5px; margin-bottom: 8px;';
+                    const badgesContainer = document.createElement('div');
+                    badgesContainer.className = 'card-badges';
                     
                     const distanceBadge = document.createElement('span');
                     distanceBadge.className = 'distance-badge';
                     distanceBadge.textContent = distanceValue + ' km';
-                    distanceContainer.appendChild(distanceBadge);
+                    badgesContainer.appendChild(distanceBadge);
                     
                     const timeBadge = document.createElement('span');
                     timeBadge.className = 'time-badge';
                     timeBadge.textContent = travelTime;
-                    distanceContainer.appendChild(timeBadge);
+                    badgesContainer.appendChild(timeBadge);
                     
-                    // Ajouter après le titre
-                    card.appendChild(distanceContainer);
+                    cardHeader.appendChild(badgesContainer);
                 }
             }
             
-            // Adresse
-            const addressEl = document.createElement('p');
-            addressEl.textContent = address + ', ' + city + ' ' + postalCode;
+            card.appendChild(cardHeader);
+            
+            // Adresse (plus compacte)
+            const addressEl = document.createElement('div');
+            addressEl.className = 'card-address';
+            addressEl.textContent = `${address}, ${city} ${postalCode}`;
             card.appendChild(addressEl);
             
-            // Conteneur pour les liens
-            const linksContainer = document.createElement('div');
-            linksContainer.style.cssText = 'display: flex; align-items: center; gap: 15px;';
+            // Actions compactes avec icônes
+            const actionsContainer = document.createElement('div');
+            actionsContainer.className = 'card-actions-compact';
             
-            // Lien "Plus d'informations"
-            const moreInfoLink = document.createElement('a');
-            moreInfoLink.className = 'more-info';
-            moreInfoLink.href = '#';
-            moreInfoLink.textContent = 'Plus d\'informations';
-            moreInfoLink.setAttribute('tabindex', '0');
-            // Stocker les données de manière sécurisée
-            moreInfoLink.setAttribute('data-feature', encodeURIComponent(JSON.stringify(props)));
+            // Bouton téléphone
+            if (phone && phone !== "null") {
+                const phoneBtn = document.createElement('button');
+                phoneBtn.className = 'card-action-icon phone';
+                phoneBtn.setAttribute('aria-label', 'Appeler');
+                phoneBtn.setAttribute('title', 'Appeler');
+                phoneBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 00-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/></svg>`;
+                phoneBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    window.location.href = `tel:${phone}`;
+                };
+                actionsContainer.appendChild(phoneBtn);
+            }
+            
+            // Bouton itinéraire
+            const routeBtn = document.createElement('button');
+            routeBtn.className = 'card-action-icon route';
+            routeBtn.setAttribute('aria-label', 'Itinéraire');
+            routeBtn.setAttribute('title', 'Calculer un itinéraire');
+            routeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21.71 11.29l-9-9a.996.996 0 00-1.41 0l-9 9a.996.996 0 000 1.41l9 9c.39.39 1.02.39 1.41 0l9-9a.996.996 0 000-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/></svg>`;
+            routeBtn.onclick = (e) => {
+                e.stopPropagation();
+                // Calculer l'itinéraire vers cette destination
+                if (window.switchToRouteMode) {
+                    window.switchToRouteMode();
+                    destinationCoords = feature.geometry.coordinates;
+                    if (currentSearchCenter) {
+                        showRouteOnMap(currentSearchCenter, destinationCoords);
+                    }
+                }
+            };
+            actionsContainer.appendChild(routeBtn);
+            
+            // Bouton info (remplace "Plus d'informations")
+            const infoBtn = document.createElement('button');
+            infoBtn.className = 'card-action-icon info';
+            infoBtn.setAttribute('aria-label', 'Plus d\'informations');
+            infoBtn.setAttribute('title', 'Plus d\'informations');
+            infoBtn.setAttribute('data-feature', encodeURIComponent(JSON.stringify(props)));
+            infoBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>`;
+            
+            // Ajouter l'event listener pour le bouton info
+            infoBtn.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+            });
+            
+            actionsContainer.appendChild(infoBtn);
+            
+            // Bouton Voir en 3D / Retour à la carte
+            const view3dBtn = document.createElement('button');
             
             // Vérifier si cette UP est actuellement en vue zoomée
             const currentZoom = map.getZoom();
@@ -4173,26 +4413,21 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 { units: 'kilometers' }
             );
             
-            // Mêmes conditions que dans le popup pour la cohérence
             const isCurrently3D = (
                 (currentPitch > 45 && currentZoom >= 16 && centerDistance < 2) ||
                 (currentZoom >= 16 && centerDistance < 0.5) ||
                 (currentZoom >= 15 && centerDistance < 0.2)
             );
             
-            // Créer le bouton approprié
-            const viewBtn = document.createElement('a');
-            viewBtn.className = 'view-btn';
-            viewBtn.href = '#';
-            
             if (isCurrently3D) {
-                // Bouton "Retour à la carte"
-                viewBtn.textContent = 'Retour à la carte';
-                viewBtn.style.color = '#28a745'; // Couleur verte pour indiquer l'état actif
+                // Mode retour à la carte
+                view3dBtn.className = 'card-action-icon view3d active';
+                view3dBtn.setAttribute('aria-label', 'Retour à la carte');
+                view3dBtn.setAttribute('title', 'Retour à la carte');
+                view3dBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 11l-6-6v5H8c-2.76 0-5 2.24-5 5v4h2v-4c0-1.65 1.35-3 3-3h7v5l6-6z"/></svg>`;
                 
-                viewBtn.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
+                view3dBtn.onclick = (e) => {
+                    e.stopPropagation();
                     // Retour à la vue normale
                     map.flyTo({
                         center: feature.geometry.coordinates,
@@ -4205,31 +4440,23 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     // Réinitialiser les variables de tracking
                     currentView3DCoordinates = null;
                     zoomingToCoordinates = null;
-                    // Rafraîchir les cards ET fermer/recréer les popups
+                    
+                    // Rafraîchir les cards après l'animation
                     setTimeout(() => {
-                        updateSidebarBasedOnMapViewport();
-                        // Si un popup est ouvert sur cette UP, le rafraîchir
-                        if (activePopups.length > 0) {
-                            const currentPopup = activePopups[0];
-                            const popupLngLat = currentPopup.getLngLat();
-                            // Vérifier si le popup est sur cette UP
-                            if (Math.abs(popupLngLat.lng - feature.geometry.coordinates[0]) < 0.0001 &&
-                                Math.abs(popupLngLat.lat - feature.geometry.coordinates[1]) < 0.0001) {
-                                // Fermer et recréer le popup
-                                activePopups.forEach(p => p.remove());
-                                activePopups.length = 0;
-                                showSinglePopup(feature.properties, feature.geometry.coordinates);
-                            }
+                        if (window.currentAppMode === 'normal') {
+                            updateSidebarBasedOnMapViewport();
                         }
                     }, 1300);
-                });
+                };
             } else {
-                // Bouton "Voir en 3D"
-                viewBtn.textContent = 'Voir en 3D';
+                // Mode voir en 3D
+                view3dBtn.className = 'card-action-icon view3d';
+                view3dBtn.setAttribute('aria-label', 'Voir en 3D');
+                view3dBtn.setAttribute('title', 'Voir en 3D');
+                view3dBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 7C6.48 7 2 9.24 2 12c0 2.24 2.94 4.13 7 4.77V20l4-4-4-4v2.73c-3.15-.56-5-1.9-5-2.73 0-1.06 3.04-3 8-3s8 1.94 8 3c0 .73-1.46 1.89-4 2.53v1.05c2.8-.59 5-1.94 5-3.58 0-2.76-4.48-5-10-5z"/></svg>`;
                 
-                viewBtn.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
+                view3dBtn.onclick = (e) => {
+                    e.stopPropagation();
                     // Marquer qu'on est en train de zoomer vers cette UP
                     zoomingToCoordinates = feature.geometry.coordinates;
                     currentView3DCoordinates = feature.geometry.coordinates;
@@ -4244,74 +4471,35 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                         essential: true
                     });
                     
-                    // Attendre un peu que le zoom soit appliqué avant d'afficher le popup
+                    // Rafraîchir les cards après l'animation
                     setTimeout(() => {
-                        // Afficher le popup après que la vue 3D soit activée
-                        showSinglePopup(feature.properties, feature.geometry.coordinates);
-                        // Rafraîchir les cards
-                        updateSidebarBasedOnMapViewport();
-                        // Réinitialiser APRÈS avoir affiché le popup
-                        setTimeout(() => {
-                            zoomingToCoordinates = null; // Zoom terminé
-                        }, 100);
+                        if (window.currentAppMode === 'normal') {
+                            updateSidebarBasedOnMapViewport();
+                        }
                     }, 1300);
-                });
+                };
             }
             
-            viewBtn.setAttribute('tabindex', '0');
+            actionsContainer.appendChild(view3dBtn);
+            card.appendChild(actionsContainer);
             
-            linksContainer.appendChild(moreInfoLink);
-            linksContainer.appendChild(viewBtn);
-            
-            card.appendChild(linksContainer);
-            
-            // Boutons d'action (créés avec DOM)
-            const hasRouteButton = currentSearchCenter && feature.geometry && feature.geometry.coordinates;
-            if (phone || email || hasRouteButton) {
-                const actionsDiv = document.createElement('div');
-                actionsDiv.className = 'card-actions';
-                
-                if (phone) {
-                    const callBtn = document.createElement('a');
-                    callBtn.href = `tel:${phone}`;
-                    callBtn.className = 'action-btn call';
-                    callBtn.textContent = 'Appeler';
-                    callBtn.setAttribute('tabindex', '0');
-                    actionsDiv.appendChild(callBtn);
-                }
-                
-                if (email) {
-                    const emailBtn = document.createElement('a');
-                    emailBtn.href = `mailto:${email}`;
-                    emailBtn.className = 'action-btn mail';
-                    emailBtn.textContent = 'Email';
-                    emailBtn.setAttribute('tabindex', '0');
-                    actionsDiv.appendChild(emailBtn);
-                }
-                
-                
-                card.appendChild(actionsDiv);
-            }
-            
-            card.addEventListener('click', () => {
-                if (window.currentAppMode === 'normal') {
-                    // En mode normal, même comportement que double-clic sur UP : sélection + rayon
-                    selectUPAndShowRadius(feature);
-                } else if (window.currentAppMode === 'route') {
-                    // En mode itinéraire, sélectionner pour le calcul de route
+            // Click handler pour la card entière (focus sur l'établissement)
+            card.addEventListener('click', (event) => {
+                if (!event.target.closest('.card-action-icon')) {
                     focusOnEstablishment(feature);
                 }
             });
-
-            card.querySelectorAll('.action-btn, .more-info, .view-btn').forEach(button => {
+            
+            // Empêcher la propagation du clic sur les boutons d'action
+            card.querySelectorAll('.card-action-icon').forEach(button => {
                 button.addEventListener('click', (event) => {
                     event.stopPropagation();
                 });
             });
-
+            
             sidebar.appendChild(card);
         });
-
+        
         attachModalListeners();
         
         // Mettre à jour le compteur d'établissements visibles
@@ -4345,12 +4533,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 if (visibleCount === 0) {
                     message = `Aucun \u00E9tablissement visible dans cette zone.`;
                     if (totalFiltered > 0) {
-                        message += ` (${totalFiltered} au total - zoomez ou d\u00E9placez la carte)`;
+                        message += ` (${totalFiltered} au total)`;
                     }
                 } else if (visibleCount === totalFiltered) {
                     message = `${visibleCount} \u00E9tablissement(s) trouv\u00E9(s).`;
                 } else {
-                    message = `${visibleCount} \u00E9tablissement(s) visible(s) sur ${totalFiltered} au total.`;
+                    message = `${visibleCount} visible(s) sur ${totalFiltered} trouv\u00E9(s).`;
                 }
             }
             
@@ -4358,8 +4546,26 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         }
     }
     
+    function closeModal() {
+        const modal = document.getElementById('modal');
+        const modalContent = document.querySelector('.modal-content');
+        
+        // Appliquer les animations de fermeture
+        modal.style.animation = 'fadeOut 0.3s ease';
+        modalContent.style.animation = 'slideDown 0.3s ease';
+        
+        // Attendre la fin de l'animation avant de masquer
+        setTimeout(() => {
+            modal.style.display = 'none';
+            // Réinitialiser les animations pour la prochaine ouverture
+            modal.style.animation = '';
+            modalContent.style.animation = '';
+        }, 300);
+    }
+    
     function attachModalListeners() {
-        document.querySelectorAll('#establishments-view .more-info').forEach(button => {
+        // Nouvelle sélection pour les boutons info avec icônes
+        document.querySelectorAll('#establishments-view .card-action-icon.info').forEach(button => {
             button.addEventListener('click', function(event) {
                 event.preventDefault();
                 // La propagation est déjà stoppée par un autre listener, mais on le laisse par sécurité
@@ -4376,68 +4582,129 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     const email=props.Email&&props.Email!=="null"?props.Email:null;
                     const activity=props.activity?props.activity.charAt(0).toUpperCase()+props.activity.slice(1):'N/A';
                     
-                    // Créer le contenu de la modal avec DOM pour éviter les problèmes d'iframe
-                    modalInfo.innerHTML = '';
+                    // Créer le contenu moderne de la modal
+                    const modalContent = document.querySelector('.modal-content');
+                    modalContent.innerHTML = '';
                     
-                    // Titre
+                    // Header
+                    const modalHeader = document.createElement('div');
+                    modalHeader.className = 'modal-header';
                     const modalTitle = document.createElement('h3');
                     modalTitle.textContent = name;
-                    modalInfo.appendChild(modalTitle);
+                    modalHeader.appendChild(modalTitle);
+                    
+                    const closeBtn = document.createElement('span');
+                    closeBtn.className = 'close-button';
+                    closeBtn.innerHTML = '×';
+                    closeBtn.onclick = () => closeModal();
+                    modalHeader.appendChild(closeBtn);
+                    
+                    modalContent.appendChild(modalHeader);
+                    
+                    // Body
+                    const modalBody = document.createElement('div');
+                    modalBody.className = 'modal-body';
                     
                     // Adresse
-                    const addressP = document.createElement('p');
-                    const addressStrong = document.createElement('strong');
-                    addressStrong.textContent = 'Adresse: ';
-                    addressP.appendChild(addressStrong);
-                    addressP.appendChild(document.createTextNode(address));
-                    addressP.appendChild(document.createElement('br'));
-                    addressP.appendChild(document.createTextNode(city + ' ' + postalCode));
-                    modalInfo.appendChild(addressP);
+                    const addressRow = document.createElement('div');
+                    addressRow.className = 'modal-info-row';
+                    const addressLabel = document.createElement('div');
+                    addressLabel.className = 'modal-info-label';
+                    addressLabel.textContent = 'Adresse';
+                    const addressValue = document.createElement('div');
+                    addressValue.className = 'modal-info-value';
+                    addressValue.innerHTML = `${address}<br>${city} ${postalCode}`;
+                    addressRow.appendChild(addressLabel);
+                    addressRow.appendChild(addressValue);
+                    modalBody.appendChild(addressRow);
                     
                     // Téléphone
-                    const phoneP = document.createElement('p');
-                    const phoneStrong = document.createElement('strong');
-                    phoneStrong.textContent = 'T\u00E9l\u00E9phone: ';
-                    phoneP.appendChild(phoneStrong);
+                    const phoneRow = document.createElement('div');
+                    phoneRow.className = 'modal-info-row';
+                    const phoneLabel = document.createElement('div');
+                    phoneLabel.className = 'modal-info-label';
+                    phoneLabel.textContent = 'Téléphone';
+                    const phoneValue = document.createElement('div');
+                    phoneValue.className = 'modal-info-value';
                     if (phone) {
                         const phoneLink = document.createElement('a');
                         phoneLink.href = `tel:${phone}`;
                         phoneLink.textContent = phone;
-                        phoneP.appendChild(phoneLink);
+                        phoneValue.appendChild(phoneLink);
                     } else {
-                        phoneP.appendChild(document.createTextNode('Non disponible'));
+                        phoneValue.textContent = 'Non disponible';
                     }
-                    modalInfo.appendChild(phoneP);
+                    phoneRow.appendChild(phoneLabel);
+                    phoneRow.appendChild(phoneValue);
+                    modalBody.appendChild(phoneRow);
                     
                     // Email
-                    const emailP = document.createElement('p');
-                    const emailStrong = document.createElement('strong');
-                    emailStrong.textContent = 'Email: ';
-                    emailP.appendChild(emailStrong);
+                    const emailRow = document.createElement('div');
+                    emailRow.className = 'modal-info-row';
+                    const emailLabel = document.createElement('div');
+                    emailLabel.className = 'modal-info-label';
+                    emailLabel.textContent = 'Email';
+                    const emailValue = document.createElement('div');
+                    emailValue.className = 'modal-info-value';
                     if (email) {
                         const emailLink = document.createElement('a');
                         emailLink.href = `mailto:${email}`;
                         emailLink.textContent = email;
-                        emailP.appendChild(emailLink);
+                        emailValue.appendChild(emailLink);
                     } else {
-                        emailP.appendChild(document.createTextNode('Non disponible'));
+                        emailValue.textContent = 'Non disponible';
                     }
-                    modalInfo.appendChild(emailP);
+                    emailRow.appendChild(emailLabel);
+                    emailRow.appendChild(emailValue);
+                    modalBody.appendChild(emailRow);
                     
                     // Activité
-                    const activityP = document.createElement('p');
-                    const activityStrong = document.createElement('strong');
-                    activityStrong.textContent = 'Activit\u00E9: ';
-                    activityP.appendChild(activityStrong);
-                    activityP.appendChild(document.createTextNode(activity));
-                    modalInfo.appendChild(activityP);
+                    const activityRow = document.createElement('div');
+                    activityRow.className = 'modal-info-row';
+                    const activityLabel = document.createElement('div');
+                    activityLabel.className = 'modal-info-label';
+                    activityLabel.textContent = 'Activité';
+                    const activityValue = document.createElement('div');
+                    activityValue.className = 'modal-info-value';
+                    const activityBadge = document.createElement('span');
+                    activityBadge.className = 'activity-badge';
+                    activityBadge.textContent = activity;
+                    activityValue.appendChild(activityBadge);
+                    activityRow.appendChild(activityLabel);
+                    activityRow.appendChild(activityValue);
+                    modalBody.appendChild(activityRow);
+                    
+                    modalContent.appendChild(modalBody);
+                    
+                    // Footer avec actions
+                    const modalFooter = document.createElement('div');
+                    modalFooter.className = 'modal-footer';
+                    
+                    if (phone) {
+                        const callBtn = document.createElement('button');
+                        callBtn.className = 'modal-action-btn primary';
+                        callBtn.innerHTML = '📞 Appeler';
+                        callBtn.onclick = () => window.location.href = `tel:${phone}`;
+                        modalFooter.appendChild(callBtn);
+                    }
+                    
+                    const closeActionBtn = document.createElement('button');
+                    closeActionBtn.className = 'modal-action-btn secondary';
+                    closeActionBtn.textContent = 'Fermer';
+                    closeActionBtn.onclick = () => closeModal();
+                    modalFooter.appendChild(closeActionBtn);
+                    
+                    modalContent.appendChild(modalFooter);
                 } catch (e) {
                     modalInfo.innerHTML = '';
                     const errorP = document.createElement('p');
                     errorP.textContent = "Impossible d'afficher les informations.";
                     modalInfo.appendChild(errorP);
                 }
+                // Afficher la modal avec animations
                 modal.style.display = 'block';
+                modal.style.animation = 'fadeIn 0.3s ease';
+                modalContent.style.animation = 'slideUp 0.3s ease';
                 // Corriger les entités HTML dans la modal
                 setTimeout(fixCardEntities, 100);
             });
@@ -4711,6 +4978,14 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Configurer la correction des entités HTML pour les cards
         setupCardEntityFix();
         
+        // Gérer le clic en dehors de la modal pour la fermer
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('modal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+        
         // Corriger spécifiquement le bouton reset si nécessaire
         const resetButton = document.getElementById('reset-map');
         if (resetButton && resetButton.textContent.includes('\\u')) {
@@ -4766,6 +5041,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 // Fermer les popups
                 activePopups.forEach(p => p.remove());
                 activePopups.length = 0;
+                
+                // Fermer la modal si elle est ouverte
+                const modal = document.getElementById('modal');
+                if (modal && modal.style.display === 'block') {
+                    closeModal();
+                }
             }
         });
     }
@@ -4796,6 +5077,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Exposer le mode actuel globalement pour que d'autres fonctions puissent le vérifier
         window.currentAppMode = 'normal';
         let normalGeocoder = null;
+        // Rendre normalGeocoder accessible globalement
+        window.normalGeocoder = null;
 
         // Fonction pour basculer vers le mode normal (exposée globalement)
         window.switchToNormalMode = function() {
@@ -4893,8 +5176,13 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 placeholder: 'Rechercher une ville ou UP...',
                 countries: 'fr',
                 language: 'fr',
-                limit: 5
+                localGeocoder: localUPGeocoder,
+                localGeocoderOnly: false,
+                limit: 8
             });
+            
+            // Rendre accessible globalement pour le reset
+            window.normalGeocoder = normalGeocoder;
             
             // Ajouter le geocoder avant le bouton de géolocalisation
             const geolocateBtn = document.getElementById('normal-geolocate');
@@ -4907,15 +5195,29 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             // Gérer les résultats de recherche
             normalGeocoder.on('result', function(e) {
                 if (e.result && e.result.geometry) {
+                    // Définir le centre de recherche
+                    currentSearchCenter = e.result.geometry.coordinates;
+                    
+                    // Afficher le contrôle de rayon et définir à 80 km
+                    showRadiusControl();
+                    currentSearchRadius = 80;
+                    const radiusSlider = document.getElementById('radius-slider');
+                    if (radiusSlider) radiusSlider.value = 80;
+                    const radiusValue = document.getElementById('radius-value');
+                    if (radiusValue) radiusValue.textContent = "80 km";
+                    
+                    // Dessiner le cercle de 80 km autour du point sélectionné
+                    drawSearchRadiusCircle(currentSearchCenter, 80);
+                    
                     map.flyTo({
                         center: e.result.geometry.coordinates,
                         zoom: 12,
                         duration: 1500
                     });
                     
-                    // Mettre à jour les établissements visibles
+                    // Appliquer les filtres avec le rayon de 80 km après le zoom
                     setTimeout(() => {
-                        updateSidebarBasedOnMapViewport();
+                        applyFilters();
                     }, 1600);
                 }
             });
