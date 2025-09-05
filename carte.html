@@ -19,9 +19,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 /* Style pour les UP dans l'autocompl\u00e9tion */
 .mapboxgl-ctrl-geocoder--suggestion.is-up{background:linear-gradient(to right,#f0f7ff 0%,#ffffff 100%)!important;border-left:3px solid #002060!important}
 .mapboxgl-ctrl-geocoder--suggestion.is-up .mapboxgl-ctrl-geocoder--suggestion-title{color:#002060!important;font-weight:600}#map-container{display:flex;height:85vh;width:100vw;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:20}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:10}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}.geolocate-btn{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>') center/18px no-repeat;width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon{display:none!important}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px}/* Nouvelle version compacte et moderne des cards */
-.establishment-card{background:#fff;margin:4px 6px;padding:10px 12px;border-radius:6px;box-shadow:0 1px 3px rgba(0,0,0,.1);cursor:pointer;transition:all .2s ease;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;position:relative;border-left:3px solid transparent}
-.establishment-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.15);border-left-color:#002060}
-.establishment-card:active{transform:translateY(1px);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.establishment-card{background:#fff;margin:6px 8px;padding:10px 12px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);cursor:pointer;transition:all .2s ease;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;position:relative;border-left:3px solid #e0e0e0;border:1px solid #f0f0f0}
+.establishment-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.12),0 2px 4px rgba(0,0,0,.08);border-left:3px solid #002060;transform:translateY(-2px);background:#fafbfc}
+.establishment-card:active{transform:translateY(0px);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 
 /* Header de la card avec nom et badges */
 .card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
@@ -46,6 +46,13 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 .card-action-icon.info:hover{background:#ff9900}
 .card-action-icon.view3d:hover{background:#6f42c1}
 .card-action-icon.view3d.active{background:#28a745;color:white}
+
+/* Couleurs par type d'activité */
+.establishment-card[data-activity="beton"]{border-left-color:#ff9900}
+.establishment-card[data-activity="granulat"]{border-left-color:#4682B4}
+.establishment-card[data-activity="ciment"]{border-left-color:#228B22}
+.establishment-card[data-activity="ciment-prompt"]{border-left-color:#8B4513}
+.establishment-card[data-activity="autre"]{border-left-color:#6c757d}
 
 /* État actif/focus pour accessibilité */
 .establishment-card:focus-visible{outline:2px solid #002060;outline-offset:2px}
@@ -575,6 +582,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     let currentSearchRadius = 80;
     let currentLayoutMode = 'dual';
     let primaryFilteredFeatures = [];
+    let userLocationMarker = null; // Marker pour la géolocalisation
     let currentMapboxMarkers = [];
     let activePopups = [];
     let debounceTimer;
@@ -2598,9 +2606,21 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 navigator.geolocation.getCurrentPosition(position => {
                     currentSearchCenter = [position.coords.longitude, position.coords.latitude];
                     if (geocoder) geocoder.setInput('Ma position actuelle');
-                    map.flyTo({ center: currentSearchCenter, zoom: 9 });
-                    // Afficher le contrôle de rayon - l'interface itinéraire est toujours visible
+                    
+                    // Afficher le contrôle de rayon et définir à 80 km
                     showRadiusControl();
+                    currentSearchRadius = 80;
+                    const radiusSlider = document.getElementById('radius-slider');
+                    if (radiusSlider) radiusSlider.value = 80;
+                    const radiusValue = document.getElementById('radius-value');
+                    if (radiusValue) radiusValue.textContent = "80 km";
+                    
+                    // Dessiner le cercle de 80 km
+                    drawSearchRadiusCircle(currentSearchCenter, 80);
+                    
+                    // Zoomer pour voir tout le rayon
+                    map.flyTo({ center: currentSearchCenter, zoom: 9.5, duration: 1500 });
+                    
                     showRouteInterface();
                     applyFilters();
                 }, () => { alert("Impossible d'accéder à votre position."); });
@@ -3383,6 +3403,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         activePopups.forEach(p => p.remove());
         activePopups.length = 0;
         
+        // Supprimer le marker de géolocalisation s'il existe
+        if (userLocationMarker) {
+            userLocationMarker.remove();
+            userLocationMarker = null;
+        }
+        
         // Réinitialiser les filtres de légende (aucun filtre = tout affiché)
         activeFilters.clear();
         updateLegendVisualState();
@@ -4022,10 +4048,21 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         zoomingToCoordinates = coordinates;
         currentView3DCoordinates = coordinates;
         
-        // Zoomer sur l'UP
+        // Calculer le zoom approprié en fonction du rayon actuel
+        // Formule approximative : zoom = 11.5 - log2(radius_km / 10)
+        const radiusKm = currentSearchRadius || 80;
+        let zoomLevel;
+        if (radiusKm <= 20) zoomLevel = 11;
+        else if (radiusKm <= 40) zoomLevel = 10.5;
+        else if (radiusKm <= 60) zoomLevel = 10;
+        else if (radiusKm <= 80) zoomLevel = 9.5;
+        else if (radiusKm <= 100) zoomLevel = 9;
+        else zoomLevel = 8.5;
+        
+        // Zoomer pour voir tout le rayon
         map.flyTo({
             center: coordinates,
-            zoom: 12,
+            zoom: zoomLevel,
             duration: 1500
         });
         
@@ -4051,30 +4088,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     function focusOnEstablishment(feature) {
         const coordinates = feature.geometry.coordinates;
         
-        // Vérifier si on est en mode normal - ne pas faire de calcul d'itinéraire
+        // Vérifier si on est en mode normal - activer le rayon au lieu du zoom 3D
         if (window.currentAppMode === 'normal') {
-            // Marquer qu'on est en train de zoomer vers cette UP
-            zoomingToCoordinates = coordinates;
-            currentView3DCoordinates = coordinates;
-            
-            // En mode normal, zoomer avec vue 3D sur l'établissement
-            map.flyTo({
-                center: coordinates,
-                zoom: 17,
-                pitch: 60,
-                bearing: 30,
-                speed: 1.2,
-                essential: true
-            });
-            
-            // Attendre que le zoom 3D soit terminé avant d'afficher le popup
-            setTimeout(() => {
-                showSinglePopup(feature.properties, coordinates);
-                // Réinitialiser APRÈS avoir affiché le popup
-                setTimeout(() => {
-                    zoomingToCoordinates = null; // Zoom terminé
-                }, 100);
-            }, 1300);
+            // Sélectionner l'UP et afficher le rayon (comme un double-clic sur la carte)
+            selectUPAndShowRadius(feature);
             return;
         }
         
@@ -4249,6 +4266,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         sortedFeatures.forEach(feature => {
             const card = document.createElement('div');
             card.className = 'establishment-card';
+            
+            // Ajouter l'attribut data-activity pour le style de bordure
+            const activityType = getActivityType(feature.properties.activity);
+            card.setAttribute('data-activity', activityType);
+            
             card.setAttribute('tabindex', '0');
             card.setAttribute('role', 'button');
             card.setAttribute('aria-label', `Établissement ${feature.properties.UP}`);
@@ -4373,14 +4395,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             routeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21.71 11.29l-9-9a.996.996 0 00-1.41 0l-9 9a.996.996 0 000 1.41l9 9c.39.39 1.02.39 1.41 0l9-9a.996.996 0 000-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/></svg>`;
             routeBtn.onclick = (e) => {
                 e.stopPropagation();
-                // Calculer l'itinéraire vers cette destination
+                // Basculer en mode route si nécessaire
                 if (window.switchToRouteMode) {
                     window.switchToRouteMode();
-                    destinationCoords = feature.geometry.coordinates;
-                    if (currentSearchCenter) {
-                        showRouteOnMap(currentSearchCenter, destinationCoords);
-                    }
                 }
+                // Sélectionner cette UP comme point A
+                selectAsPointA(feature);
             };
             actionsContainer.appendChild(routeBtn);
             
@@ -5244,17 +5264,39 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                         function(position) {
                             const userLocation = [position.coords.longitude, position.coords.latitude];
                             
-                            // Centrer la carte sur la position de l'utilisateur
+                            // Définir le centre de recherche
+                            currentSearchCenter = userLocation;
+                            
+                            // Afficher le contrôle de rayon et définir à 80 km
+                            showRadiusControl();
+                            currentSearchRadius = 80;
+                            const radiusSlider = document.getElementById('radius-slider');
+                            if (radiusSlider) radiusSlider.value = 80;
+                            const radiusValue = document.getElementById('radius-value');
+                            if (radiusValue) radiusValue.textContent = "80 km";
+                            
+                            // Dessiner le cercle de 80 km
+                            drawSearchRadiusCircle(userLocation, 80);
+                            
+                            // Zoomer pour voir tout le rayon
                             map.flyTo({
                                 center: userLocation,
-                                zoom: 12,
+                                zoom: 9.5,
                                 duration: 1500
                             });
                             
-                            // Ajouter un marker pour la position de l'utilisateur
-                            new mapboxgl.Marker({ color: '#FF0000' })
+                            // Supprimer l'ancien marker s'il existe
+                            if (userLocationMarker) {
+                                userLocationMarker.remove();
+                            }
+                            
+                            // Ajouter un nouveau marker pour la position de l'utilisateur
+                            userLocationMarker = new mapboxgl.Marker({ color: '#FF0000' })
                                 .setLngLat(userLocation)
                                 .addTo(map);
+                            
+                            // Appliquer les filtres avec le rayon de 80 km
+                            applyFilters();
                             
                             // Mettre à jour les établissements visibles
                             setTimeout(() => {
