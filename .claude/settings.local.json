@@ -9,7 +9,8 @@
       "WebFetch(domain:tollguru.com)",
       "Bash(python:*)",
       "Bash(del remove_console_logs.py)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(del carte_mobile.html)"
     ],
     "deny": [],
     "ask": []

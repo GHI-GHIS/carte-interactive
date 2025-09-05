@@ -17,66 +17,54 @@
 <style>
 body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:hidden}#map-container{display:flex;height:85vh;width:100vw;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:20}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:10}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}.geolocate-btn{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>') center/18px no-repeat;width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon{display:none!important}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px}.establishment-card{background:#fff;margin:6px 8px 10px 7px;padding:11px 15px 0 20px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.38);cursor:pointer;transition:transform .2s,box-shadow .2s;font-family:Arial,sans-serif}.establishment-card:hover{transform:scale(1.02);box-shadow:0 4px 8px rgba(0,0,0,.15)}.establishment-card h3{font-size:16px;color:#002060;margin:0 0 5px 0}.establishment-card p{font-size:14px;color:#333;margin:0 0 12px 0}.establishment-card a{color:#002060;text-decoration:none}.establishment-card a:hover{text-decoration:underline}.establishment-card .more-info{font-size:12px;color:#ff9900;margin-top:10px;display:inline-block}.establishment-card .view-btn{font-size:12px;color:#17a2b8;margin-top:10px;margin-left:15px;display:inline-block;cursor:pointer;transition:color .2s}.establishment-card .view-btn:hover{color:#138496;text-decoration:underline}.establishment-card .view-btn.back-mode{color:#28a745}.establishment-card .view-btn.back-mode:hover{color:#218838}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:9999;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}.mapboxgl-popup-content{width:max-content;font-family:Arial,sans-serif;padding:15px!important;max-width:280px!important}.mapboxgl-popup-content h3{color:#002060;margin:0 0 10px 0;font-size:16px}.mapboxgl-popup-content p{margin:0 0 5px 0;line-height:1.4;font-size:14px}.mapboxgl-popup-content p strong{color:#333;font-weight:bold}.mapboxgl-popup-content .popup-actions{display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid #eee}.mapboxgl-popup-content .popup-view-btn{flex:1;padding:5px 10px;background-color:#17a2b8;color:#fff;border:none;border-radius:4px;cursor:pointer;text-align:center;font-size:12px;transition:background-color .2s}.mapboxgl-popup-content .popup-view-btn:hover{background-color:#138496}#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-right,#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-left{display:none}.modal{display:none;position:fixed;z-index:1001;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.4)}.modal-content{background-color:#fefefe;margin:15% auto;padding:20px;border:1px solid #888;width:80%;max-width:600px;border-radius:8px}.close-button{color:#aaa;float:right;font-size:28px;font-weight:bold;cursor:pointer}.close-button:hover,.close-button:focus{color:#000;text-decoration:none}.view-switcher{position:fixed;top:83px;right:28px;z-index:1005;padding:10px 15px;background-color:#002060;color:#fff;border:0;border-radius:5px;cursor:pointer;font-size:14px;box-shadow:0 2px 5px rgba(0,0,0,.2);display:none;transition:background-color .3s}.view-switcher:hover{background-color:#003380}#map-container.layout-dual #sidebar{width:30%;min-width:415px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,415px));opacity:1}#map-container.layout-sidebar-full{height:100vh}#map-container.layout-sidebar-full #sidebar{width:94%;min-width:94%;opacity:1;transform:translateX(0)}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-map-full{height:100vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none}#map-container.layout-map-full #map{width:100%;opacity:1}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:415px}#map-container.layout-dual #map{width:calc(100% - 415px)}}@media (max-width:600px){#map-container.layout-sidebar-full #sidebar{width:100%;min-width:88%}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
 /* Mode Switcher Styles */
-/* Mode Switcher sur la carte */
 .mode-switcher-container {
-    position: absolute;
-    top: 20px;
-    left: 10px;
-    z-index: 100;
-    background: #fff;
-    border-radius: 22px;
-    padding: 3px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    padding: 15px 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #e0e0e0;
 }
 
 .mode-switcher {
     display: flex;
-    background: transparent;
-    border-radius: 20px;
-    padding: 0;
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 4px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .mode-btn {
-    padding: 8px 16px;
+    flex: 1;
+    padding: 10px 15px;
     background: transparent;
     border: none;
-    border-radius: 18px;
+    border-radius: 6px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
-    color: #6c757d;
-    transition: all 0.2s ease;
+    color: #666;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
-    white-space: nowrap;
-    min-width: 90px;
+    gap: 8px;
 }
 
 .mode-btn:hover {
-    background: rgba(0, 0, 0, 0.05);
-    color: #333;
+    background: rgba(255,255,255,0.5);
 }
 
 .mode-btn.active {
-    background: #002060;
-    color: white;
-    box-shadow: 0 1px 3px rgba(0,32,96,0.3);
+    background: white;
+    color: #002060;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
     font-weight: 600;
 }
 
-.mode-btn.active:hover {
-    background: #003380;
-}
-
 .mode-btn .mode-icon {
-    font-size: 14px;
+    font-size: 18px;
 }
 
 .mode-btn .mode-label {
-    font-size: 12px;
-    letter-spacing: 0.3px;
+    font-size: 14px;
 }
 
 /* Mode Interface Containers */
@@ -98,7 +86,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 }
 
 /* Légende de la carte */
-.map-legend{position:absolute;bottom:30px;left:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:900;font-size:13px}.map-legend h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold}.legend-item{display:flex;align-items:center;margin:6px 0;cursor:pointer;padding:4px;border-radius:4px;transition:background-color .2s}.legend-item:hover{background-color:#f0f8ff}.legend-item.inactive{opacity:.4}.legend-item.inactive:hover{opacity:.6}.legend-marker{width:30px;height:30px;margin-right:8px;background-size:contain;background-repeat:no-repeat;background-position:center}.legend-marker.beton{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-beton.png')}.legend-marker.granulats{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-granulats.png')}.legend-marker.ciment{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-ciment.png')}.legend-marker.ciment-prompt{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-12/ciment-prompt-naturel.png')}
+.map-legend{position:absolute;bottom:30px;left:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:100;font-size:13px}.map-legend h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold}.legend-item{display:flex;align-items:center;margin:6px 0;cursor:pointer;padding:4px;border-radius:4px;transition:background-color .2s}.legend-item:hover{background-color:#f0f8ff}.legend-item.inactive{opacity:.4}.legend-item.inactive:hover{opacity:.6}.legend-marker{width:30px;height:30px;margin-right:8px;background-size:contain;background-repeat:no-repeat;background-position:center}.legend-marker.beton{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-beton.png')}.legend-marker.granulats{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-granulats.png')}.legend-marker.ciment{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-ciment.png')}.legend-marker.ciment-prompt{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-12/ciment-prompt-naturel.png')}
 
 /* Contrôle de rayon sur la carte */
 .map-radius-control{position:absolute;bottom:120px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:100;font-size:13px;display:none}.map-radius-control h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold}.radius-control-map{display:flex;align-items:center;gap:10px}.radius-control-map label{font-size:13px;color:#333;white-space:nowrap}.radius-control-map input[type="range"]{flex:1;min-width:120px}.radius-control-map span{font-weight:bold;color:#002060;min-width:50px;font-size:13px}
@@ -267,7 +255,19 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
   <div id="map-container">
     <div id="sidebar">
       
-      <!-- Contenu du sidebar sans le mode switcher -->
+      <!-- Mode Switcher -->
+      <div class="mode-switcher-container">
+        <div class="mode-switcher">
+          <button id="mode-normal" class="mode-btn active" data-mode="normal">
+            <span class="mode-icon">🗺️</span>
+            <span class="mode-label">Vue normale</span>
+          </button>
+          <button id="mode-route" class="mode-btn" data-mode="route">
+            <span class="mode-icon">🚗</span>
+            <span class="mode-label">Itinéraires</span>
+          </button>
+        </div>
+      </div>
 
       <!-- Mode Normal Interface -->
       <div id="normal-mode-interface" class="mode-interface">
@@ -410,20 +410,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
       </div>
     </div>
     <div id="map">
-      <!-- Mode Switcher sur la carte -->
-      <div class="mode-switcher-container">
-        <div class="mode-switcher">
-          <button id="mode-normal" class="mode-btn active" data-mode="normal">
-            <span class="mode-icon">📍</span>
-            <span class="mode-label">Carte</span>
-          </button>
-          <button id="mode-route" class="mode-btn" data-mode="route">
-            <span class="mode-icon">🚗</span>
-            <span class="mode-label">Itinéraire</span>
-          </button>
-        </div>
-      </div>
-      
       <!-- Légende de la carte (overlay sur la carte) -->
       <div class="map-legend" id="map-legend" style="display:block;">
         <h4>Filtres</h4>
@@ -1290,22 +1276,15 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
     
     function initializeMap() {
-        // Préserver la légende et le switcher avant de nettoyer le conteneur
+        // Préserver la légende avant de nettoyer le conteneur
         const mapContainer = document.getElementById('map');
         let legendElement = null;
-        let switcherElement = null;
         
         if (mapContainer) {
             // Sauvegarder la légende avant de nettoyer
             legendElement = mapContainer.querySelector('#map-legend');
             if (legendElement) {
                 legendElement = legendElement.cloneNode(true);
-            }
-            
-            // Sauvegarder le mode switcher avant de nettoyer
-            switcherElement = mapContainer.querySelector('.mode-switcher-container');
-            if (switcherElement) {
-                switcherElement = switcherElement.cloneNode(true);
             }
             
             mapContainer.innerHTML = '';
@@ -1318,17 +1297,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             // Configuration Mapbox par défaut - tout est activé automatiquement
         });
         
-        // Restaurer la légende et le switcher après l'initialisation de Mapbox
-        if (switcherElement) {
-            mapContainer.appendChild(switcherElement);
-            // Réattacher les event listeners du switcher
-            const modeNormalBtn = switcherElement.querySelector('#mode-normal');
-            const modeRouteBtn = switcherElement.querySelector('#mode-route');
-            if (modeNormalBtn && modeRouteBtn) {
-                modeNormalBtn.addEventListener('click', () => switchMode('normal'));
-                modeRouteBtn.addEventListener('click', () => switchMode('route'));
-            }
-        }
+        // Restaurer la légende après l'initialisation de Mapbox
         if (legendElement) {
             mapContainer.appendChild(legendElement);
         }
@@ -4770,22 +4739,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         });
     }
 
-    // Fonction globale pour changer de mode (utilisée par le switcher sur la carte)
-    function switchMode(mode) {
-        const modeNormalBtn = document.getElementById('mode-normal');
-        const modeRouteBtn = document.getElementById('mode-route');
-        
-        if (mode === 'normal') {
-            if (window.switchToNormalMode) window.switchToNormalMode();
-            if (modeNormalBtn) modeNormalBtn.classList.add('active');
-            if (modeRouteBtn) modeRouteBtn.classList.remove('active');
-        } else if (mode === 'route') {
-            if (window.switchToRouteMode) window.switchToRouteMode();
-            if (modeNormalBtn) modeNormalBtn.classList.remove('active');
-            if (modeRouteBtn) modeRouteBtn.classList.add('active');
-        }
-    }
-    
     // Initialisation du mode switcher
     function initializeModeSwitcher() {
         const modeNormalBtn = document.getElementById('mode-normal');
@@ -4797,8 +4750,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         window.currentAppMode = 'normal';
         let normalGeocoder = null;
 
-        // Fonction pour basculer vers le mode normal (exposée globalement)
-        window.switchToNormalMode = function() {
+        // Fonction pour basculer vers le mode normal
+        function switchToNormalMode() {
             window.currentAppMode = 'normal';
             
             // Mise à jour des boutons
@@ -4827,8 +4780,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             updateSidebarBasedOnMapViewport();
         }
 
-        // Fonction pour basculer vers le mode itinéraire (exposée globalement)
-        window.switchToRouteMode = function() {
+        // Fonction pour basculer vers le mode itinéraire
+        function switchToRouteMode() {
             window.currentAppMode = 'route';
             
             // Mise à jour des boutons
@@ -4930,8 +4883,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         }, 100);
 
         // Event listeners pour les boutons
-        modeNormalBtn.addEventListener('click', window.switchToNormalMode);
-        modeRouteBtn.addEventListener('click', window.switchToRouteMode);
+        modeNormalBtn.addEventListener('click', switchToNormalMode);
+        modeRouteBtn.addEventListener('click', switchToRouteMode);
 
         // Géolocalisation pour le mode normal
         const normalGeolocateBtn = document.getElementById('normal-geolocate');
@@ -4970,7 +4923,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         }
 
         // Initialiser en mode normal par défaut
-        window.switchToNormalMode();
+        switchToNormalMode();
     }
 
 
