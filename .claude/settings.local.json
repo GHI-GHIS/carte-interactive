@@ -10,7 +10,8 @@
       "Bash(python:*)",
       "Bash(del remove_console_logs.py)",
       "Bash(grep:*)",
-      "Bash(del carte_mobile.html)"
+      "Bash(del carte_mobile.html)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []
