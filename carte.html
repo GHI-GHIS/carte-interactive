@@ -56,9 +56,143 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
 /* État actif/focus pour accessibilité */
 .establishment-card:focus-visible{outline:2px solid #002060;outline-offset:2px}
-.card-action-icon:focus-visible{outline:2px solid #002060;outline-offset:-2px}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:9999;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}.mapboxgl-popup-content{width:max-content;font-family:Arial,sans-serif;padding:15px!important;max-width:280px!important}.mapboxgl-popup-content h3{color:#002060;margin:0 0 10px 0;font-size:16px}.mapboxgl-popup-content p{margin:0 0 5px 0;line-height:1.4;font-size:14px}.mapboxgl-popup-content p strong{color:#333;font-weight:bold}.mapboxgl-popup-content .popup-actions{display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid #eee}.mapboxgl-popup-content .popup-view-btn{flex:1;padding:5px 10px;background-color:#17a2b8;color:#fff;border:none;border-radius:4px;cursor:pointer;text-align:center;font-size:12px;transition:background-color .2s}.mapboxgl-popup-content .popup-view-btn:hover{background-color:#138496}
-/* Style pour le tooltip au hover - même contenu mais apparence plus légère */
-.hover-tooltip .mapboxgl-popup-content{opacity:0.95;box-shadow:0 2px 12px rgba(0,0,0,0.2)}.hover-tooltip .mapboxgl-popup-tip{border-top-color:#fff}#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-right,#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-left{display:none}/* Modal moderne */
+.card-action-icon:focus-visible{outline:2px solid #002060;outline-offset:-2px}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:9999;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}/* Popup au clic - design cohérent avec tooltip hover */
+.mapboxgl-popup-content{
+    width:max-content;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+    padding:18px!important;
+    max-width:320px!important;
+    border-radius:12px;
+    box-shadow:0 10px 40px rgba(0,0,0,0.12),
+               0 2px 10px rgba(0,0,0,0.08);
+}
+
+.mapboxgl-popup-content h3{
+    color:#002060;
+    margin:0 0 12px 0;
+    font-size:16px;
+    font-weight:600;
+    padding-bottom:8px;
+    border-bottom:2px solid rgba(0,32,96,0.1);
+}
+
+.mapboxgl-popup-content p{
+    margin:0 0 6px 0;
+    line-height:1.5;
+    font-size:13px;
+    color:#4a5568;
+}
+
+.mapboxgl-popup-content p strong{
+    color:#2d3748;
+    font-weight:600;
+    display:inline-block;
+    min-width:80px;
+}
+
+.mapboxgl-popup-content .popup-actions{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid rgba(0,32,96,0.06);
+}
+
+.mapboxgl-popup-content .popup-view-btn{
+    flex:1;
+    padding:8px 14px;
+    background:linear-gradient(135deg, #002060 0%, #003380 100%);
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    text-align:center;
+    font-size:12px;
+    font-weight:500;
+    transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mapboxgl-popup-content .popup-view-btn:hover{
+    background:linear-gradient(135deg, #003380 0%, #004499 100%);
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(0,32,96,0.2);
+}
+/* Style pour le tooltip au hover - design ultra épuré et moderne */
+.hover-tooltip .mapboxgl-popup-content{
+    opacity:0.98;
+    background:rgba(255,255,255,0.97);
+    backdrop-filter:blur(10px);
+    box-shadow:0 8px 32px rgba(0,0,0,0.08),
+               0 2px 8px rgba(0,0,0,0.06);
+    border:1px solid rgba(0,32,96,0.08);
+    border-radius:12px;
+    max-width:320px!important;
+    animation:tooltipFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-tooltip .mapboxgl-popup-tip{
+    border-top-color:rgba(255,255,255,0.97);
+}
+
+/* Titre du tooltip avec accent subtil */
+.hover-tooltip h3{
+    font-size:15px;
+    font-weight:600;
+    color:#002060;
+    margin-bottom:12px;
+    padding-bottom:8px;
+    border-bottom:2px solid rgba(0,32,96,0.1);
+}
+
+/* Informations avec meilleure hiérarchie visuelle */
+.hover-tooltip p{
+    font-size:13px;
+    line-height:1.5;
+    color:#4a5568;
+    margin-bottom:6px;
+}
+
+.hover-tooltip p strong{
+    color:#2d3748;
+    font-weight:600;
+    display:inline-block;
+    min-width:80px;
+}
+
+/* Actions avec style minimal */
+.hover-tooltip .popup-actions{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid rgba(0,32,96,0.06);
+}
+
+.hover-tooltip .popup-view-btn{
+    background:linear-gradient(135deg, #002060 0%, #003380 100%);
+    border:none;
+    padding:7px 14px;
+    font-size:12px;
+    font-weight:500;
+    border-radius:6px;
+    transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-tooltip .popup-view-btn:hover{
+    background:linear-gradient(135deg, #003380 0%, #004499 100%);
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(0,32,96,0.2);
+}
+
+/* Animation d'entrée */
+@keyframes tooltipFadeIn{
+    from{
+        opacity:0;
+        transform:translateY(4px);
+    }
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-right,#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-left{display:none}/* Modal moderne */
 .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.6);backdrop-filter:blur(4px);animation:fadeIn 0.3s ease}
 
 .modal-content{background:#fff;margin:5% auto;padding:0;border:none;width:90%;max-width:500px;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.2);animation:slideUp 0.3s ease;overflow:hidden}
@@ -1408,40 +1542,70 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             map.getCanvas().style.cursor = '';
         });
         
-        // Variable pour stocker le popup tooltip actuel
+        // Variables pour la gestion optimisée du hover
         let hoverPopup = null;
+        let hoverTimeout = null;
+        let currentHoverFeature = null;
         
         map.on('mouseenter', 'unclustered-point', (e) => {
             map.getCanvas().style.cursor = 'pointer';
             
-            // Créer et afficher le tooltip avec le même contenu que le popup au clic
-            const coordinates = e.features[0].geometry.coordinates.slice();
-            const properties = e.features[0].properties;
+            // Stocker la feature actuelle pour vérification
+            currentHoverFeature = e.features[0];
             
-            // Enlever l'ancien popup s'il existe
-            if (hoverPopup) {
-                hoverPopup.remove();
+            // Annuler tout timeout précédent
+            if (hoverTimeout) {
+                clearTimeout(hoverTimeout);
             }
             
-            // Utiliser la même fonction createPopupContent pour créer le contenu
-            hoverPopup = createPopupContent(properties, coordinates);
-            
-            // Modifier les classes et options pour le hover
-            hoverPopup.options.closeButton = false;
-            hoverPopup.options.closeOnClick = false;
-            hoverPopup.options.className = 'hover-tooltip';
-            
-            // Afficher le popup
-            hoverPopup.setLngLat(coordinates).addTo(map);
+            // Délai de 300ms pour éviter les affichages accidentels
+            hoverTimeout = setTimeout(() => {
+                // Vérifier qu'on est toujours sur la même feature
+                if (currentHoverFeature && currentHoverFeature === e.features[0]) {
+                    // Créer et afficher le tooltip avec le même contenu que le popup au clic
+                    const coordinates = e.features[0].geometry.coordinates.slice();
+                    const properties = e.features[0].properties;
+                    
+                    // Enlever l'ancien popup s'il existe
+                    if (hoverPopup) {
+                        hoverPopup.remove();
+                    }
+                    
+                    // Utiliser la même fonction createPopupContent pour créer le contenu
+                    hoverPopup = createPopupContent(properties, coordinates);
+                    
+                    // Modifier les classes et options pour le hover
+                    hoverPopup.options.closeButton = false;
+                    hoverPopup.options.closeOnClick = false;
+                    hoverPopup.options.className = 'hover-tooltip';
+                    hoverPopup.options.offset = [0, -10]; // Légèrement décalé vers le haut
+                    
+                    // Afficher le popup avec animation fluide
+                    hoverPopup.setLngLat(coordinates).addTo(map);
+                }
+            }, 300); // Délai de 300ms pour intention de hover
         });
         
         map.on('mouseleave', 'unclustered-point', () => {
             map.getCanvas().style.cursor = '';
             
-            // Supprimer le tooltip
+            // Annuler le timeout si on quitte avant l'affichage
+            if (hoverTimeout) {
+                clearTimeout(hoverTimeout);
+                hoverTimeout = null;
+            }
+            
+            // Réinitialiser la feature actuelle
+            currentHoverFeature = null;
+            
+            // Supprimer le tooltip avec un léger délai pour transition fluide
             if (hoverPopup) {
-                hoverPopup.remove();
-                hoverPopup = null;
+                setTimeout(() => {
+                    if (hoverPopup && !currentHoverFeature) {
+                        hoverPopup.remove();
+                        hoverPopup = null;
+                    }
+                }, 100);
             }
         });
     }
