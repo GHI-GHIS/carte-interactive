@@ -56,7 +56,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
 /* État actif/focus pour accessibilité */
 .establishment-card:focus-visible{outline:2px solid #002060;outline-offset:2px}
-.card-action-icon:focus-visible{outline:2px solid #002060;outline-offset:-2px}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:9999;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}.mapboxgl-popup-content{width:max-content;font-family:Arial,sans-serif;padding:15px!important;max-width:280px!important}.mapboxgl-popup-content h3{color:#002060;margin:0 0 10px 0;font-size:16px}.mapboxgl-popup-content p{margin:0 0 5px 0;line-height:1.4;font-size:14px}.mapboxgl-popup-content p strong{color:#333;font-weight:bold}.mapboxgl-popup-content .popup-actions{display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid #eee}.mapboxgl-popup-content .popup-view-btn{flex:1;padding:5px 10px;background-color:#17a2b8;color:#fff;border:none;border-radius:4px;cursor:pointer;text-align:center;font-size:12px;transition:background-color .2s}.mapboxgl-popup-content .popup-view-btn:hover{background-color:#138496}#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-right,#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-left{display:none}/* Modal moderne */
+.card-action-icon:focus-visible{outline:2px solid #002060;outline-offset:-2px}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:9999;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}.mapboxgl-popup-content{width:max-content;font-family:Arial,sans-serif;padding:15px!important;max-width:280px!important}.mapboxgl-popup-content h3{color:#002060;margin:0 0 10px 0;font-size:16px}.mapboxgl-popup-content p{margin:0 0 5px 0;line-height:1.4;font-size:14px}.mapboxgl-popup-content p strong{color:#333;font-weight:bold}.mapboxgl-popup-content .popup-actions{display:flex;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid #eee}.mapboxgl-popup-content .popup-view-btn{flex:1;padding:5px 10px;background-color:#17a2b8;color:#fff;border:none;border-radius:4px;cursor:pointer;text-align:center;font-size:12px;transition:background-color .2s}.mapboxgl-popup-content .popup-view-btn:hover{background-color:#138496}
+/* Style pour le tooltip au hover - même contenu mais apparence plus légère */
+.hover-tooltip .mapboxgl-popup-content{opacity:0.95;box-shadow:0 2px 12px rgba(0,0,0,0.2)}.hover-tooltip .mapboxgl-popup-tip{border-top-color:#fff}#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-right,#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-left{display:none}/* Modal moderne */
 .modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.6);backdrop-filter:blur(4px);animation:fadeIn 0.3s ease}
 
 .modal-content{background:#fff;margin:5% auto;padding:0;border:none;width:90%;max-width:500px;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.2);animation:slideUp 0.3s ease;overflow:hidden}
@@ -1377,12 +1379,24 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 properties: e.features[0].properties
             };
             
-            // En mode normal, sélectionner l'UP et afficher le rayon
-            if (window.currentAppMode === 'normal') {
-                selectUPAndShowRadius(feature);
+            // Comportement différent selon le mode
+            if (window.currentAppMode === 'route') {
+                // En mode itinéraire : remplir Point A ou Point B
+                if (!currentPointAFeature) {
+                    // Si Point A est vide, le remplir
+                    selectAsPointA(feature);
+                } else if (!currentPointBFeature) {
+                    // Si Point A est rempli mais pas Point B, remplir Point B
+                    selectAsPointB(feature);
+                    // Le calcul d'itinéraire se lance automatiquement dans selectAsPointB
+                } else {
+                    // Si les deux points sont remplis, remplacer le Point A et vider le Point B
+                    clearPointBSelection();
+                    selectAsPointA(feature);
+                }
             } else {
-                // En mode itinéraire, comportement normal
-                focusOnEstablishment(feature);
+                // En mode normal : sélectionner l'UP et afficher le rayon
+                selectUPAndShowRadius(feature);
             }
         });
 
@@ -1394,11 +1408,41 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             map.getCanvas().style.cursor = '';
         });
         
-        map.on('mouseenter', 'unclustered-point', () => {
+        // Variable pour stocker le popup tooltip actuel
+        let hoverPopup = null;
+        
+        map.on('mouseenter', 'unclustered-point', (e) => {
             map.getCanvas().style.cursor = 'pointer';
+            
+            // Créer et afficher le tooltip avec le même contenu que le popup au clic
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const properties = e.features[0].properties;
+            
+            // Enlever l'ancien popup s'il existe
+            if (hoverPopup) {
+                hoverPopup.remove();
+            }
+            
+            // Utiliser la même fonction createPopupContent pour créer le contenu
+            hoverPopup = createPopupContent(properties, coordinates);
+            
+            // Modifier les classes et options pour le hover
+            hoverPopup.options.closeButton = false;
+            hoverPopup.options.closeOnClick = false;
+            hoverPopup.options.className = 'hover-tooltip';
+            
+            // Afficher le popup
+            hoverPopup.setLngLat(coordinates).addTo(map);
         });
+        
         map.on('mouseleave', 'unclustered-point', () => {
             map.getCanvas().style.cursor = '';
+            
+            // Supprimer le tooltip
+            if (hoverPopup) {
+                hoverPopup.remove();
+                hoverPopup = null;
+            }
         });
     }
 
