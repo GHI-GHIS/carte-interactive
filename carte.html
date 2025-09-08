@@ -1478,7 +1478,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             });
         });
 
-        // Click event for individual points - show popup
+        // Click event for individual points - show popup only (no selection)
         map.on('click', 'unclustered-point', (e) => {
             const coordinates = e.features[0].geometry.coordinates.slice();
             const properties = e.features[0].properties;
@@ -1488,22 +1488,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
             }
             
-            // Si on est en vue zoomée (même manuellement), considérer cette UP comme active
-            const currentPitch = map.getPitch();
-            const currentZoom = map.getZoom();
-            const mapCenter = map.getCenter();
-            const distance = turf.distance(
-                turf.point([mapCenter.lng, mapCenter.lat]),
-                turf.point(coordinates),
-                { units: 'kilometers' }
-            );
-            
-            // Si on est très zoomé ET proche de cette UP, la considérer comme en vue 3D
-            if ((currentPitch > 45 && currentZoom >= 16) || (currentZoom >= 15 && distance < 1)) {
-                currentView3DCoordinates = coordinates;
-            }
-            
-            // Utiliser showSinglePopup pour garantir qu'un seul popup soit visible
+            // Simple clic = afficher uniquement le popup informatif sans sélection
             showSinglePopup(properties, coordinates);
         });
         
@@ -1583,6 +1568,19 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             
             // Stocker la feature actuelle pour vérification
             currentHoverFeature = e.features[0];
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            
+            // Vérifier s'il y a déjà un popup actif sur cette UP
+            const hasActivePopupOnSameUP = activePopups.some(popup => {
+                const popupLngLat = popup.getLngLat();
+                return Math.abs(popupLngLat.lng - coordinates[0]) < 0.0001 && 
+                       Math.abs(popupLngLat.lat - coordinates[1]) < 0.0001;
+            });
+            
+            // Si un popup est déjà affiché sur cette UP, ne pas créer de tooltip hover
+            if (hasActivePopupOnSameUP) {
+                return;
+            }
             
             // Annuler tout timeout de fermeture
             if (closeTimeout) {
@@ -1599,12 +1597,25 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             hoverTimeout = setTimeout(() => {
                 // Vérifier qu'on est toujours sur la même feature
                 if (currentHoverFeature && currentHoverFeature === e.features[0]) {
+                    // Vérifier à nouveau qu'aucun popup n'a été créé entre temps
+                    const stillNoPopup = !activePopups.some(popup => {
+                        const popupLngLat = popup.getLngLat();
+                        return Math.abs(popupLngLat.lng - coordinates[0]) < 0.0001 && 
+                               Math.abs(popupLngLat.lat - coordinates[1]) < 0.0001;
+                    });
+                    
+                    if (!stillNoPopup) return;
+                    
                     // Créer et afficher le tooltip avec le même contenu que le popup au clic
-                    const coordinates = e.features[0].geometry.coordinates.slice();
                     const properties = e.features[0].properties;
                     
                     // Enlever l'ancien popup s'il existe
                     if (hoverPopup) {
+                        // Retirer de activePopups avant de supprimer
+                        const index = activePopups.indexOf(hoverPopup);
+                        if (index > -1) {
+                            activePopups.splice(index, 1);
+                        }
                         hoverPopup.remove();
                         isHoveringPopup = false;
                     }
@@ -1620,6 +1631,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     
                     // Afficher le popup avec animation fluide
                     hoverPopup.setLngLat(coordinates).addTo(map);
+                    
+                    // Ajouter le hover popup à activePopups pour éviter les doublons
+                    activePopups.push(hoverPopup);
                     
                     // Attacher les écouteurs après un court délai pour s'assurer que le DOM est prêt
                     setTimeout(attachPopupListeners, 50);
@@ -1643,6 +1657,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             if (hoverPopup && !isHoveringPopup) {
                 closeTimeout = setTimeout(() => {
                     if (!currentHoverFeature && !isHoveringPopup && hoverPopup) {
+                        // Retirer de activePopups avant de supprimer
+                        const index = activePopups.indexOf(hoverPopup);
+                        if (index > -1) {
+                            activePopups.splice(index, 1);
+                        }
                         hoverPopup.remove();
                         hoverPopup = null;
                         isHoveringPopup = false;
@@ -2366,12 +2385,58 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Ajouter la route à la carte comme source et layer
         addRouteToMap(route);
         
-        // Centrer la carte sur la route
+        // Centrer la carte sur l'itinéraire en tenant compte de la zone visible
         try {
+            // Créer les bounds incluant tous les points de l'itinéraire
             const bounds = new mapboxgl.LngLatBounds();
-            route.geometry.coordinates.forEach(coord => bounds.extend(coord));
-            map.fitBounds(bounds, { padding: 50 });
-        } catch (boundsError) {
+            
+            // Inclure les points A et B en priorité
+            if (currentSearchCenter) bounds.extend(currentSearchCenter);
+            if (destinationCoords) bounds.extend(destinationCoords);
+            
+            // Inclure quelques points clés de la route pour un meilleur ajustement
+            if (route.geometry && route.geometry.coordinates) {
+                const coords = route.geometry.coordinates;
+                const step = Math.max(1, Math.floor(coords.length / 10)); // Échantillonner 10 points
+                for (let i = 0; i < coords.length; i += step) {
+                    bounds.extend(coords[i]);
+                }
+            }
+            
+            // Définir le padding en fonction du layout
+            let paddingOptions;
+            
+            if (currentLayoutMode === 'dual') {
+                // En mode dual, compenser pour la sidebar en ajoutant du padding à gauche
+                const sidebar = document.getElementById('sidebar');
+                const sidebarWidth = sidebar ? sidebar.offsetWidth : 415;
+                
+                paddingOptions = {
+                    top: 100,
+                    bottom: 100,
+                    left: sidebarWidth + 80, // Sidebar + marge
+                    right: 80
+                };
+            } else {
+                // En mode plein écran, padding symétrique
+                paddingOptions = {
+                    top: 100,
+                    bottom: 100,
+                    left: 100,
+                    right: 100
+                };
+            }
+            
+            // Ajuster la vue avec fitBounds qui gérera automatiquement le centrage
+            map.fitBounds(bounds, {
+                padding: paddingOptions,
+                duration: 1500,
+                maxZoom: 15, // Limiter le zoom pour garder une vue d'ensemble
+                linear: false,
+                essential: true
+            });
+        } catch (error) {
+            console.error('Erreur lors du centrage de la carte:', error);
         }
         
         // Mettre à jour les temps de trajet avec les données réelles
@@ -2640,6 +2705,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 'line-opacity': 0.75
             }
         });
+        
+        // Ajouter des marqueurs pour les points A et B si la fonction existe
+        if (typeof addRouteMarkers === 'function') {
+            addRouteMarkers();
+        }
         
         currentRouteSource = 'route';
         isRouteMode = true; // Activer le mode itinéraire
@@ -4486,8 +4556,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }
         }
         
-        // Zoom sur l'établissement
-        map.flyTo({ center: coordinates, zoom: 17, pitch: 60, bearing: 30, speed: 1.2, essential: true });
+        // Suppression du zoom 3D - Simple sélection sans zoom
+        // map.flyTo({ center: coordinates, zoom: 17, pitch: 60, bearing: 30, speed: 1.2, essential: true });
         
         // Utiliser showSinglePopup pour garantir qu'un seul popup soit visible
         showSinglePopup(feature.properties, coordinates);
