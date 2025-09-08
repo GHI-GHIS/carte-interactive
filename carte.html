@@ -489,6 +489,44 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
 /* Mobile responsive amélioré */
 @media (max-width:768px){.map-legend{bottom:60px;left:5px;padding:8px;font-size:12px}.legend-item{margin:4px 0}.legend-marker{width:24px;height:24px;margin-right:6px}.mobile-toggle-btn{position:fixed;bottom:20px;right:20px;z-index:1007;background:#002060;color:#fff;border:none;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.3);cursor:pointer;transition:all .3s}.mobile-toggle-btn:hover{transform:scale(1.1);background:#003380}.mobile-toggle-btn svg{width:24px;height:24px}}
+
+/* Styles pour le bouton de fermeture des popups */
+.mapboxgl-popup-close-button {
+    font-size: 20px !important;
+    font-weight: bold !important;
+    color: #666 !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 4px 8px !important;
+    position: absolute !important;
+    right: 4px !important;
+    top: 4px !important;
+    width: 28px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease !important;
+}
+
+.mapboxgl-popup-close-button:hover {
+    background: rgba(0,0,0,0.05) !important;
+    color: #333 !important;
+    transform: scale(1.1) !important;
+}
+
+.mapboxgl-popup-close-button:active {
+    transform: scale(0.95) !important;
+}
+
+/* S'assurer que la croix est visible sur tous les popups */
+.hover-tooltip .mapboxgl-popup-close-button,
+.clicked-popup .mapboxgl-popup-close-button {
+    display: flex !important;
+    opacity: 1 !important;
+}
 </style>
 
 </head>
@@ -1458,7 +1496,84 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
     
     function setupClusterInteractions() {
-        // Click event for clusters - progressive zoom
+        console.log('Setting up cluster interactions');
+        
+        // NOUVELLE APPROCHE : Gestionnaire de clic global qui détecte manuellement les UP
+        map.on('click', (e) => {
+            // Détecter sur quoi on a cliqué
+            const features = map.queryRenderedFeatures(e.point);
+            
+            // Chercher si on a cliqué sur une UP
+            const upFeature = features.find(f => f.layer && f.layer.id === 'unclustered-point');
+            
+            if (upFeature) {
+                console.log('Clic détecté sur UP via gestionnaire global:', upFeature.properties.UP);
+                
+                // On a cliqué sur une UP - afficher le popup persistant
+                const coordinates = upFeature.geometry.coordinates.slice();
+                const properties = upFeature.properties;
+                
+                // Fermer tous les popups existants
+                if (clickedPopup) {
+                    closeClickedPopup();
+                }
+                if (hoverPopup) {
+                    hoverPopup.remove();
+                    hoverPopup = null;
+                    isHoveringPopup = false;
+                }
+                
+                try {
+                    // Créer et afficher le popup persistant
+                    clickedPopup = createPopupContent(properties, coordinates, 'clicked');
+                    clickedPopup.setLngLat(coordinates).addTo(map);
+                    activePopups.push(clickedPopup);
+                    
+                    clickedPopup.on('close', () => {
+                        const index = activePopups.indexOf(clickedPopup);
+                        if (index > -1) {
+                            activePopups.splice(index, 1);
+                        }
+                        clickedPopup = null;
+                    });
+                    
+                    console.log('Popup affiché avec succès');
+                } catch (error) {
+                    console.error('Erreur:', error);
+                }
+                
+                return; // Ne pas continuer pour fermer le popup
+            }
+            
+            // Si on a cliqué sur un cluster
+            const clusterFeature = features.find(f => f.layer && f.layer.id === 'clusters');
+            if (clusterFeature) {
+                // Zoom sur le cluster
+                const clusterId = clusterFeature.properties.cluster_id;
+                map.getSource('establishments').getClusterExpansionZoom(
+                    clusterId,
+                    (err, zoom) => {
+                        if (err) return;
+                        
+                        const currentZoom = map.getZoom();
+                        const newZoom = Math.min(zoom + 1, 22);
+                        
+                        map.easeTo({
+                            center: clusterFeature.geometry.coordinates,
+                            zoom: newZoom,
+                            duration: 500
+                        });
+                    }
+                );
+                return;
+            }
+            
+            // Si on a cliqué sur la carte vide - fermer les popups
+            console.log('Clic sur la carte vide');
+            closeClickedPopup();
+        });
+        
+        // Click event for clusters - progressive zoom (ANCIEN CODE - À GARDER AU CAS OÙ)
         map.on('click', 'clusters', (e) => {
             const features = map.queryRenderedFeatures(e.point, {
                 layers: ['clusters']
@@ -1482,34 +1597,21 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Variable pour détecter un double-clic
         let clickTimeout = null;
         
-        // Click event for individual points - show popup only (no selection)
+        // ANCIEN CODE DE CLIC - DÉSACTIVÉ CAR NE FONCTIONNE PAS
+        // Le nouveau gestionnaire global gère maintenant les clics sur les UP
+        /*
         map.on('click', 'unclustered-point', (e) => {
-            // Attendre pour voir si c'est un double-clic
-            if (clickTimeout) {
-                clearTimeout(clickTimeout);
-                clickTimeout = null;
-                return; // Double-clic détecté, ne pas exécuter le simple clic
-            }
-            
-            clickTimeout = setTimeout(() => {
-                clickTimeout = null;
-                // Simple clic confirmé
-                const coordinates = e.features[0].geometry.coordinates.slice();
-                const properties = e.features[0].properties;
-                
-                // Ensure that if the map is zoomed out such that multiple copies of the feature are visible, the popup appears over the copy being pointed to.
-                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
-                }
-                
-                // Simple clic = afficher uniquement le popup informatif sans sélection
-                showSinglePopup(properties, coordinates);
-            }, 250); // Délai pour distinguer simple clic du double-clic
+            console.log('Clic sur UP détecté');
+            // ... ancien code ...
         });
+        */
         
         // Double-click event for individual points
         map.on('dblclick', 'unclustered-point', (e) => {
             e.preventDefault();
+            
+            // Vérifier qu'il y a bien des features
+            if (!e.features || !e.features[0]) return;
             
             // Annuler le timeout du simple clic si présent
             if (clickTimeout) {
@@ -1550,15 +1652,28 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             map.getCanvas().style.cursor = '';
         });
         
-        // Variables pour la gestion optimisée du hover
+        // Variables pour la gestion optimisée du hover et des popups persistants
         let hoverPopup = null;
+        let clickedPopup = null; // Popup persistant créé par clic
         let hoverTimeout = null;
         let closeTimeout = null;
         let currentHoverFeature = null;
         let isHoveringPopup = false;
         
-        // Fonction pour attacher les écouteurs au popup
-        function attachPopupListeners() {
+        // Fonction pour fermer le popup cliqué
+        function closeClickedPopup() {
+            if (clickedPopup) {
+                const index = activePopups.indexOf(clickedPopup);
+                if (index > -1) {
+                    activePopups.splice(index, 1);
+                }
+                clickedPopup.remove();
+                clickedPopup = null;
+            }
+        }
+        
+        // Fonction pour attacher les écouteurs au popup hover
+        function attachHoverPopupListeners() {
             if (!hoverPopup || !hoverPopup._container) return;
             
             // Quand la souris entre dans le popup
@@ -1577,6 +1692,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 // Fermer après un délai si on n'est plus sur le point non plus
                 closeTimeout = setTimeout(() => {
                     if (!currentHoverFeature && !isHoveringPopup && hoverPopup) {
+                        // Retirer de activePopups avant de supprimer
+                        const index = activePopups.indexOf(hoverPopup);
+                        if (index > -1) {
+                            activePopups.splice(index, 1);
+                        }
                         hoverPopup.remove();
                         hoverPopup = null;
                     }
@@ -1587,11 +1707,21 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         map.on('mouseenter', 'unclustered-point', (e) => {
             map.getCanvas().style.cursor = 'pointer';
             
+            // Vérifier qu'il y a bien des features
+            if (!e.features || !e.features[0]) return;
+            
             // Stocker la feature actuelle pour vérification
             currentHoverFeature = e.features[0];
             const coordinates = e.features[0].geometry.coordinates.slice();
             
-            // Vérifier s'il y a déjà un popup actif sur cette UP
+            // Vérifier s'il y a déjà un popup cliqué sur cette UP
+            const hasClickedPopupOnSameUP = clickedPopup && (() => {
+                const popupLngLat = clickedPopup.getLngLat();
+                return Math.abs(popupLngLat.lng - coordinates[0]) < 0.0001 && 
+                       Math.abs(popupLngLat.lat - coordinates[1]) < 0.0001;
+            })();
+            
+            // Vérifier aussi s'il y a un popup dans activePopups sur cette UP (pour le popup de sélection)
             const hasActivePopupOnSameUP = activePopups.some(popup => {
                 const popupLngLat = popup.getLngLat();
                 return Math.abs(popupLngLat.lng - coordinates[0]) < 0.0001 && 
@@ -1599,7 +1729,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             });
             
             // Si un popup est déjà affiché sur cette UP, ne pas créer de tooltip hover
-            if (hasActivePopupOnSameUP) {
+            if (hasClickedPopupOnSameUP || hasActivePopupOnSameUP) {
                 return;
             }
             
@@ -1609,67 +1739,52 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 closeTimeout = null;
             }
             
-            // Annuler tout timeout d'ouverture précédent
-            if (hoverTimeout) {
-                clearTimeout(hoverTimeout);
+            // Fermer immédiatement l'ancien hover popup s'il existe et n'est pas sur la même UP
+            if (hoverPopup) {
+                const hoverLngLat = hoverPopup.getLngLat();
+                if (Math.abs(hoverLngLat.lng - coordinates[0]) > 0.0001 || 
+                    Math.abs(hoverLngLat.lat - coordinates[1]) > 0.0001) {
+                    const index = activePopups.indexOf(hoverPopup);
+                    if (index > -1) {
+                        activePopups.splice(index, 1);
+                    }
+                    hoverPopup.remove();
+                    hoverPopup = null;
+                    isHoveringPopup = false;
+                }
             }
             
-            // Délai de 300ms pour éviter les affichages accidentels
-            hoverTimeout = setTimeout(() => {
-                // Vérifier qu'on est toujours sur la même feature
-                if (currentHoverFeature && currentHoverFeature === e.features[0]) {
-                    // Vérifier à nouveau qu'aucun popup n'a été créé entre temps
-                    const stillNoPopup = !activePopups.some(popup => {
-                        const popupLngLat = popup.getLngLat();
-                        return Math.abs(popupLngLat.lng - coordinates[0]) < 0.0001 && 
-                               Math.abs(popupLngLat.lat - coordinates[1]) < 0.0001;
-                    });
-                    
-                    if (!stillNoPopup) return;
-                    
-                    // Créer et afficher le tooltip avec le même contenu que le popup au clic
-                    const properties = e.features[0].properties;
-                    
-                    // Enlever l'ancien popup s'il existe
-                    if (hoverPopup) {
-                        // Retirer de activePopups avant de supprimer
-                        const index = activePopups.indexOf(hoverPopup);
-                        if (index > -1) {
-                            activePopups.splice(index, 1);
-                        }
-                        hoverPopup.remove();
-                        isHoveringPopup = false;
-                    }
-                    
-                    // Utiliser la même fonction createPopupContent pour créer le contenu
-                    hoverPopup = createPopupContent(properties, coordinates);
-                    
-                    // Modifier les classes et options pour le hover
-                    hoverPopup.options.closeButton = false;
-                    hoverPopup.options.closeOnClick = false;
-                    hoverPopup.options.className = 'hover-tooltip';
-                    hoverPopup.options.offset = [0, -10]; // Légèrement décalé vers le haut
-                    
-                    // Afficher le popup avec animation fluide
-                    hoverPopup.setLngLat(coordinates).addTo(map);
-                    
-                    // Ajouter le hover popup à activePopups pour éviter les doublons
-                    activePopups.push(hoverPopup);
-                    
-                    // Attacher les écouteurs après un court délai pour s'assurer que le DOM est prêt
-                    setTimeout(attachPopupListeners, 50);
+            // Créer et afficher le tooltip immédiatement (pas de délai)
+            if (!hoverPopup) {
+                // FERMER tout popup existant (cliqué ou hover)
+                if (clickedPopup) {
+                    closeClickedPopup();
                 }
-            }, 300); // Délai de 300ms pour intention de hover
+                
+                const properties = e.features[0].properties;
+                
+                // Créer le popup hover avec les bonnes options
+                hoverPopup = createPopupContent(properties, coordinates, 'hover');
+                
+                // Afficher le popup avec animation fluide
+                hoverPopup.setLngLat(coordinates).addTo(map);
+                
+                // Gérer la fermeture du hover popup avec la croix
+                hoverPopup.on('close', () => {
+                    hoverPopup = null;
+                    isHoveringPopup = false;
+                });
+                
+                // NE PAS ajouter le hover popup à activePopups pour éviter les conflits
+                // activePopups.push(hoverPopup);
+                
+                // Attacher les écouteurs après un court délai pour s'assurer que le DOM est prêt
+                setTimeout(attachHoverPopupListeners, 50);
+            }
         });
         
         map.on('mouseleave', 'unclustered-point', () => {
             map.getCanvas().style.cursor = '';
-            
-            // Annuler le timeout d'ouverture si on quitte avant l'affichage
-            if (hoverTimeout) {
-                clearTimeout(hoverTimeout);
-                hoverTimeout = null;
-            }
             
             // Réinitialiser la feature actuelle
             currentHoverFeature = null;
@@ -1678,11 +1793,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             if (hoverPopup && !isHoveringPopup) {
                 closeTimeout = setTimeout(() => {
                     if (!currentHoverFeature && !isHoveringPopup && hoverPopup) {
-                        // Retirer de activePopups avant de supprimer
-                        const index = activePopups.indexOf(hoverPopup);
-                        if (index > -1) {
-                            activePopups.splice(index, 1);
-                        }
                         hoverPopup.remove();
                         hoverPopup = null;
                         isHoveringPopup = false;
@@ -1690,6 +1800,19 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 }, 200); // Délai de grâce pour permettre de passer au popup
             }
         });
+        
+        // ANCIEN GESTIONNAIRE - DÉSACTIVÉ car maintenant intégré dans le gestionnaire global
+        /*
+        map.on('click', (e) => {
+            setTimeout(() => {
+                const features = map.queryRenderedFeatures(e.point, { layers: ['unclustered-point', 'clusters'] });
+                if (features.length === 0) {
+                    console.log('Clic sur la carte vide - fermeture du popup');
+                    closeClickedPopup();
+                }
+            }, 10);
+        });
+        */
     }
 
 
@@ -3377,6 +3500,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 }
                 
                 opacity += direction * 0.05;
+                
+                // S'assurer que l'opacité reste dans les limites [0.7, 1.0]
+                opacity = Math.max(0.7, Math.min(1.0, opacity));
+                
                 if (opacity >= 1 || opacity <= 0.7) {
                     direction *= -1;
                 }
@@ -3962,7 +4089,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
       return el;
     }
 
-    function createPopupContent(props, coordinates = null) {
+    function createPopupContent(props, coordinates = null, popupType = 'default') {
         const name = decodeHTMLEntities(props.UP||'N/A');
         const address = decodeHTMLEntities(props.Adresse||'N/A');
         const city = decodeHTMLEntities(props.Ville||'');
@@ -3993,8 +4120,35 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }
         }
         
-        // Créer le popup avec DOM uniquement (évite tous problèmes de syntaxe)
-        const popup = new mapboxgl.Popup({ offset: 25, maxWidth: '300px' });
+        // Créer le popup avec les options appropriées selon le type
+        let popupOptions;
+        if (popupType === 'clicked') {
+            popupOptions = { 
+                offset: 25, 
+                maxWidth: '300px', 
+                closeButton: true,  // CROIX pour le popup cliqué
+                closeOnClick: false, 
+                className: 'clicked-popup' 
+            };
+        } else if (popupType === 'hover') {
+            popupOptions = { 
+                offset: [0, -10], 
+                maxWidth: '300px', 
+                closeButton: true,  // CROIX aussi pour le hover
+                closeOnClick: false, 
+                className: 'hover-tooltip' 
+            };
+        } else {
+            // default
+            popupOptions = { 
+                offset: 25, 
+                maxWidth: '300px', 
+                closeButton: true,  // CROIX par défaut partout
+                closeOnClick: false 
+            };
+        }
+        
+        const popup = new mapboxgl.Popup(popupOptions);
         
         // Créer le contenu avec DOM pour éviter les problèmes de balises
         const popupDiv = document.createElement('div');
@@ -4017,6 +4171,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Distance (si disponible)
         if (currentSearchCenter && coordinates) {
             let distance, travelTime;
+            
+            // Vérifier si c'est l'établissement de destination
+            const isDestination = destinationCoords && 
+                Math.abs(coordinates[0] - destinationCoords[0]) < 0.0001 &&
+                Math.abs(coordinates[1] - destinationCoords[1]) < 0.0001;
             
             // Utiliser les données réelles de routage si disponibles, sinon calcul à vol d'oiseau
             if (realRouteData) {
@@ -4112,16 +4271,15 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             { units: 'kilometers' }
         );
         
-        // Déterminer si on est en vue "zoomée" sur cette UP
-        // Inclure aussi si on est en train de zoomer vers cette UP
-        const isCurrentlyZoomingHere = zoomingToCoordinates && 
-            Math.abs(zoomingToCoordinates[0] - coordinates[0]) < 0.0001 &&
-            Math.abs(zoomingToCoordinates[1] - coordinates[1]) < 0.0001;
-            
-        const isZoomedOnThisUP = isCurrentlyZoomingHere || (
-            (currentPitch > 45 && currentZoom >= 16 && centerDistance < 2) || // Vue 3D
-            (currentZoom >= 16 && centerDistance < 0.5) || // Vue très zoomée et très proche
-            (currentZoom >= 15 && centerDistance < 0.2) // Vue zoomée et extrêmement proche
+        // Utiliser EXACTEMENT la même logique que les cards pour la cohérence
+        // On est en vue 3D uniquement si :
+        // 1. Le pitch est élevé (> 45°) ET
+        // 2. Le zoom est important (>= 16) ET
+        // 3. On est proche du centre
+        const isIn3DView = (
+            currentPitch > 45 && // DOIT avoir un pitch élevé pour être en 3D
+            currentZoom >= 16 && // DOIT être zoomé
+            centerDistance < 0.5 // DOIT être proche du centre
         );
         
         const actionsDiv = document.createElement('div');
@@ -4130,14 +4288,26 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const viewBtn = document.createElement('button');
         viewBtn.className = 'popup-view-btn';
         
-        if (isZoomedOnThisUP) {
-            // Bouton "Retour à la carte" car on est zoomé sur cette UP
+        if (isIn3DView) {
+            // Bouton "Retour à la carte" car on est EN VUE 3D sur cette UP
             viewBtn.textContent = 'Retour à la carte';
             viewBtn.style.backgroundColor = '#28a745';
             viewBtn.onclick = function() {
                 // Réinitialiser les variables de tracking
                 currentView3DCoordinates = null;
-                zoomingToCoordinates = null;
+                
+                // Fermer le popup actuel
+                const popup = activePopups.find(p => {
+                    const popupLngLat = p.getLngLat();
+                    return Math.abs(popupLngLat.lng - coordinates[0]) < 0.0001 && 
+                           Math.abs(popupLngLat.lat - coordinates[1]) < 0.0001;
+                });
+                if (popup) {
+                    popup.remove();
+                    const index = activePopups.indexOf(popup);
+                    if (index > -1) activePopups.splice(index, 1);
+                }
+                // Le popup est déjà fermé via activePopups ci-dessus
                 
                 map.flyTo({
                     center: coordinates,
@@ -4148,26 +4318,28 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     essential: true
                 });
                 
-                // Rafraîchir le popup ET les cards après le retour
-                setTimeout(() => {
-                    // Fermer le popup actuel et le recréer avec le bon bouton
-                    activePopups.forEach(p => p.remove());
-                    activePopups.length = 0;
-                    // Recréer le popup avec le bouton "Voir en 3D"
-                    const refreshedPopup = createPopupContent(props, coordinates);
-                    refreshedPopup.setLngLat(coordinates).addTo(map);
-                    activePopups.push(refreshedPopup);
-                    // Rafraîchir aussi les cards
-                    updateSidebarBasedOnMapViewport();
-                }, 1300);
+                updateSidebarBasedOnMapViewport();
             };
         } else {
             // Bouton "Voir en 3D" car on n'est pas zoomé sur cette UP
             viewBtn.textContent = 'Voir en 3D';
             viewBtn.onclick = function() {
-                // Marquer qu'on est en train de zoomer vers cette UP
-                zoomingToCoordinates = coordinates;
+                // Marquer qu'on est en train de zoomer vers cette UP EN 3D
                 currentView3DCoordinates = coordinates;
+                
+                // Fermer le popup actuel
+                const popup = activePopups.find(p => {
+                    const popupLngLat = p.getLngLat();
+                    return Math.abs(popupLngLat.lng - coordinates[0]) < 0.0001 && 
+                           Math.abs(popupLngLat.lat - coordinates[1]) < 0.0001;
+                });
+                if (popup) {
+                    popup.remove();
+                    const index = activePopups.indexOf(popup);
+                    if (index > -1) activePopups.splice(index, 1);
+                }
+                // Fermer aussi le clickedPopup global s'il existe
+                // Le popup est déjà fermé via activePopups ci-dessus
                 
                 map.flyTo({
                     center: coordinates,
@@ -4178,20 +4350,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     essential: true
                 });
                 
-                // Fermer le popup actuel et en rouvrir un avec le bon bouton
-                setTimeout(() => {
-                    activePopups.forEach(p => p.remove());
-                    activePopups.length = 0;
-                    // Recréer le popup avec les mêmes propriétés
-                    const refreshedPopup = createPopupContent(props, coordinates);
-                    refreshedPopup.setLngLat(coordinates).addTo(map);
-                    activePopups.push(refreshedPopup);
-                    updateSidebarBasedOnMapViewport();
-                    // Réinitialiser APRÈS avoir recréé le popup
-                    setTimeout(() => {
-                        zoomingToCoordinates = null; // Zoom terminé
-                    }, 100);
-                }, 1300);
+                updateSidebarBasedOnMapViewport();
             };
         }
         
@@ -4542,9 +4701,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }
         }
         
-        // Marquer qu'on zoome vers cette UP (pour le cas du double-clic)
-        zoomingToCoordinates = coordinates;
-        currentView3DCoordinates = coordinates;
+        // NE PAS marquer qu'on zoome vers cette UP car on ne fait PAS de vue 3D
+        // zoomingToCoordinates = coordinates; // SUPPRIMÉ - c'était le bug !
+        // currentView3DCoordinates = coordinates; // SUPPRIMÉ - on n'est pas en 3D !
         
         // Calculer le zoom pour voir tout le rayon (vue encore plus large)
         const radiusKm = currentSearchRadius || 80;
@@ -4586,10 +4745,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Attendre que le zoom soit terminé avant d'afficher le popup
         setTimeout(() => {
             showSinglePopup(feature.properties, coordinates);
-            // Réinitialiser après affichage
-            setTimeout(() => {
-                zoomingToCoordinates = null;
-            }, 100);
+            // Pas besoin de réinitialiser car on n'a jamais défini zoomingToCoordinates
         }, 1600);
         
         // Appliquer les filtres avec le nouveau centre
@@ -5032,10 +5188,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 { units: 'kilometers' }
             );
             
+            // On est en vue 3D uniquement si le pitch est élevé (> 45°)
             const isCurrently3D = (
-                (currentPitch > 45 && currentZoom >= 16 && centerDistance < 2) ||
-                (currentZoom >= 16 && centerDistance < 0.5) ||
-                (currentZoom >= 15 && centerDistance < 0.2)
+                currentPitch > 45 && // DOIT avoir un pitch élevé pour être en 3D
+                currentZoom >= 16 && // DOIT être zoomé
+                centerDistance < 0.5 // DOIT être proche du centre
             );
             
             if (isCurrently3D) {
@@ -5339,16 +5496,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 map.getSource('radius-circle-source').setData(circleGeoJSON);
             } else {
                 map.addSource('radius-circle-source', { type: 'geojson', data: circleGeoJSON });
-                // Ajouter le cercle AVANT les points pour qu'il soit en dessous
-                // Trouver la position du layer unclustered-point et insérer avant
-                const layers = map.getStyle().layers;
-                let firstSymbolId;
-                for (let i = 0; i < layers.length; i++) {
-                    if (layers[i].type === 'symbol') {
-                        firstSymbolId = layers[i].id;
-                        break;
-                    }
-                }
+                // Ajouter le layer du cercle
+                // Important: Ne PAS spécifier de beforeId pour éviter les conflits avec l'ordre des layers
                 map.addLayer({ 
                     id: 'radius-circle-layer', 
                     type: 'line', 
@@ -5359,7 +5508,15 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                         'line-width': 2, 
                         'line-dasharray': [2, 2] 
                     } 
-                }, firstSymbolId); // Insérer avant le premier layer symbol
+                });
+                
+                // Déplacer le layer du cercle en dessous des points après l'avoir ajouté
+                if (map.getLayer('unclustered-point')) {
+                    map.moveLayer('radius-circle-layer', 'unclustered-point');
+                }
+                if (map.getLayer('clusters')) {
+                    map.moveLayer('radius-circle-layer', 'clusters');
+                }
             }
         } catch (e) { console.error("Erreur lors de la création du cercle:", e); }
     }
