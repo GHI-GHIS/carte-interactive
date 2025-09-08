@@ -742,6 +742,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     // Variables pour stocker les features des points sélectionnés
     let currentPointAFeature = null; // Feature complète du Point A
     let currentPointBFeature = null; // Feature complète du Point B
+    let isPointAFromUP = false; // Indique si Point A est une UP
+    let isPointBFromUP = false; // Indique si Point B est une UP
     
     // Fonction pour mapper les activités vers les types de légende
     function getActivityType(activity) {
@@ -1516,11 +1518,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             // Comportement différent selon le mode
             if (window.currentAppMode === 'route') {
                 // En mode itinéraire : remplir Point A ou Point B
-                if (!currentPointAFeature) {
-                    // Si Point A est vide, le remplir
+                if (!currentSearchCenter) {
+                    // Si Point A est vide (pas de coordonnées), le remplir
                     selectAsPointA(feature);
-                } else if (!currentPointBFeature) {
-                    // Si Point A est rempli mais pas Point B, remplir Point B
+                } else if (!destinationCoords) {
+                    // Si Point A est rempli mais pas Point B (pas de destination), remplir Point B
                     selectAsPointB(feature);
                     // Le calcul d'itinéraire se lance automatiquement dans selectAsPointB
                 } else {
@@ -1545,7 +1547,36 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Variables pour la gestion optimisée du hover
         let hoverPopup = null;
         let hoverTimeout = null;
+        let closeTimeout = null;
         let currentHoverFeature = null;
+        let isHoveringPopup = false;
+        
+        // Fonction pour attacher les écouteurs au popup
+        function attachPopupListeners() {
+            if (!hoverPopup || !hoverPopup._container) return;
+            
+            // Quand la souris entre dans le popup
+            hoverPopup._container.addEventListener('mouseenter', () => {
+                isHoveringPopup = true;
+                // Annuler toute fermeture en cours
+                if (closeTimeout) {
+                    clearTimeout(closeTimeout);
+                    closeTimeout = null;
+                }
+            });
+            
+            // Quand la souris quitte le popup
+            hoverPopup._container.addEventListener('mouseleave', () => {
+                isHoveringPopup = false;
+                // Fermer après un délai si on n'est plus sur le point non plus
+                closeTimeout = setTimeout(() => {
+                    if (!currentHoverFeature && !isHoveringPopup && hoverPopup) {
+                        hoverPopup.remove();
+                        hoverPopup = null;
+                    }
+                }, 200); // Délai de grâce pour retourner au point
+            });
+        }
         
         map.on('mouseenter', 'unclustered-point', (e) => {
             map.getCanvas().style.cursor = 'pointer';
@@ -1553,7 +1584,13 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             // Stocker la feature actuelle pour vérification
             currentHoverFeature = e.features[0];
             
-            // Annuler tout timeout précédent
+            // Annuler tout timeout de fermeture
+            if (closeTimeout) {
+                clearTimeout(closeTimeout);
+                closeTimeout = null;
+            }
+            
+            // Annuler tout timeout d'ouverture précédent
             if (hoverTimeout) {
                 clearTimeout(hoverTimeout);
             }
@@ -1569,6 +1606,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     // Enlever l'ancien popup s'il existe
                     if (hoverPopup) {
                         hoverPopup.remove();
+                        isHoveringPopup = false;
                     }
                     
                     // Utiliser la même fonction createPopupContent pour créer le contenu
@@ -1582,6 +1620,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     
                     // Afficher le popup avec animation fluide
                     hoverPopup.setLngLat(coordinates).addTo(map);
+                    
+                    // Attacher les écouteurs après un court délai pour s'assurer que le DOM est prêt
+                    setTimeout(attachPopupListeners, 50);
                 }
             }, 300); // Délai de 300ms pour intention de hover
         });
@@ -1589,7 +1630,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         map.on('mouseleave', 'unclustered-point', () => {
             map.getCanvas().style.cursor = '';
             
-            // Annuler le timeout si on quitte avant l'affichage
+            // Annuler le timeout d'ouverture si on quitte avant l'affichage
             if (hoverTimeout) {
                 clearTimeout(hoverTimeout);
                 hoverTimeout = null;
@@ -1598,14 +1639,15 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             // Réinitialiser la feature actuelle
             currentHoverFeature = null;
             
-            // Supprimer le tooltip avec un léger délai pour transition fluide
-            if (hoverPopup) {
-                setTimeout(() => {
-                    if (hoverPopup && !currentHoverFeature) {
+            // Fermer uniquement si on n'est pas sur le popup
+            if (hoverPopup && !isHoveringPopup) {
+                closeTimeout = setTimeout(() => {
+                    if (!currentHoverFeature && !isHoveringPopup && hoverPopup) {
                         hoverPopup.remove();
                         hoverPopup = null;
+                        isHoveringPopup = false;
                     }
-                }, 100);
+                }, 200); // Délai de grâce pour permettre de passer au popup
             }
         });
     }
@@ -1945,6 +1987,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
        // Événement principal 'result'
        geocoder.on('result', (e) => {
             currentSearchCenter = e.result.center || e.result.geometry.coordinates;
+            
+            // Déterminer si c'est une UP ou une ville
+            isPointAFromUP = !!(e.result.properties && (e.result.properties.UP || e.result.properties['Nom du site']));
+            
             // Point A sélectionné - afficher automatiquement le Point B
             showRouteInterface();
             showPointB();
@@ -1953,10 +1999,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             setFocusOnPointB();
             
             // Mettre à jour l'affichage
-            if (e.result.properties && e.result.properties['Nom du site']) {
+            if (isPointAFromUP) {
                 updatePointADisplay(e.result.properties);
+                // Stocker la feature pour Point A
+                currentPointAFeature = e.result;
             } else {
-                // Pour une adresse normale, afficher dans le bandeau
+                // Pour une adresse normale (ville), afficher dans le bandeau
                 const selectedPointA = document.getElementById('selected-point-a');
                 const pointAName = document.getElementById('point-a-name');
                 const geocoderContainer = document.getElementById('geocoder-container');
@@ -1976,6 +2024,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                         clearPointA.addEventListener('click', clearPointASelection);
                     }
                 }
+                // Stocker un objet feature même pour une ville
+                currentPointAFeature = e.result;
             }
             
             // Afficher le contrôle de rayon et définir à 80 km
@@ -2017,12 +2067,17 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 return;
             }
             
+            // Déterminer si c'est une UP ou une ville
+            isPointBFromUP = !!(e.result.properties && (e.result.properties.UP || e.result.properties['Nom du site']));
+            
             destinationCoords = newDestinationCoords;
             // Mettre à jour l'affichage
-            if (e.result.properties && e.result.properties['Nom du site']) {
+            if (isPointBFromUP) {
                 updatePointBDisplay(e.result.properties);
+                // Stocker la feature pour Point B
+                currentPointBFeature = e.result;
             } else {
-                // Pour une adresse normale
+                // Pour une adresse normale (ville)
                 const selectedPointB = document.getElementById('selected-point-b');
                 const pointBName = document.getElementById('point-b-name');
                 const geocoderContainerB = document.getElementById('geocoder-container-b');
@@ -2048,10 +2103,17 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                         pointBSection.style.borderWidth = '2px';
                     }
                 }
+                // Stocker un objet feature même pour une ville
+                currentPointBFeature = e.result;
             }
             
-            // Si A et B sont définis, calculer automatiquement l'itinéraire
+            // Si A et B sont définis, vérifier qu'au moins un est une UP avant de calculer
             if (currentSearchCenter && destinationCoords) {
+                if (!isPointAFromUP && !isPointBFromUP) {
+                    // Les deux sont des villes - afficher un message d'erreur
+                    showCityToCityError();
+                    return;
+                }
                 setTimeout(() => {
                     showRouteOnMap(currentSearchCenter, destinationCoords);
                 }, 500);
@@ -3420,6 +3482,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     // Auto-recalcul quand les options changent
     function recalculateRoute() {
         if (currentSearchCenter && destinationCoords) {
+            // Vérifier qu'au moins un est une UP
+            if (!isPointAFromUP && !isPointBFromUP) {
+                showCityToCityError();
+                return;
+            }
             showRouteOnMap(currentSearchCenter, destinationCoords);
         }
     }
@@ -3649,6 +3716,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         currentFocusedInput = 'A'; // Remettre le focus sur A
         currentPointAFeature = null;
         currentPointBFeature = null;
+        isPointAFromUP = false;
+        isPointBFromUP = false;
         
         removeSearchRadiusCircle();
         clearPointADisplay();
@@ -4207,6 +4276,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Réinitialiser la destination
         destinationCoords = null;
         currentPointBFeature = null;
+        isPointBFromUP = false;
         
         // Cacher l'affichage du Point B sélectionné
         clearPointBDisplay();
@@ -4313,6 +4383,29 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Définir le centre de recherche actuel
         currentSearchCenter = coordinates;
         
+        // Stocker la feature pour persistance entre modes
+        currentPointAFeature = feature;
+        isPointAFromUP = true;
+        
+        // Afficher la sélection dans le geocoder normal si disponible
+        if (window.normalGeocoder && feature.properties) {
+            const upName = feature.properties.UP || feature.properties['Nom du site'] || '';
+            const adresse = feature.properties.Adresse || feature.properties['Adresse'] || '';
+            const ville = feature.properties.Ville || feature.properties['Ville'] || '';
+            
+            // Format avec emoji comme dans localUPGeocoder
+            const displayName = `📍 ${upName}${adresse ? ', ' + adresse : ''}${ville ? ', ' + ville : ''}`;
+            
+            // Utiliser setInput sans déclencher de recherche
+            const input = window.normalGeocoder._inputEl || window.normalGeocoder.container.querySelector('input');
+            if (input) {
+                input.value = displayName;
+                // Fermer les suggestions s'il y en a
+                window.normalGeocoder.clear();
+                window.normalGeocoder._inputEl.value = displayName;
+            }
+        }
+        
         // Marquer qu'on zoome vers cette UP (pour le cas du double-clic)
         zoomingToCoordinates = coordinates;
         currentView3DCoordinates = coordinates;
@@ -4406,6 +4499,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Mettre à jour les variables globales
         currentSearchCenter = coordinates;
         currentPointAFeature = feature;
+        isPointAFromUP = true; // Appelé depuis la carte = toujours une UP
         
         // Mettre à jour l'affichage
         updatePointADisplay(feature.properties);
@@ -4438,13 +4532,18 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Mettre à jour les variables globales
         destinationCoords = coordinates;
         currentPointBFeature = feature;
+        isPointBFromUP = true; // Appelé depuis la carte = toujours une UP
         
         // Mettre à jour l'affichage
         updatePointBDisplay(feature.properties);
         showPointB();
         
-        // Si Point A existe, calculer l'itinéraire
+        // Si Point A existe, vérifier qu'au moins un est une UP avant de calculer
         if (currentPointAFeature && currentSearchCenter) {
+            if (!isPointAFromUP && !isPointBFromUP) {
+                showCityToCityError();
+                return;
+            }
             setTimeout(() => {
                 showRouteOnMap(currentSearchCenter, destinationCoords);
             }, 500);
@@ -5415,6 +5514,32 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             // Effacer les routes si elles existent
             clearRoute();
             
+            // Transférer la sélection du Point A vers le geocoder normal si elle existe
+            if (currentSearchCenter && normalGeocoder) {
+                // Si c'était une UP, afficher son nom
+                if (currentPointAFeature && currentPointAFeature.properties) {
+                    const props = currentPointAFeature.properties;
+                    const upName = props.UP || props['Nom du site'] || '';
+                    if (upName) {
+                        const adresse = props.Adresse || props['Adresse'] || '';
+                        const ville = props.Ville || props['Ville'] || '';
+                        const displayName = `📍 ${upName}${adresse ? ', ' + adresse : ''}${ville ? ', ' + ville : ''}`;
+                        
+                        // Définir directement la valeur sans déclencher de recherche
+                        const input = normalGeocoder._inputEl || normalGeocoder.container.querySelector('input');
+                        if (input) {
+                            input.value = displayName;
+                        }
+                    }
+                } else if (currentPointAFeature && currentPointAFeature.place_name) {
+                    // Si c'était une ville
+                    const input = normalGeocoder._inputEl || normalGeocoder.container.querySelector('input');
+                    if (input) {
+                        input.value = currentPointAFeature.place_name || currentPointAFeature.text;
+                    }
+                }
+            }
+            
             // Réinitialiser les sélections d'itinéraire
             clearRoutePoints();
             
@@ -5437,6 +5562,18 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             // Afficher le bouton d'ajout de destination en mode route
             const addDestBtn = document.getElementById('add-destination-btn');
             if (addDestBtn) addDestBtn.style.display = 'block';
+            
+            // Transférer la sélection actuelle vers le Point A si elle existe
+            if (currentSearchCenter && !currentPointAFeature) {
+                // Si on a une sélection mais pas encore de Point A dans le mode route
+                showRouteInterface();
+                showPointB();
+            } else if (currentPointAFeature) {
+                // Si on a déjà un Point A, l'afficher
+                showRouteInterface();
+                showPointB();
+                updatePointADisplay(currentPointAFeature.properties || {});
+            }
             
             // Rafraîchir les cards pour mettre à jour le style de curseur
             updateSidebarBasedOnMapViewport();
@@ -5509,6 +5646,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 if (e.result && e.result.geometry) {
                     // Définir le centre de recherche
                     currentSearchCenter = e.result.geometry.coordinates;
+                    
+                    // Stocker la sélection pour persistance entre modes
+                    currentPointAFeature = e.result;
+                    isPointAFromUP = !!(e.result.properties && (e.result.properties.UP || e.result.properties['Nom du site']));
                     
                     // Afficher le contrôle de rayon et définir à 80 km
                     showRadiusControl();
