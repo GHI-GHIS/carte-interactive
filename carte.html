@@ -117,70 +117,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     transform:translateY(-1px);
     box-shadow:0 4px 12px rgba(0,32,96,0.2);
 }
-/* Style pour le tooltip au hover - design ultra épuré et moderne */
-.hover-tooltip .mapboxgl-popup-content{
-    opacity:0.98;
-    background:rgba(255,255,255,0.97);
-    backdrop-filter:blur(10px);
-    box-shadow:0 8px 32px rgba(0,0,0,0.08),
-               0 2px 8px rgba(0,0,0,0.06);
-    border:1px solid rgba(0,32,96,0.08);
-    border-radius:12px;
-    max-width:320px!important;
-    animation:tooltipFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hover-tooltip .mapboxgl-popup-tip{
-    border-top-color:rgba(255,255,255,0.97);
-}
-
-/* Titre du tooltip avec accent subtil */
-.hover-tooltip h3{
-    font-size:15px;
-    font-weight:600;
-    color:#002060;
-    margin-bottom:12px;
-    padding-bottom:8px;
-    border-bottom:2px solid rgba(0,32,96,0.1);
-}
-
-/* Informations avec meilleure hiérarchie visuelle */
-.hover-tooltip p{
-    font-size:13px;
-    line-height:1.5;
-    color:#4a5568;
-    margin-bottom:6px;
-}
-
-.hover-tooltip p strong{
-    color:#2d3748;
-    font-weight:600;
-    display:inline-block;
-    min-width:80px;
-}
-
-/* Actions avec style minimal */
-.hover-tooltip .popup-actions{
-    margin-top:12px;
-    padding-top:12px;
-    border-top:1px solid rgba(0,32,96,0.06);
-}
-
-.hover-tooltip .popup-view-btn{
-    background:linear-gradient(135deg, #002060 0%, #003380 100%);
-    border:none;
-    padding:7px 14px;
-    font-size:12px;
-    font-weight:500;
-    border-radius:6px;
-    transition:all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hover-tooltip .popup-view-btn:hover{
-    background:linear-gradient(135deg, #003380 0%, #004499 100%);
-    transform:translateY(-1px);
-    box-shadow:0 4px 12px rgba(0,32,96,0.2);
-}
 
 /* Animation d'entrée */
 @keyframes tooltipFadeIn{
@@ -518,6 +454,74 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
 .mapboxgl-popup-close-button:active {
     transform: scale(0.95) !important;
+}
+
+/* Style uniforme pour les popups clicked et hover */
+.clicked-popup .mapboxgl-popup-content,
+.hover-tooltip .mapboxgl-popup-content{
+    opacity:0.98;
+    background:rgba(255,255,255,0.97);
+    backdrop-filter:blur(10px);
+    box-shadow:0 8px 32px rgba(0,0,0,0.08),
+               0 2px 8px rgba(0,0,0,0.06);
+    border:1px solid rgba(0,32,96,0.08);
+    animation:fadeIn 0.15s ease-out;
+    transform-origin:bottom center;
+}
+
+.clicked-popup .mapboxgl-popup-tip,
+.hover-tooltip .mapboxgl-popup-tip{
+    border-top-color:rgba(255,255,255,0.97);
+}
+
+.clicked-popup h3,
+.hover-tooltip h3{
+    font-size:15px;
+    font-weight:600;
+    color:#002060;
+    margin-bottom:12px;
+    padding-bottom:8px;
+    border-bottom:2px solid rgba(0,32,96,0.08);
+}
+
+.clicked-popup p,
+.hover-tooltip p{
+    font-size:13px;
+    line-height:1.5;
+    color:#4a5568;
+    margin-bottom:6px;
+}
+
+.clicked-popup p strong,
+.hover-tooltip p strong{
+    color:#2d3748;
+    font-weight:600;
+    display:inline-block;
+    min-width:80px;
+}
+
+.clicked-popup .popup-actions,
+.hover-tooltip .popup-actions{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid rgba(0,32,96,0.06);
+}
+
+.clicked-popup .popup-view-btn,
+.hover-tooltip .popup-view-btn{
+    background:linear-gradient(135deg, #002060 0%, #003380 100%);
+    border:none;
+    padding:7px 14px;
+    font-size:12px;
+    font-weight:500;
+    letter-spacing:0.3px;
+}
+
+.clicked-popup .popup-view-btn:hover,
+.hover-tooltip .popup-view-btn:hover{
+    background:linear-gradient(135deg, #003380 0%, #004499 100%);
+    transform:translateY(-1px);
+    box-shadow:0 4px 12px rgba(0,32,96,0.2);
 }
 
 /* S'assurer que la croix est visible sur tous les popups */
@@ -4131,7 +4135,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             };
         } else if (popupType === 'hover') {
             popupOptions = { 
-                offset: [0, -10], 
+                offset: 25, 
                 maxWidth: '300px', 
                 closeButton: true,  // CROIX aussi pour le hover
                 closeOnClick: false, 
