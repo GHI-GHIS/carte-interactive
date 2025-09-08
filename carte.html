@@ -1478,23 +1478,43 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             });
         });
 
+        // Variable pour détecter un double-clic
+        let clickTimeout = null;
+        
         // Click event for individual points - show popup only (no selection)
         map.on('click', 'unclustered-point', (e) => {
-            const coordinates = e.features[0].geometry.coordinates.slice();
-            const properties = e.features[0].properties;
-            
-            // Ensure that if the map is zoomed out such that multiple copies of the feature are visible, the popup appears over the copy being pointed to.
-            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
-                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            // Attendre pour voir si c'est un double-clic
+            if (clickTimeout) {
+                clearTimeout(clickTimeout);
+                clickTimeout = null;
+                return; // Double-clic détecté, ne pas exécuter le simple clic
             }
             
-            // Simple clic = afficher uniquement le popup informatif sans sélection
-            showSinglePopup(properties, coordinates);
+            clickTimeout = setTimeout(() => {
+                clickTimeout = null;
+                // Simple clic confirmé
+                const coordinates = e.features[0].geometry.coordinates.slice();
+                const properties = e.features[0].properties;
+                
+                // Ensure that if the map is zoomed out such that multiple copies of the feature are visible, the popup appears over the copy being pointed to.
+                while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                    coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+                }
+                
+                // Simple clic = afficher uniquement le popup informatif sans sélection
+                showSinglePopup(properties, coordinates);
+            }, 250); // Délai pour distinguer simple clic du double-clic
         });
         
         // Double-click event for individual points
         map.on('dblclick', 'unclustered-point', (e) => {
             e.preventDefault();
+            
+            // Annuler le timeout du simple clic si présent
+            if (clickTimeout) {
+                clearTimeout(clickTimeout);
+                clickTimeout = null;
+            }
             const feature = {
                 geometry: e.features[0].geometry,
                 properties: e.features[0].properties
@@ -1768,8 +1788,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         map = new mapboxgl.Map({
             container: 'map', style: 'mapbox://styles/mapbox/streets-v11',
             center: [2.2137, 46.2276], zoom: 5, pitch: 0, bearing: 0,
-            zoomControl: false // Désactiver les contrôles de zoom par défaut (on utilise nos boutons custom)
-            // Configuration Mapbox par défaut - tout est activé automatiquement
+            zoomControl: false, // Désactiver les contrôles de zoom par défaut (on utilise nos boutons custom)
+            doubleClickZoom: false // Désactiver le zoom double-clic par défaut pour éviter les conflits
         });
         
         // Restaurer la légende et le switcher après l'initialisation de Mapbox
@@ -4480,23 +4500,36 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         zoomingToCoordinates = coordinates;
         currentView3DCoordinates = coordinates;
         
-        // Calculer le zoom approprié en fonction du rayon actuel
-        // Formule approximative : zoom = 11.5 - log2(radius_km / 10)
+        // Calculer le zoom pour voir tout le rayon (vue encore plus large)
         const radiusKm = currentSearchRadius || 80;
         let zoomLevel;
-        if (radiusKm <= 20) zoomLevel = 11;
-        else if (radiusKm <= 40) zoomLevel = 10.5;
-        else if (radiusKm <= 60) zoomLevel = 10;
-        else if (radiusKm <= 80) zoomLevel = 9.5;
-        else if (radiusKm <= 100) zoomLevel = 9;
-        else zoomLevel = 8.5;
+        if (radiusKm <= 20) zoomLevel = 9;
+        else if (radiusKm <= 40) zoomLevel = 8.5;
+        else if (radiusKm <= 60) zoomLevel = 8;
+        else if (radiusKm <= 80) zoomLevel = 7.5;
+        else if (radiusKm <= 100) zoomLevel = 7;
+        else zoomLevel = 6.5;
         
-        // Zoomer pour voir tout le rayon
-        map.flyTo({
-            center: coordinates,
-            zoom: zoomLevel,
-            duration: 1500
-        });
+        // Vérifier le zoom actuel
+        const currentZoom = map.getZoom();
+        console.log('SelectUPAndShowRadius appelé - Zoom actuel:', currentZoom, 'Zoom cible:', zoomLevel, 'Coordonnées:', coordinates);
+        
+        // Calculer la durée d'animation en fonction de l'écart de zoom
+        const zoomDifference = Math.abs(currentZoom - zoomLevel);
+        const animationDuration = zoomDifference > 3 ? 1000 : 800; // Plus long si grand écart
+        
+        // Forcer le centrage et zoom directement sans pré-dézoom
+        setTimeout(() => {
+            map.flyTo({
+                center: coordinates,
+                zoom: zoomLevel,
+                duration: animationDuration,
+                essential: true,
+                curve: zoomDifference > 3 ? 1.5 : 1, // Courbe plus douce si grand écart
+                easing: (t) => t // Linear easing pour plus de contrôle
+            });
+            console.log('FlyTo exécuté vers:', coordinates, 'avec zoom:', zoomLevel);
+        }, 100);
         
         // Afficher le contrôle de rayon
         showRadiusControl();
