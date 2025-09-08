@@ -18,7 +18,7 @@
 body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:hidden}
 /* Style pour les UP dans l'autocompl\u00e9tion */
 .mapboxgl-ctrl-geocoder--suggestion.is-up{background:linear-gradient(to right,#f0f7ff 0%,#ffffff 100%)!important;border-left:3px solid #002060!important}
-.mapboxgl-ctrl-geocoder--suggestion.is-up .mapboxgl-ctrl-geocoder--suggestion-title{color:#002060!important;font-weight:600}#map-container{display:flex;height:85vh;width:100vw;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:20}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:10}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}.geolocate-btn{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>') center/18px no-repeat;width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon{display:none!important}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px}/* Nouvelle version compacte et moderne des cards */
+.mapboxgl-ctrl-geocoder--suggestion.is-up .mapboxgl-ctrl-geocoder--suggestion-title{color:#002060!important;font-weight:600}#map-container{display:flex;height:85vh!important;width:100vw;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:9999999}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:10}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}.geolocate-btn{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>') center/18px no-repeat;width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon{display:none!important}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px}/* Nouvelle version compacte et moderne des cards */
 .establishment-card{background:#fff;margin:6px 8px;padding:10px 12px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);cursor:pointer;transition:all .2s ease;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;position:relative;border-left:3px solid #e0e0e0;border:1px solid #f0f0f0}
 .establishment-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.12),0 2px 4px rgba(0,0,0,.08);border-left:3px solid #002060;transform:translateY(-2px);background:#fafbfc}
 .establishment-card:active{transform:translateY(0px);box-shadow:0 1px 3px rgba(0,0,0,.08)}
@@ -74,14 +74,14 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     .modal-content{width:95%;margin:10% auto}
     .modal-info-row{flex-direction:column;gap:4px}
     .modal-info-label{min-width:unset}
-}.view-switcher{position:fixed;top:83px;right:28px;z-index:1005;padding:10px 15px;background-color:#002060;color:#fff;border:0;border-radius:5px;cursor:pointer;font-size:14px;box-shadow:0 2px 5px rgba(0,0,0,.2);display:none;transition:background-color .3s}.view-switcher:hover{background-color:#003380}#map-container.layout-dual #sidebar{width:30%;min-width:415px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,415px));opacity:1}#map-container.layout-sidebar-full{height:100vh}#map-container.layout-sidebar-full #sidebar{width:94%;min-width:94%;opacity:1;transform:translateX(0)}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-map-full{height:100vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none}#map-container.layout-map-full #map{width:100%;opacity:1}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:415px}#map-container.layout-dual #map{width:calc(100% - 415px)}}@media (max-width:600px){#map-container.layout-sidebar-full #sidebar{width:100%;min-width:88%}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
+}#map-container.layout-dual #sidebar{width:30%;min-width:415px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,415px));opacity:1}#map-container.layout-sidebar-full{height:100vh}#map-container.layout-sidebar-full #sidebar{width:94%;min-width:94%;opacity:1;transform:translateX(0)}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-sidebar-full .mode-switcher-container{display:none!important}#map-container.layout-sidebar-full .custom-zoom-controls{display:none!important}#map-container.layout-map-full{height:100vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none;padding:0}#map-container.layout-map-full #map{width:100%;opacity:1}#map-container.layout-map-full .mode-switcher-container{display:none!important}#map-container.layout-map-full .map-legend{transform:scale(0.65);transform-origin:bottom left}#map-container.layout-map-full .map-radius-control{transform:scale(0.65);transform-origin:bottom left}#map-container.layout-map-full .custom-zoom-controls{transform:scale(0.75);transform-origin:top right;top:20px}#map-container.layout-map-full .mapboxgl-popup{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-sidebar-full .mapboxgl-popup{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-map-full .clicked-popup,#map-container.layout-map-full .hover-tooltip{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-sidebar-full .clicked-popup,#map-container.layout-sidebar-full .hover-tooltip{transform:scale(0.35);transform-origin:bottom center}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:415px}#map-container.layout-dual #map{width:calc(100% - 415px)}}@media (max-width:600px){#map-container.layout-sidebar-full #sidebar{width:100%;min-width:88%}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
 .mode-switcher-container{position:absolute;top:20px;left:10px;z-index:100;background:#fff;border-radius:22px;padding:3px;box-shadow:0 2px 10px rgba(0,0,0,0.2)}.mode-switcher{display:flex;background:transparent;border-radius:20px;padding:0}.mode-btn{padding:8px 16px;background:transparent;border:none;border-radius:18px;cursor:pointer;font-size:13px;font-weight:500;color:#6c757d;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;min-width:90px}.mode-btn:hover{background:rgba(0,0,0,0.05);color:#333}.mode-btn.active{background:#002060;color:white;box-shadow:0 1px 3px rgba(0,32,96,0.3);font-weight:600}.mode-btn.active:hover{background:#003380}.mode-btn .mode-icon{font-size:14px}.mode-btn .mode-label{font-size:12px;letter-spacing:0.3px}.mode-interface{transition:opacity 0.3s ease,transform 0.3s ease}#normal-mode-interface .search-container{display:flex;align-items:center;gap:5px}#normal-geocoder-container{flex:1;display:flex;align-items:center;gap:5px}
 
 /* Légende de la carte */
-.map-legend{position:absolute;bottom:30px;left:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:900;font-size:13px}.map-legend h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold}.legend-item{display:flex;align-items:center;margin:6px 0;cursor:pointer;padding:4px;border-radius:4px;transition:background-color .2s}.legend-item:hover{background-color:#f0f8ff}.legend-item.inactive{opacity:.4}.legend-item.inactive:hover{opacity:.6}.legend-marker{width:30px;height:30px;margin-right:8px;background-size:contain;background-repeat:no-repeat;background-position:center}.legend-marker.beton{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-beton.png')}.legend-marker.granulats{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-granulats.png')}.legend-marker.ciment{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-ciment.png')}.legend-marker.ciment-prompt{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-12/ciment-prompt-naturel.png')}
+.map-legend{position:absolute;bottom:30px;left:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:900;font-size:13px}.map-legend h4{margin:0 0 0px 0;font-size:14px;color:#333;font-weight:bold;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between}.map-legend h4:hover{color:#002060}.map-legend h4::after{content:'▼';font-size:10px;transition:transform 0.3s}.map-legend.collapsed h4::after{transform:rotate(-90deg);margin-left: 4px;}.map-legend.collapsed .legend-items{display:none}.legend-item{display:flex;align-items:center;margin:6px 0;cursor:pointer;padding:4px;border-radius:4px;transition:background-color .2s}.legend-item:hover{background-color:#f0f8ff}.legend-item.inactive{opacity:.4}.legend-item.inactive:hover{opacity:.6}.legend-marker{width:30px;height:30px;margin-right:8px;background-size:contain;background-repeat:no-repeat;background-position:center}.legend-marker.beton{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-beton.png')}.legend-marker.granulats{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-granulats.png')}.legend-marker.ciment{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-ciment.png')}.legend-marker.ciment-prompt{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-12/ciment-prompt-naturel.png')}
 
 /* Contrôle de rayon sur la carte */
-.map-radius-control{position:absolute;bottom:120px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:100;font-size:13px;display:none}.map-radius-control h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold}.radius-control-map{display:flex;align-items:center;gap:10px}.radius-control-map label{font-size:13px;color:#333;white-space:nowrap}.radius-control-map input[type="range"]{flex:1;min-width:120px}.radius-control-map span{font-weight:bold;color:#002060;min-width:50px;font-size:13px}
+.map-radius-control{position:absolute;bottom:160px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:100;font-size:13px;display:none;transition:bottom 0.3s ease}.map-radius-control h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between}.map-radius-control h4:hover{color:#002060}.map-radius-control h4::after{content:'▼';font-size:10px;transition:transform 0.3s;margin-left:4px}.map-radius-control.collapsed h4::after{transform:rotate(-90deg);margin-left:4px}.map-radius-control.collapsed .radius-control-content{display:none}.radius-control-map{display:flex;align-items:center;gap:10px}.radius-control-map label{font-size:13px;color:#333;white-space:nowrap}.radius-control-map input[type="range"]{flex:1;min-width:120px}.radius-control-map span{font-weight:bold;color:#002060;min-width:50px;font-size:13px}
 
 /* Interface d'itinéraire améliorée */
 #route-interface-container{margin-top:15px}.route-point-section{border:1px solid #ddd;padding:15px;border-radius:6px;background:#f9f9f9;transition:all .3s ease-in-out}.route-input-group{margin-bottom:12px;display:flex;flex-direction:column;gap:5px}.route-input-group label{display:block;margin-bottom:5px;font-weight:bold;color:#333;font-size:14px}.point-input-container{display:flex;align-items:center;gap:5px}.point-input-container #geocoder-container{flex:1;display:flex;align-items:center;gap:5px;min-width:0}.point-input-container #geocoder-container-b{flex:1;display:flex;align-items:center;gap:5px;min-width:0}.point-input-container input{flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px}.search-btn,.add-point-btn{background:#002060;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .2s}.search-btn:hover,.add-point-btn:hover{background:#003380}.add-point-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;flex-shrink:0}.route-actions{display:flex;gap:10px;margin-top:15px}.route-action-btn{padding:10px 15px;border:none;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .2s}.route-action-btn.primary{background:#28a745;color:white}.route-action-btn.primary:hover{background:#218838}.route-action-btn.secondary{background:#6c757d;color:white}.route-action-btn.secondary:hover{background:#545b62}#point-b-section{animation:slideDown .3s ease-in-out}@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}#clear-point-a:hover,#clear-point-b:hover{background:rgba(211,47,47,0.2)!important;border-color:rgba(211,47,47,0.5)!important;transform:translateY(-50%) scale(1.1)!important}
@@ -119,13 +119,16 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 .distance-badge{display:inline-block;background:#002060;color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:bold;margin-left:8px}.time-badge{display:inline-block;background:#28a745;color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:bold;margin-left:5px}
 
 /* Contrôles de zoom personnalisés */
-.custom-zoom-controls{position:fixed;bottom:20px;right:20px;z-index:2000;display:flex;flex-direction:column;gap:2px}.zoom-btn{width:40px;height:40px;background:#fff;border:1px solid #ccc;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;color:#333;box-shadow:0 2px 4px rgba(0,0,0,.1);transition:all .2s}.zoom-btn:hover{background:#f8f8f8;box-shadow:0 3px 6px rgba(0,0,0,.15)}.zoom-btn:active{transform:scale(0.95);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.custom-zoom-controls{position:fixed;top:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:2px}.zoom-btn{width:40px;height:40px;background:#fff;border:1px solid #ccc;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;color:#333;box-shadow:0 2px 4px rgba(0,0,0,.1);transition:all .2s}.zoom-btn:hover{background:#f8f8f8;box-shadow:0 3px 6px rgba(0,0,0,.15)}.zoom-btn:active{transform:scale(0.95);box-shadow:0 1px 2px rgba(0,0,0,.1)}
 
 /* Accessibilité */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}*:focus-visible{outline:2px solid #002060;outline-offset:2px}button:focus-visible,a:focus-visible{outline:2px solid #002060;outline-offset:2px}
 
+/* Bouton toggle mobile - visible jusqu'à 1300px */
+.mobile-toggle-btn{position:fixed;bottom:20px;right:20px;z-index:1007;background:#002060;color:#fff;border:none;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.3);cursor:pointer;transition:all .3s}.mobile-toggle-btn:hover{transform:scale(1.1);background:#003380}.mobile-toggle-btn svg{width:24px;height:24px}
+
 /* Mobile responsive amélioré */
-@media (max-width:768px){.map-legend{bottom:60px;left:5px;padding:8px;font-size:12px}.legend-item{margin:4px 0}.legend-marker{width:24px;height:24px;margin-right:6px}.mobile-toggle-btn{position:fixed;bottom:20px;right:20px;z-index:1007;background:#002060;color:#fff;border:none;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.3);cursor:pointer;transition:all .3s}.mobile-toggle-btn:hover{transform:scale(1.1);background:#003380}.mobile-toggle-btn svg{width:24px;height:24px}}
+@media (max-width:768px){.map-legend{bottom:60px;left:5px;padding:8px;font-size:12px}.legend-item{margin:4px 0}.legend-marker{width:24px;height:24px;margin-right:6px}#map-container.layout-map-full #sidebar{padding:0!important;margin:0!important}}
 
 /* Styles pour le bouton de fermeture des popups */
 .mapboxgl-popup-close-button{font-size:20px!important;font-weight:bold!important;color:#666!important;background:transparent!important;border:none!important;cursor:pointer!important;padding:4px 8px!important;position:absolute!important;right:4px!important;top:4px!important;width:28px!important;height:28px!important;display:flex!important;align-items:center!important;justify-content:center!important;border-radius:4px!important;transition:all 0.2s ease!important}.mapboxgl-popup-close-button:hover{background:rgba(0,0,0,0.05)!important;color:#333!important;transform:scale(1.1)!important}.mapboxgl-popup-close-button:active{transform:scale(0.95)!important}
@@ -138,7 +141,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 <body>
   <div id="loading-overlay">Chargement de la carte...</div>
 
-  <button id="view-switcher" class="view-switcher">Afficher Carte</button>
 
 
   <div id="map-container">
@@ -304,25 +306,27 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
       <!-- Légende de la carte (overlay sur la carte) -->
       <div class="map-legend" id="map-legend" style="display:block;">
         <h4>Filtres</h4>
-        <div class="legend-item">
-          <div class="legend-marker beton"></div>
-          <span>Béton</span>
-          <span class="distance-badge" id="beton-count">0</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-marker granulats"></div>
-          <span>Granulats</span>
-          <span class="distance-badge" id="granulats-count">0</span>
-        </div>
-        <div class="legend-item">
-          <div class="legend-marker ciment"></div>
-          <span>Ciment</span>
-          <span class="distance-badge" id="ciment-count">0</span>
-        </div>
-        <div class="legend-item" id="ciment-prompt-legend" style="display:none;">
-          <div class="legend-marker ciment-prompt"></div>
-          <span>Ciment Prompt</span>
-          <span class="distance-badge" id="ciment-prompt-count">0</span>
+        <div class="legend-items">
+          <div class="legend-item">
+            <div class="legend-marker beton"></div>
+            <span>Béton</span>
+            <span class="distance-badge" id="beton-count">0</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-marker granulats"></div>
+            <span>Granulats</span>
+            <span class="distance-badge" id="granulats-count">0</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-marker ciment"></div>
+            <span>Ciment</span>
+            <span class="distance-badge" id="ciment-count">0</span>
+          </div>
+          <div class="legend-item" id="ciment-prompt-legend" style="display:none;">
+            <div class="legend-marker ciment-prompt"></div>
+            <span>Ciment Prompt</span>
+            <span class="distance-badge" id="ciment-prompt-count">0</span>
+          </div>
         </div>
       </div>
     </div>
@@ -335,7 +339,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
   </div>
 
   <!-- Bouton mobile pour basculer carte/liste -->
-  <button class="mobile-toggle-btn" id="mobile-toggle" aria-label="Basculer vue" style="display:none;">
+  <button class="mobile-toggle-btn" id="mobile-toggle" aria-label="Basculer vue">
     <svg viewBox="0 0 24 24" fill="currentColor">
       <path id="mobile-toggle-icon" d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>
     </svg>
@@ -361,6 +365,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     let currentSearchCenter = null;
     let currentSearchRadius = 80;
     let currentLayoutMode = 'dual';
+    let currentMode = 'normal'; // Mode normal ou route
     let primaryFilteredFeatures = [];
     let userLocationMarker = null; // Marker pour la géolocalisation
     let currentMapboxMarkers = [];
@@ -2817,9 +2822,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         
         const modal = document.getElementById('modal');
-        const closeButton = document.querySelector('.close-button');
-        if (closeButton) { closeButton.addEventListener('click', () => modal.style.display = 'none'); }
-        window.addEventListener('click', (event) => { if (event.target === modal) modal.style.display = 'none'; });
         window.addEventListener('resize', debounce(checkAndSetLayout, 300));
     }
     
@@ -2847,6 +2849,23 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     
     // Fonction pour initialiser les événements de clic sur la légende
     function initializeLegendListeners() {
+        // Gérer le toggle du titre de la légende
+        const legendTitle = document.querySelector('.map-legend h4');
+        if (legendTitle) {
+            legendTitle.addEventListener('click', () => {
+                const legend = document.querySelector('.map-legend');
+                legend.classList.toggle('collapsed');
+                
+                // Mettre à jour la position immédiatement pour une transition fluide
+                updateRadiusControlPosition();
+                
+                // Recalculer après l'animation pour s'assurer de la position finale
+                setTimeout(() => {
+                    updateRadiusControlPosition();
+                }, 300);
+            });
+        }
+        
         const legendItems = document.querySelectorAll('.legend-item');
         
         legendItems.forEach(item => {
@@ -3045,6 +3064,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     
     // Mode visuel avancé pour l'itinéraire
     function activateRouteMode() {
+        currentMode = 'route'; // Activer le mode itinéraire
         const mapContainer = document.getElementById('map-container');
         if (mapContainer) {
             mapContainer.classList.add('route-mode-active');
@@ -3063,6 +3083,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
     
     function deactivateRouteMode() {
+        currentMode = 'normal'; // Revenir au mode normal
         const mapContainer = document.getElementById('map-container');
         if (mapContainer) {
             mapContainer.classList.remove('route-mode-active');
@@ -3424,12 +3445,18 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             radiusControl = document.createElement('div');
             radiusControl.id = 'map-radius-control-overlay';
             radiusControl.className = 'map-radius-control';
-            radiusControl.style.cssText = 'position:absolute;bottom:220px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:1001;font-size:13px;display:block;';
+            radiusControl.style.cssText = 'position:absolute;bottom:260px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:901;font-size:13px;display:block;';
             
             // Créer le contenu sans innerHTML pour éviter les problèmes d'iframe
             const h4 = document.createElement('h4');
-            h4.style.cssText = 'margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold;';
+            h4.style.cssText = 'margin:0 0 0 0;font-size:14px;color:#333;font-weight:bold;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between;';
             h4.textContent = 'Rayon de recherche';
+            h4.addEventListener('click', () => {
+                radiusControl.classList.toggle('collapsed');
+            });
+            
+            const radiusContent = document.createElement('div');
+            radiusContent.className = 'radius-control-content';
             
             const controlDiv = document.createElement('div');
             controlDiv.style.cssText = 'display:flex;align-items:center;gap:10px;';
@@ -3456,8 +3483,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             controlDiv.appendChild(slider);
             controlDiv.appendChild(valueSpan);
             
+            radiusContent.appendChild(controlDiv);
+            
             radiusControl.appendChild(h4);
-            radiusControl.appendChild(controlDiv);
+            radiusControl.appendChild(radiusContent);
             
             // Ajouter à la carte
             const mapContainer = document.getElementById('map');
@@ -3472,6 +3501,43 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         // Ajouter les event listeners maintenant que l'élément est visible
         initializeRadiusControlListeners();
+        
+        // Positionner le contrôle de rayon par rapport à la légende
+        updateRadiusControlPosition();
+    }
+    
+    // Fonction pour mettre à jour la position du contrôle de rayon
+    function updateRadiusControlPosition() {
+        const radiusControl = document.getElementById('map-radius-control-overlay');
+        const mapLegend = document.querySelector('.map-legend');
+        const mapContainer = document.getElementById('map-container');
+        
+        if (radiusControl && mapLegend) {
+            // Vérifier si on est en mode map-full pour prendre en compte le scale
+            const isMapFull = mapContainer && mapContainer.classList.contains('layout-map-full');
+            const scaleFactor = isMapFull ? 0.65 : 1;
+            
+            // Obtenir la hauteur réelle de la légende (avec scale)
+            const legendHeight = mapLegend.offsetHeight * scaleFactor;
+            
+            // Obtenir la position bottom actuelle de la légende depuis son style CSS
+            const legendBottomStyle = window.getComputedStyle(mapLegend).bottom;
+            const legendBottom = parseInt(legendBottomStyle) || 30;
+            
+            // Obtenir la position left de la légende
+            const legendLeftStyle = window.getComputedStyle(mapLegend).left;
+            const legendLeft = parseInt(legendLeftStyle) || 10;
+            
+            // Positionner juste au-dessus avec un espace minimal
+            const newBottom = legendBottom + legendHeight + 2;
+            radiusControl.style.bottom = newBottom + 'px';
+            
+            // Aligner horizontalement avec la légende
+            radiusControl.style.left = legendLeft + 'px';
+            
+            // S'assurer que le z-index permet l'affichage simultané
+            radiusControl.style.zIndex = '901'; // Au-dessus de la légende (900)
+        }
     }
     
     // Variable pour éviter d'ajouter les listeners plusieurs fois
@@ -4152,7 +4218,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 currentSearchCenter = pointBCoords;
                 // Maintenir le contrôle de rayon visible et redessiner le cercle
                 const radiusControl = document.querySelector('.map-radius-control');
-                if (radiusControl) radiusControl.style.display = 'block';
+                if (radiusControl) {
+                    radiusControl.style.display = 'block';
+                    updateRadiusControlPosition();
+                }
                 
                 drawSearchRadiusCircle(pointBCoords, currentSearchRadius);
             } else {
@@ -4864,10 +4933,32 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             actionsContainer.appendChild(view3dBtn);
             card.appendChild(actionsContainer);
             
-            // Click handler pour la card entière (focus sur l'établissement)
+            // Click handler pour la card entière (focus sur l'établissement ou modal)
             card.addEventListener('click', (event) => {
                 if (!event.target.closest('.card-action-icon')) {
-                    focusOnEstablishment(feature);
+                    // Vérifier si le modal est en train de se fermer
+                    if (window.modalClosing) {
+                        return;
+                    }
+                    
+                    // En mode "Afficher la liste" uniquement, afficher le modal
+                    const mapContainer = document.getElementById('map-container');
+                    if (mapContainer && mapContainer.classList.contains('layout-sidebar-full')) {
+                        // Vérifier si le modal est déjà ouvert
+                        const modal = document.getElementById('modal');
+                        if (modal && modal.style.display === 'block') {
+                            return;
+                        }
+                        
+                        // Simuler un clic sur le bouton "Plus d'infos"
+                        const infoBtn = card.querySelector('.card-action-icon.info');
+                        if (infoBtn) {
+                            infoBtn.click();
+                        }
+                    } else {
+                        // Comportement normal : focus sur l'établissement
+                        focusOnEstablishment(feature);
+                    }
                 }
             });
             
@@ -4927,21 +5018,23 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         }
     }
     
+    // Flag global pour empêcher la réouverture pendant la fermeture
+    window.modalClosing = false;
+    
     function closeModal() {
+        // Marquer que le modal est en train de se fermer
+        window.modalClosing = true;
+        
         const modal = document.getElementById('modal');
         const modalContent = document.querySelector('.modal-content');
         
-        // Appliquer les animations de fermeture
-        modal.style.animation = 'fadeOut 0.3s ease';
-        modalContent.style.animation = 'slideDown 0.3s ease';
+        // Fermeture immédiate sans animation pour éviter les conflits
+        modal.style.display = 'none';
         
-        // Attendre la fin de l'animation avant de masquer
+        // Bloquer toute réouverture pendant 500ms
         setTimeout(() => {
-            modal.style.display = 'none';
-            // Réinitialiser les animations pour la prochaine ouverture
-            modal.style.animation = '';
-            modalContent.style.animation = '';
-        }, 300);
+            window.modalClosing = false;
+        }, 500);
     }
     
     function attachModalListeners() {
@@ -4951,6 +5044,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 event.preventDefault();
                 // La propagation est déjà stoppée par un autre listener, mais on le laisse par sécurité
                 event.stopPropagation();
+                
+                // Ne pas ouvrir si le modal est en train de se fermer
+                if (window.modalClosing) {
+                    return;
+                }
+                
                 const modal = document.getElementById('modal');
                 const modalInfo = document.getElementById('modal-info');
                 try {
@@ -4977,7 +5076,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     const closeBtn = document.createElement('span');
                     closeBtn.className = 'close-button';
                     closeBtn.innerHTML = '×';
-                    closeBtn.onclick = () => closeModal();
                     modalHeader.appendChild(closeBtn);
                     
                     modalContent.appendChild(modalHeader);
@@ -5072,7 +5170,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     const closeActionBtn = document.createElement('button');
                     closeActionBtn.className = 'modal-action-btn secondary';
                     closeActionBtn.textContent = 'Fermer';
-                    closeActionBtn.onclick = () => closeModal();
+                    closeActionBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        closeModal();
+                    };
                     modalFooter.appendChild(closeActionBtn);
                     
                     modalContent.appendChild(modalFooter);
@@ -5085,7 +5186,10 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 // Afficher la modal avec animations
                 modal.style.display = 'block';
                 modal.style.animation = 'fadeIn 0.3s ease';
-                modalContent.style.animation = 'slideUp 0.3s ease';
+                const modalContent = document.querySelector('.modal-content');
+                if (modalContent) {
+                    modalContent.style.animation = 'slideUp 0.3s ease';
+                }
                 // Corriger les entités HTML dans la modal
                 setTimeout(fixCardEntities, 100);
             });
@@ -5142,41 +5246,32 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     }
 
     function initializeLayout(){
-        const viewSwitcherButton=document.getElementById('view-switcher');
-        viewSwitcherButton.addEventListener('click',()=>{
-            if(currentLayoutMode==='sidebarFull'){ switchToMapFullScreen(); }
-            else if(currentLayoutMode==='mapFull'){ switchToSidebarFullScreen(); }
-        });
+        // Le bouton view-switcher a été supprimé, on garde juste la vérification du layout
         checkAndSetLayout();
     }
     
     function checkAndSetLayout(){
         const isBelowThreshold=window.innerHeight<VIEW_MODE_THRESHOLD;
-        const viewSwitcherButton=document.getElementById('view-switcher');
         if(isBelowThreshold){
+            // En mobile, pas de vue duale
             if(currentLayoutMode==='dual'){ switchToSidebarFullScreen(); }
-            viewSwitcherButton.style.display='block';
         }else{
+            // En desktop, la vue duale est permise
             if(currentLayoutMode!=='dual'){ switchToDualView(); }
-            viewSwitcherButton.style.display='none';
         }
         setTimeout(()=>{if(map)map.resize();},550);
     }
     
     function switchToSidebarFullScreen(){
         const mapContainer=document.getElementById('map-container');
-        const viewSwitcherButton=document.getElementById('view-switcher');
         mapContainer.className='layout-sidebar-full';
-        viewSwitcherButton.textContent='Afficher Carte';
         currentLayoutMode='sidebarFull';
         setTimeout(()=>{if(map){map.resize();updateSidebarBasedOnMapViewport();}},550);
     }
     
     function switchToMapFullScreen(){
         const mapContainer=document.getElementById('map-container');
-        const viewSwitcherButton=document.getElementById('view-switcher');
         mapContainer.className='layout-map-full';
-        viewSwitcherButton.textContent='Afficher Liste';
         currentLayoutMode='mapFull';
         setTimeout(()=>{if(map){map.resize();updateSidebarBasedOnMapViewport();}},550);
     }
@@ -5379,10 +5474,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Configurer la correction des entités HTML pour les cards
         setupCardEntityFix();
         
-        // Gérer le clic en dehors de la modal pour la fermer
+        // Gérer le clic en dehors de la modal ou sur la croix pour la fermer
         window.addEventListener('click', function(event) {
             const modal = document.getElementById('modal');
-            if (event.target === modal) {
+            // Fermer si on clique en dehors OU sur la croix
+            if (event.target === modal || event.target.classList.contains('close-button')) {
                 closeModal();
             }
         });
@@ -5411,7 +5507,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const mapContainer = document.getElementById('map-container');
         
         function checkMobile() {
-            if (window.innerWidth <= 768) {
+            // Afficher le switcher tant qu'on n'est pas en desktop (largeur < 1300px)
+            if (window.innerWidth < 1300) {
                 mobileToggle.style.display = 'flex';
             } else {
                 mobileToggle.style.display = 'none';
@@ -5422,15 +5519,28 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         window.addEventListener('resize', checkMobile);
         
         mobileToggle.addEventListener('click', () => {
-            if (currentLayoutMode === 'dual') {
-                switchToMapFullScreen();
-                document.getElementById('mobile-toggle-icon').setAttribute('d', 'M4 6H20M4 12H20M4 18H11');
-            } else if (currentLayoutMode === 'mapFull') {
-                switchToSidebarFullScreen();
-                document.getElementById('mobile-toggle-icon').setAttribute('d', 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z');
+            // En mobile (largeur < 1300px), pas de vue duale
+            if (window.innerWidth < 1300) {
+                // Uniquement switcher entre map et sidebar
+                if (currentLayoutMode === 'mapFull') {
+                    switchToSidebarFullScreen();
+                    document.getElementById('mobile-toggle-icon').setAttribute('d', 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z');
+                } else {
+                    switchToMapFullScreen();
+                    document.getElementById('mobile-toggle-icon').setAttribute('d', 'M4 6H20M4 12H20M4 18H11');
+                }
             } else {
-                switchToDualView();
-                document.getElementById('mobile-toggle-icon').setAttribute('d', 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z');
+                // En desktop (largeur >= 1300px), permettre toutes les vues incluant duale
+                if (currentLayoutMode === 'dual') {
+                    switchToMapFullScreen();
+                    document.getElementById('mobile-toggle-icon').setAttribute('d', 'M4 6H20M4 12H20M4 18H11');
+                } else if (currentLayoutMode === 'mapFull') {
+                    switchToSidebarFullScreen();
+                    document.getElementById('mobile-toggle-icon').setAttribute('d', 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z');
+                } else {
+                    switchToDualView();
+                    document.getElementById('mobile-toggle-icon').setAttribute('d', 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z');
+                }
             }
         });
     }
