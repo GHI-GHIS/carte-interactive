@@ -476,16 +476,6 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 /* Clustering */
 .cluster-marker{background:#555;border:3px solid #fff;border-radius:50%;color:#fff;font-weight:bold;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:transform .2s}.cluster-marker:hover{transform:scale(1.1)}.cluster-small{width:35px;height:35px;background:#555}.cluster-medium{width:45px;height:45px;background:#333}.cluster-large{width:55px;height:55px;background:#222}
 
-/* Marqueurs de route personnalisés pour iframe */
-.custom-route-marker {
-    z-index: 1000;
-    cursor: pointer;
-    position: relative;
-}
-.custom-route-marker:hover {
-    transform: scale(1.1);
-    transition: transform 0.2s;
-}
 
 
 /* Indicateurs de distance */
@@ -2737,10 +2727,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             }
         });
         
-        // Ajouter des marqueurs pour les points A et B si la fonction existe
-        if (typeof addRouteMarkers === 'function') {
-            addRouteMarkers();
-        }
+        // Mettre à jour la taille des pins sélectionnés
+        updateSelectedPointsSize();
         
         currentRouteSource = 'route';
         isRouteMode = true; // Activer le mode itinéraire
@@ -2759,45 +2747,42 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         showRouteInfoOnMap(route);
     }
     
-    // Fonction pour ajouter les marqueurs de route (Points A et B)
-    function addRouteMarkers() {
-        // Nettoyer les marqueurs existants
-        if (window.routeMarkers) {
-            window.routeMarkers.forEach(marker => marker.remove());
-        }
-        window.routeMarkers = [];
+    // Fonction pour mettre à jour la taille des pins sélectionnés
+    function updateSelectedPointsSize() {
+        if (!map.getLayer('unclustered-point')) return;
         
-        // Créer un marqueur HTML personnalisé pour le Point A
-        if (currentSearchCenter) {
-            const elA = document.createElement('div');
-            elA.className = 'custom-route-marker marker-a';
-            elA.innerHTML = '<div style="width: 30px; height: 40px; background: #1976d2; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.4);"><div style="transform: rotate(45deg); color: white; font-weight: bold; text-align: center; margin-top: 8px; font-size: 14px;">A</div></div>';
-            
-            const markerA = new mapboxgl.Marker({
-                element: elA,
-                anchor: 'bottom'
-            })
-            .setLngLat(currentSearchCenter)
-            .addTo(map);
-            
-            window.routeMarkers.push(markerA);
+        // Créer une expression pour déterminer la taille des icons
+        let sizeExpression = ['case'];
+        
+        // Si Point A est sélectionné
+        if (currentPointAFeature && currentSearchCenter) {
+            // Utiliser le nom de l'établissement pour identifier le point
+            const pointAName = currentPointAFeature.properties?.UP || currentPointAFeature.properties?.['Nom du site'];
+            if (pointAName) {
+                sizeExpression.push(
+                    ['==', ['get', 'UP'], pointAName],
+                    1.5  // Taille augmentée de 50%
+                );
+            }
         }
         
-        // Créer un marqueur HTML personnalisé pour le Point B
-        if (destinationCoords) {
-            const elB = document.createElement('div');
-            elB.className = 'custom-route-marker marker-b';
-            elB.innerHTML = '<div style="width: 30px; height: 40px; background: #ff5722; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.4);"><div style="transform: rotate(45deg); color: white; font-weight: bold; text-align: center; margin-top: 8px; font-size: 14px;">B</div></div>';
-            
-            const markerB = new mapboxgl.Marker({
-                element: elB,
-                anchor: 'bottom'
-            })
-            .setLngLat(destinationCoords)
-            .addTo(map);
-            
-            window.routeMarkers.push(markerB);
+        // Si Point B est sélectionné
+        if (currentPointBFeature && destinationCoords) {
+            // Utiliser le nom de l'établissement pour identifier le point
+            const pointBName = currentPointBFeature.properties?.UP || currentPointBFeature.properties?.['Nom du site'];
+            if (pointBName) {
+                sizeExpression.push(
+                    ['==', ['get', 'UP'], pointBName],
+                    1.5  // Taille augmentée de 50%
+                );
+            }
         }
+        
+        // Taille par défaut
+        sizeExpression.push(1.0);
+        
+        // Appliquer la nouvelle taille
+        map.setLayoutProperty('unclustered-point', 'icon-size', sizeExpression);
     }
     
     // Fonctions pour contrôler la légende
@@ -2932,10 +2917,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             map.removeSource('route');
         }
         
-        // Supprimer les marqueurs de route (Points A et B)
-        if (window.routeMarkers) {
-            window.routeMarkers.forEach(marker => marker.remove());
-            window.routeMarkers = [];
+        // Réinitialiser la taille des pins
+        if (map.getLayer('unclustered-point')) {
+            map.setLayoutProperty('unclustered-point', 'icon-size', 1.0);
         }
         
         // Supprimer le marker de destination et nettoyer l'interface
@@ -4418,6 +4402,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Réappliquer les filtres avec le nouveau contexte
         applyFilters();
         
+        // Mettre à jour la taille des pins sélectionnés
+        updateSelectedPointsSize();
     }
     
     function clearPointBSelection() {
@@ -4443,6 +4429,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Supprimer le trajet actuel
         clearCurrentRoute();
         
+        // Mettre à jour la taille des pins sélectionnés
+        updateSelectedPointsSize();
     }
     
     function areCoordinatesIdentical(coords1, coords2, tolerance = 0.00001) {
@@ -4679,6 +4667,34 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         drawSearchRadiusCircle(currentSearchCenter, 80);
         applyFilters();
         
+        // Mettre à jour la taille des pins sélectionnés
+        updateSelectedPointsSize();
+        
+        // Centrer et zoomer sur le point sélectionné (même comportement qu'en mode carte)
+        const radiusKm = currentSearchRadius || 80;
+        let zoomLevel;
+        if (radiusKm <= 20) zoomLevel = 9;
+        else if (radiusKm <= 40) zoomLevel = 8.5;
+        else if (radiusKm <= 60) zoomLevel = 8;
+        else if (radiusKm <= 80) zoomLevel = 7.5;
+        else if (radiusKm <= 100) zoomLevel = 7;
+        else zoomLevel = 6.5;
+        
+        const currentZoom = map.getZoom();
+        const zoomDifference = Math.abs(currentZoom - zoomLevel);
+        const animationDuration = zoomDifference > 3 ? 1000 : 800;
+        
+        setTimeout(() => {
+            map.flyTo({
+                center: coordinates,
+                zoom: zoomLevel,
+                duration: animationDuration,
+                essential: true,
+                curve: zoomDifference > 3 ? 1.5 : 1,
+                easing: (t) => t
+            });
+        }, 100);
+        
         // Si Point B existe déjà, calculer l'itinéraire
         if (currentPointBFeature && destinationCoords) {
             setTimeout(() => {
@@ -4698,6 +4714,37 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         // Mettre à jour l'affichage
         updatePointBDisplay(feature.properties);
         showPointB();
+        
+        // Mettre à jour la taille des pins sélectionnés
+        updateSelectedPointsSize();
+        
+        // Centrer et zoomer sur le point sélectionné (même comportement qu'en mode carte)
+        if (!currentPointAFeature) {
+            // Seulement si Point A n'est pas défini
+            const radiusKm = currentSearchRadius || 80;
+            let zoomLevel;
+            if (radiusKm <= 20) zoomLevel = 9;
+            else if (radiusKm <= 40) zoomLevel = 8.5;
+            else if (radiusKm <= 60) zoomLevel = 8;
+            else if (radiusKm <= 80) zoomLevel = 7.5;
+            else if (radiusKm <= 100) zoomLevel = 7;
+            else zoomLevel = 6.5;
+            
+            const currentZoom = map.getZoom();
+            const zoomDifference = Math.abs(currentZoom - zoomLevel);
+            const animationDuration = zoomDifference > 3 ? 1000 : 800;
+            
+            setTimeout(() => {
+                map.flyTo({
+                    center: coordinates,
+                    zoom: zoomLevel,
+                    duration: animationDuration,
+                    essential: true,
+                    curve: zoomDifference > 3 ? 1.5 : 1,
+                    easing: (t) => t
+                });
+            }, 100);
+        }
         
         // Si Point A existe, vérifier qu'au moins un est une UP avant de calculer
         if (currentPointAFeature && currentSearchCenter) {
@@ -5292,7 +5339,27 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 map.getSource('radius-circle-source').setData(circleGeoJSON);
             } else {
                 map.addSource('radius-circle-source', { type: 'geojson', data: circleGeoJSON });
-                map.addLayer({ id: 'radius-circle-layer', type: 'line', source: 'radius-circle-source', layout: {}, paint: { 'line-color': '#555', 'line-width': 2, 'line-dasharray': [2, 2] } });
+                // Ajouter le cercle AVANT les points pour qu'il soit en dessous
+                // Trouver la position du layer unclustered-point et insérer avant
+                const layers = map.getStyle().layers;
+                let firstSymbolId;
+                for (let i = 0; i < layers.length; i++) {
+                    if (layers[i].type === 'symbol') {
+                        firstSymbolId = layers[i].id;
+                        break;
+                    }
+                }
+                map.addLayer({ 
+                    id: 'radius-circle-layer', 
+                    type: 'line', 
+                    source: 'radius-circle-source', 
+                    layout: {}, 
+                    paint: { 
+                        'line-color': '#555', 
+                        'line-width': 2, 
+                        'line-dasharray': [2, 2] 
+                    } 
+                }, firstSymbolId); // Insérer avant le premier layer symbol
             }
         } catch (e) { console.error("Erreur lors de la création du cercle:", e); }
     }
@@ -5766,10 +5833,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 map.removeSource('route');
             }
             
-            // Supprimer les markers de route s'ils existent
-            if (window.routeMarkers) {
-                window.routeMarkers.forEach(marker => marker.remove());
-                window.routeMarkers = [];
+            // Réinitialiser la taille des pins
+            if (map.getLayer('unclustered-point')) {
+                map.setLayoutProperty('unclustered-point', 'icon-size', 1.0);
             }
         }
 
