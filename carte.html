@@ -476,6 +476,17 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 /* Clustering */
 .cluster-marker{background:#555;border:3px solid #fff;border-radius:50%;color:#fff;font-weight:bold;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:transform .2s}.cluster-marker:hover{transform:scale(1.1)}.cluster-small{width:35px;height:35px;background:#555}.cluster-medium{width:45px;height:45px;background:#333}.cluster-large{width:55px;height:55px;background:#222}
 
+/* Marqueurs de route personnalisés pour iframe */
+.custom-route-marker {
+    z-index: 1000;
+    cursor: pointer;
+    position: relative;
+}
+.custom-route-marker:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s;
+}
+
 
 /* Indicateurs de distance */
 .distance-badge{display:inline-block;background:#002060;color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:bold;margin-left:8px}.time-badge{display:inline-block;background:#28a745;color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:bold;margin-left:5px}
@@ -2748,6 +2759,47 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         showRouteInfoOnMap(route);
     }
     
+    // Fonction pour ajouter les marqueurs de route (Points A et B)
+    function addRouteMarkers() {
+        // Nettoyer les marqueurs existants
+        if (window.routeMarkers) {
+            window.routeMarkers.forEach(marker => marker.remove());
+        }
+        window.routeMarkers = [];
+        
+        // Créer un marqueur HTML personnalisé pour le Point A
+        if (currentSearchCenter) {
+            const elA = document.createElement('div');
+            elA.className = 'custom-route-marker marker-a';
+            elA.innerHTML = '<div style="width: 30px; height: 40px; background: #1976d2; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.4);"><div style="transform: rotate(45deg); color: white; font-weight: bold; text-align: center; margin-top: 8px; font-size: 14px;">A</div></div>';
+            
+            const markerA = new mapboxgl.Marker({
+                element: elA,
+                anchor: 'bottom'
+            })
+            .setLngLat(currentSearchCenter)
+            .addTo(map);
+            
+            window.routeMarkers.push(markerA);
+        }
+        
+        // Créer un marqueur HTML personnalisé pour le Point B
+        if (destinationCoords) {
+            const elB = document.createElement('div');
+            elB.className = 'custom-route-marker marker-b';
+            elB.innerHTML = '<div style="width: 30px; height: 40px; background: #ff5722; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.4);"><div style="transform: rotate(45deg); color: white; font-weight: bold; text-align: center; margin-top: 8px; font-size: 14px;">B</div></div>';
+            
+            const markerB = new mapboxgl.Marker({
+                element: elB,
+                anchor: 'bottom'
+            })
+            .setLngLat(destinationCoords)
+            .addTo(map);
+            
+            window.routeMarkers.push(markerB);
+        }
+    }
+    
     // Fonctions pour contrôler la légende
     function hideLegend() {
         const mapLegend = document.getElementById('map-legend');
@@ -2878,6 +2930,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         if (currentRouteSource === 'route' && map.getSource('route')) {
             map.removeLayer('route');
             map.removeSource('route');
+        }
+        
+        // Supprimer les marqueurs de route (Points A et B)
+        if (window.routeMarkers) {
+            window.routeMarkers.forEach(marker => marker.remove());
+            window.routeMarkers = [];
         }
         
         // Supprimer le marker de destination et nettoyer l'interface
