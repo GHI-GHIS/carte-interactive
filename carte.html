@@ -15,11 +15,63 @@
   <script src='https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js'></script>
   
 <style>
-body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:hidden}
+body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif;overflow:hidden;max-width:100vw;box-sizing:border-box}
+*{box-sizing:border-box}
 /* Style pour les UP dans l'autocompl\u00e9tion */
 .mapboxgl-ctrl-geocoder--suggestion.is-up{background:linear-gradient(to right,#f0f7ff 0%,#ffffff 100%)!important;border-left:3px solid #002060!important}
-.mapboxgl-ctrl-geocoder--suggestion.is-up .mapboxgl-ctrl-geocoder--suggestion-title{color:#002060!important;font-weight:600}#map-container{display:flex;height:85vh!important;width:100vw;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:9999999}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:10}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}.geolocate-btn{background:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="%23333" d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>') center/18px no-repeat;width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon{display:none!important}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px}/* Nouvelle version compacte et moderne des cards */
-.establishment-card{background:#fff;margin:6px 8px;padding:10px 12px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);cursor:pointer;transition:all .2s ease;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;position:relative;border-left:3px solid #e0e0e0;border:1px solid #f0f0f0}
+.mapboxgl-ctrl-geocoder--suggestion.is-up .mapboxgl-ctrl-geocoder--suggestion-title{color:#002060!important;font-weight:600}#map-container{display:flex;height:85vh!important;width:100%;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:15}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:1}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}
+
+/* Container pour recherche et réinitialisation */
+.search-and-reset-container{display:flex;align-items:center;gap:0}
+.reset-map-inline{padding:8px 13px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .3s;white-space:nowrap;flex-shrink:0;margin-left:5px;height:38px}
+.reset-map-inline:hover{background-color:#333}
+
+/* Masquer le bouton inline en mode carte plein écran */
+#map-container.layout-map-full .reset-map-inline{display:none}
+
+/* Masquer l'ancien bouton réinitialiser en mode liste */
+#map-container.layout-sidebar-full #reset-section{display:none}
+
+/* Sur petits écrans, mettre le bouton au-dessus */
+@media (max-width:600px){
+    .search-and-reset-container{flex-direction:column;align-items:stretch}
+    .reset-map-inline{width:100%;margin-bottom:8px}
+}.geolocate-btn{width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:5px;transition:all 0.2s}
+.geolocate-btn:hover{background-color:#f0f0f0;border-color:#999}
+.geolocate-btn svg{width:18px;height:18px;fill:#333}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon{display:none!important}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}/* Nouvelle version compacte et moderne des cards */
+.establishment-card{background:#fff;margin:0;padding:10px 12px;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);cursor:pointer;transition:all .2s ease;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;position:relative;border-left:3px solid #e0e0e0;border:1px solid #f0f0f0;width:100%;box-sizing:border-box}
+
+/* En vue liste plein écran, afficher plusieurs colonnes selon l'espace */
+#map-container.layout-sidebar-full .establishment-card{
+    width:calc(33.333% - 6px); /* 3 colonnes par défaut */
+    max-width:calc(33.333% - 6px);
+}
+
+/* Masquer le bouton itinéraire en vue liste plein écran */
+#map-container.layout-sidebar-full .card-action-icon.route{
+    display:none !important;
+}
+
+/* Sur écrans moyens, 2 colonnes */
+@media (max-width:1400px){
+    #map-container.layout-sidebar-full .establishment-card{
+        width:calc(50% - 4px);
+        max-width:calc(50% - 4px);
+    }
+}
+
+/* Sur écrans plus petits, une seule colonne */
+@media (max-width:900px){
+    #map-container.layout-sidebar-full .establishment-card{
+        width:calc(100% - 10px);
+        max-width:calc(100% - 10px);
+    }
+}
+
+/* En vue duale ou normale, toujours une colonne */
+#map-container.layout-dual .establishment-card{
+    width:100%;
+}
 .establishment-card:hover{box-shadow:0 4px 12px rgba(0,0,0,.12),0 2px 4px rgba(0,0,0,.08);border-left:3px solid #002060;transform:translateY(-2px);background:#fafbfc}
 .establishment-card:active{transform:translateY(0px);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 
@@ -56,12 +108,12 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 
 /* État actif/focus pour accessibilité */
 .establishment-card:focus-visible{outline:2px solid #002060;outline-offset:2px}
-.card-action-icon:focus-visible{outline:2px solid #002060;outline-offset:-2px}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:9999;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}/* Popup au clic - design cohérent avec tooltip hover */
+.card-action-icon:focus-visible{outline:2px solid #002060;outline-offset:-2px}#reset-map{width:100%;padding:10px;background-color:#555;color:#fff;border:0;border-radius:4px;cursor:pointer;font-size:16px;transition:background-color .3s}#reset-map:hover{background-color:#333}#loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(255,255,255,.8);z-index:17;display:flex;justify-content:center;align-items:center;font-size:20px;color:#333;transition:opacity .5s}/* Popup au clic - design cohérent avec tooltip hover */
 .mapboxgl-popup-content{width:max-content;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;padding:18px!important;max-width:320px!important;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,0.12),0 2px 10px rgba(0,0,0,0.08)}.mapboxgl-popup-content h3{color:#002060;margin:0 0 12px 0;font-size:16px;font-weight:600;padding-bottom:8px;border-bottom:2px solid rgba(0,32,96,0.1)}.mapboxgl-popup-content p{margin:0 0 6px 0;line-height:1.5;font-size:13px;color:#4a5568}.mapboxgl-popup-content p strong{color:#2d3748;font-weight:600;display:inline-block;min-width:80px}.mapboxgl-popup-content .popup-actions{display:flex;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,32,96,0.06)}.mapboxgl-popup-content .popup-view-btn{flex:1;padding:8px 14px;background:linear-gradient(135deg,#002060 0%,#003380 100%);color:#fff;border:none;border-radius:6px;cursor:pointer;text-align:center;font-size:12px;font-weight:500;transition:all 0.2s cubic-bezier(0.4,0,0.2,1)}.mapboxgl-popup-content .popup-view-btn:hover{background:linear-gradient(135deg,#003380 0%,#004499 100%);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,32,96,0.2)}
 
 @keyframes tooltipFadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}
 }#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-right,#map>div.mapboxgl-control-container>div.mapboxgl-ctrl-bottom-left{display:none}/* Modal moderne */
-.modal{display:none;position:fixed;z-index:2000;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.6);backdrop-filter:blur(4px);animation:fadeIn 0.3s ease}.modal-content{background:#fff;margin:5% auto;padding:0;border:none;width:90%;max-width:500px;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.2);animation:slideUp 0.3s ease;overflow:hidden}.modal-header{background:linear-gradient(135deg,#002060 0%,#003380 100%);color:white;padding:20px 24px;position:relative}.modal-header h3{margin:0;font-size:20px;font-weight:600;padding-right:30px}.close-button{position:absolute;right:20px;top:50%;transform:translateY(-50%);color:white;font-size:24px;font-weight:300;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all 0.2s;background:rgba(255,255,255,0.1)}.close-button:hover{background:rgba(255,255,255,0.2);transform:translateY(-50%) rotate(90deg)}.modal-body{padding:24px}.modal-info-row{display:flex;padding:12px 0;border-bottom:1px solid #f0f0f0}.modal-info-row:last-child{border-bottom:none}.modal-info-label{font-weight:600;color:#666;min-width:100px;font-size:14px}.modal-info-value{flex:1;color:#333;font-size:14px;line-height:1.4}.modal-info-value a{color:#002060;text-decoration:none;transition:color 0.2s}.modal-info-value a:hover{color:#17a2b8;text-decoration:underline}.activity-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#e3f2fd;color:#1565c0}.modal-footer{padding:16px 24px;background:#f8f9fa;border-top:1px solid #e0e0e0;display:flex;gap:12px}.modal-action-btn{flex:1;padding:10px;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px}.modal-action-btn.primary{background:#002060;color:white}.modal-action-btn.primary:hover{background:#003380;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,32,96,0.3)}.modal-action-btn.secondary{background:#e0e0e0;color:#333}.modal-action-btn.secondary:hover{background:#d0d0d0}
+.modal{display:none;position:fixed;z-index:20;left:0;top:0;width:100%;height:100%;overflow:auto;background-color:rgba(0,0,0,.6);backdrop-filter:blur(4px);animation:fadeIn 0.3s ease}.modal-content{background:#fff;margin:10vh auto;padding:0;border:none;width:90%;max-width:500px;max-height:80vh;overflow-y:auto;border-radius:16px;box-shadow:0 10px 40px rgba(0,0,0,.2);animation:slideUp 0.3s ease;position:relative}.modal-header{background:linear-gradient(135deg,#002060 0%,#003380 100%);color:white !important;padding:20px 24px;position:relative}.modal-header h3{margin:0;font-size:20px;font-weight:600;padding-right:30px;color:white !important}.close-button{position:absolute;right:20px;top:50%;transform:translateY(-50%);color:white;font-size:24px;font-weight:300;cursor:pointer;width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:all 0.2s;background:rgba(255,255,255,0.1)}.close-button:hover{background:rgba(255,255,255,0.2);transform:translateY(-50%) rotate(90deg)}.modal-body{padding:24px}.modal-info-row{display:flex;padding:12px 0;border-bottom:1px solid #f0f0f0}.modal-info-row:last-child{border-bottom:none}.modal-info-label{font-weight:600;color:#666;min-width:100px;font-size:14px}.modal-info-value{flex:1;color:#333;font-size:14px;line-height:1.4}.modal-info-value a{color:#002060;text-decoration:none;transition:color 0.2s}.modal-info-value a:hover{color:#17a2b8;text-decoration:underline}.activity-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;background:#e3f2fd;color:#1565c0}.modal-footer{padding:16px 24px;background:#f8f9fa;border-top:1px solid #e0e0e0;display:flex;gap:12px}.modal-action-btn{flex:1;padding:10px;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px}.modal-action-btn.primary{background:#002060;color:white}.modal-action-btn.primary:hover{background:#003380;transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,32,96,0.3)}.modal-action-btn.secondary{background:#e0e0e0;color:#333}.modal-action-btn.secondary:hover{background:#d0d0d0}
 
 /* Animations */
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -74,14 +126,14 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
     .modal-content{width:95%;margin:10% auto}
     .modal-info-row{flex-direction:column;gap:4px}
     .modal-info-label{min-width:unset}
-}#map-container.layout-dual #sidebar{width:30%;min-width:415px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,415px));opacity:1}#map-container.layout-sidebar-full{height:100vh}#map-container.layout-sidebar-full #sidebar{width:94%;min-width:94%;opacity:1;transform:translateX(0)}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-sidebar-full .mode-switcher-container{display:none!important}#map-container.layout-sidebar-full .custom-zoom-controls{display:none!important}#map-container.layout-map-full{height:100vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none;padding:0}#map-container.layout-map-full #map{width:100%;opacity:1}#map-container.layout-map-full .mode-switcher-container{display:none!important}#map-container.layout-map-full .map-legend{transform:scale(0.65);transform-origin:bottom left}#map-container.layout-map-full .map-radius-control{transform:scale(0.65);transform-origin:bottom left}#map-container.layout-map-full .custom-zoom-controls{transform:scale(0.75);transform-origin:top right;top:20px}#map-container.layout-map-full .mapboxgl-popup{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-sidebar-full .mapboxgl-popup{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-map-full .clicked-popup,#map-container.layout-map-full .hover-tooltip{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-sidebar-full .clicked-popup,#map-container.layout-sidebar-full .hover-tooltip{transform:scale(0.35);transform-origin:bottom center}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:415px}#map-container.layout-dual #map{width:calc(100% - 415px)}}@media (max-width:600px){#map-container.layout-sidebar-full #sidebar{width:100%;min-width:88%}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
-.mode-switcher-container{position:absolute;top:20px;left:10px;z-index:100;background:#fff;border-radius:22px;padding:3px;box-shadow:0 2px 10px rgba(0,0,0,0.2)}.mode-switcher{display:flex;background:transparent;border-radius:20px;padding:0}.mode-btn{padding:8px 16px;background:transparent;border:none;border-radius:18px;cursor:pointer;font-size:13px;font-weight:500;color:#6c757d;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;min-width:90px}.mode-btn:hover{background:rgba(0,0,0,0.05);color:#333}.mode-btn.active{background:#002060;color:white;box-shadow:0 1px 3px rgba(0,32,96,0.3);font-weight:600}.mode-btn.active:hover{background:#003380}.mode-btn .mode-icon{font-size:14px}.mode-btn .mode-label{font-size:12px;letter-spacing:0.3px}.mode-interface{transition:opacity 0.3s ease,transform 0.3s ease}#normal-mode-interface .search-container{display:flex;align-items:center;gap:5px}#normal-geocoder-container{flex:1;display:flex;align-items:center;gap:5px}
+}#map-container.layout-dual #sidebar{width:30%;min-width:415px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,415px));opacity:1}#map-container.layout-sidebar-full{height:85vh;width:100%;overflow:hidden}#map-container.layout-sidebar-full #sidebar{width:100%;min-width:unset;max-width:100%;opacity:1;transform:translateX(0);box-sizing:border-box;overflow-x:hidden;overflow-y:auto}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-sidebar-full .mode-switcher-container{display:none!important}#map-container.layout-sidebar-full .custom-zoom-controls{display:none!important}#map-container.layout-map-full{height:85vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none;padding:0}#map-container.layout-map-full #map{width:100%;opacity:1}#map-container.layout-map-full .mode-switcher-container{display:none!important}#map-container.layout-map-full .map-legend{transform:scale(0.65);transform-origin:bottom left}#map-container.layout-map-full .map-radius-control{transform:scale(0.65);transform-origin:bottom left}#map-container.layout-map-full .custom-zoom-controls{transform:scale(0.75);transform-origin:top right;top:20px}#map-container.layout-map-full .mapboxgl-popup{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-sidebar-full .mapboxgl-popup{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-map-full .clicked-popup,#map-container.layout-map-full .hover-tooltip{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-sidebar-full .clicked-popup,#map-container.layout-sidebar-full .hover-tooltip{transform:scale(0.35);transform-origin:bottom center}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:415px}#map-container.layout-dual #map{width:calc(100% - 415px)}}@media (max-width:600px){#map-container.layout-sidebar-full #sidebar{width:100%;min-width:unset}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
+.mode-switcher-container{position:absolute;top:20px;left:10px;z-index:7;background:#fff;border-radius:22px;padding:3px;box-shadow:0 2px 10px rgba(0,0,0,0.2)}.mode-switcher{display:flex;background:transparent;border-radius:20px;padding:0}.mode-btn{padding:8px 16px;background:transparent;border:none;border-radius:18px;cursor:pointer;font-size:13px;font-weight:500;color:#6c757d;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;min-width:90px}.mode-btn:hover{background:rgba(0,0,0,0.05);color:#333}.mode-btn.active{background:#002060;color:white;box-shadow:0 1px 3px rgba(0,32,96,0.3);font-weight:600}.mode-btn.active:hover{background:#003380}.mode-btn .mode-icon{font-size:14px}.mode-btn .mode-label{font-size:12px;letter-spacing:0.3px}.mode-interface{transition:opacity 0.3s ease,transform 0.3s ease}#normal-mode-interface .search-container{display:flex;align-items:center;gap:5px}#normal-geocoder-container{flex:1;display:flex;align-items:center;gap:5px}
 
 /* Légende de la carte */
-.map-legend{position:absolute;bottom:30px;left:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:900;font-size:13px}.map-legend h4{margin:0 0 0px 0;font-size:14px;color:#333;font-weight:bold;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between}.map-legend h4:hover{color:#002060}.map-legend h4::after{content:'▼';font-size:10px;transition:transform 0.3s}.map-legend.collapsed h4::after{transform:rotate(-90deg);margin-left: 4px;}.map-legend.collapsed .legend-items{display:none}.legend-item{display:flex;align-items:center;margin:6px 0;cursor:pointer;padding:4px;border-radius:4px;transition:background-color .2s}.legend-item:hover{background-color:#f0f8ff}.legend-item.inactive{opacity:.4}.legend-item.inactive:hover{opacity:.6}.legend-marker{width:30px;height:30px;margin-right:8px;background-size:contain;background-repeat:no-repeat;background-position:center}.legend-marker.beton{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-beton.png')}.legend-marker.granulats{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-granulats.png')}.legend-marker.ciment{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-ciment.png')}.legend-marker.ciment-prompt{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-12/ciment-prompt-naturel.png')}
+.map-legend{position:absolute;bottom:30px;left:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:8;font-size:13px}.map-legend h4{margin:0 0 0px 0;font-size:14px;color:#333;font-weight:bold;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between}.map-legend h4:hover{color:#002060}.map-legend h4::after{content:'\25BC';font-size:10px;transition:transform 0.3s}.map-legend.collapsed h4::after{transform:rotate(-90deg);margin-left: 4px;}.map-legend.collapsed .legend-items{display:none}.legend-item{display:flex;align-items:center;margin:6px 0;cursor:pointer;padding:4px;border-radius:4px;transition:background-color .2s}.legend-item:hover{background-color:#f0f8ff}.legend-item.inactive{opacity:.4}.legend-item.inactive:hover{opacity:.6}.legend-marker{width:30px;height:30px;margin-right:8px;background-size:contain;background-repeat:no-repeat;background-position:center}.legend-marker.beton{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-beton.png')}.legend-marker.granulats{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-granulats.png')}.legend-marker.ciment{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-ciment.png')}.legend-marker.ciment-prompt{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-12/ciment-prompt-naturel.png')}
 
 /* Contrôle de rayon sur la carte */
-.map-radius-control{position:absolute;bottom:160px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:100;font-size:13px;display:none;transition:bottom 0.3s ease}.map-radius-control h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between}.map-radius-control h4:hover{color:#002060}.map-radius-control h4::after{content:'▼';font-size:10px;transition:transform 0.3s;margin-left:4px}.map-radius-control.collapsed h4::after{transform:rotate(-90deg);margin-left:4px}.map-radius-control.collapsed .radius-control-content{display:none}.radius-control-map{display:flex;align-items:center;gap:10px}.radius-control-map label{font-size:13px;color:#333;white-space:nowrap}.radius-control-map input[type="range"]{flex:1;min-width:120px}.radius-control-map span{font-weight:bold;color:#002060;min-width:50px;font-size:13px}
+.map-radius-control{position:absolute;bottom:160px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:7;font-size:13px;display:none;transition:bottom 0.3s ease}.map-radius-control h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between}.map-radius-control h4:hover{color:#002060}.map-radius-control h4::after{content:'\25BC';font-size:10px;transition:transform 0.3s;margin-left:4px}.map-radius-control.collapsed h4::after{transform:rotate(-90deg);margin-left:4px}.map-radius-control.collapsed .radius-control-content{display:none}.radius-control-map{display:flex;align-items:center;gap:10px}.radius-control-map label{font-size:13px;color:#333;white-space:nowrap}.radius-control-map input[type="range"]{flex:1;min-width:120px}.radius-control-map span{font-weight:bold;color:#002060;min-width:50px;font-size:13px}
 
 /* Interface d'itinéraire améliorée */
 #route-interface-container{margin-top:15px}.route-point-section{border:1px solid #ddd;padding:15px;border-radius:6px;background:#f9f9f9;transition:all .3s ease-in-out}.route-input-group{margin-bottom:12px;display:flex;flex-direction:column;gap:5px}.route-input-group label{display:block;margin-bottom:5px;font-weight:bold;color:#333;font-size:14px}.point-input-container{display:flex;align-items:center;gap:5px}.point-input-container #geocoder-container{flex:1;display:flex;align-items:center;gap:5px;min-width:0}.point-input-container #geocoder-container-b{flex:1;display:flex;align-items:center;gap:5px;min-width:0}.point-input-container input{flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px}.search-btn,.add-point-btn{background:#002060;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .2s}.search-btn:hover,.add-point-btn:hover{background:#003380}.add-point-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;flex-shrink:0}.route-actions{display:flex;gap:10px;margin-top:15px}.route-action-btn{padding:10px 15px;border:none;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .2s}.route-action-btn.primary{background:#28a745;color:white}.route-action-btn.primary:hover{background:#218838}.route-action-btn.secondary{background:#6c757d;color:white}.route-action-btn.secondary:hover{background:#545b62}#point-b-section{animation:slideDown .3s ease-in-out}@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}#clear-point-a:hover,#clear-point-b:hover{background:rgba(211,47,47,0.2)!important;border-color:rgba(211,47,47,0.5)!important;transform:translateY(-50%) scale(1.1)!important}
@@ -119,13 +171,50 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
 .distance-badge{display:inline-block;background:#002060;color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:bold;margin-left:8px}.time-badge{display:inline-block;background:#28a745;color:#fff;padding:3px 8px;border-radius:12px;font-size:11px;font-weight:bold;margin-left:5px}
 
 /* Contrôles de zoom personnalisés */
-.custom-zoom-controls{position:fixed;top:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:2px}.zoom-btn{width:40px;height:40px;background:#fff;border:1px solid #ccc;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;color:#333;box-shadow:0 2px 4px rgba(0,0,0,.1);transition:all .2s}.zoom-btn:hover{background:#f8f8f8;box-shadow:0 3px 6px rgba(0,0,0,.15)}.zoom-btn:active{transform:scale(0.95);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.custom-zoom-controls{position:absolute;top:20px;right:20px;z-index:10;display:flex;flex-direction:column;gap:2px}.zoom-btn{width:40px;height:40px;background:#fff;border:1px solid #ccc;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;color:#333;box-shadow:0 2px 4px rgba(0,0,0,.1);transition:all .2s}.zoom-btn:hover{background:#f8f8f8;box-shadow:0 3px 6px rgba(0,0,0,.15)}.zoom-btn:active{transform:scale(0.95);box-shadow:0 1px 2px rgba(0,0,0,.1)}
 
 /* Accessibilité */
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}*:focus-visible{outline:2px solid #002060;outline-offset:2px}button:focus-visible,a:focus-visible{outline:2px solid #002060;outline-offset:2px}
 
-/* Bouton toggle mobile - visible jusqu'à 1300px */
-.mobile-toggle-btn{position:fixed;bottom:20px;right:20px;z-index:1007;background:#002060;color:#fff;border:none;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.3);cursor:pointer;transition:all .3s}.mobile-toggle-btn:hover{transform:scale(1.1);background:#003380}.mobile-toggle-btn svg{width:24px;height:24px}
+/* Bouton toggle mobile - toujours visible */
+.mobile-toggle-btn{position:fixed;bottom:20px;right:20px;z-index:21;background:#002060;color:#fff;border:none;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.3);cursor:pointer;transition:all .3s}.mobile-toggle-btn:hover{transform:scale(1.1);background:#003380}.mobile-toggle-btn svg{width:24px;height:24px}
+
+/* Bouton de réinitialisation sur la carte */
+.map-reset-btn{
+    position:absolute;
+    top:20px;
+    left:10px;
+    z-index:10;
+    background:#fff;
+    color:#002060;
+    border:1px solid #ccc;
+    border-radius:6px;
+    width:40px;
+    height:40px;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 2px 4px rgba(0,0,0,.1);
+    cursor:pointer;
+    transition:all .2s
+}
+.map-reset-btn:hover{
+    background:#002060;
+    color:#fff;
+    box-shadow:0 3px 6px rgba(0,0,0,.15)
+}
+.map-reset-btn:active{
+    transform:scale(0.95);
+    box-shadow:0 1px 2px rgba(0,0,0,.1)
+}
+.map-reset-btn svg{
+    width:18px;
+    height:18px;
+    fill:currentColor
+}
+
+/* Afficher le bouton uniquement en mode carte plein écran */
+#map-container.layout-map-full .map-reset-btn{display:flex !important}
 
 /* Mobile responsive amélioré */
 @media (max-width:768px){.map-legend{bottom:60px;left:5px;padding:8px;font-size:12px}.legend-item{margin:4px 0}.legend-marker{width:24px;height:24px;margin-right:6px}#map-container.layout-map-full #sidebar{padding:0!important;margin:0!important}}
@@ -152,8 +241,15 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
       <div id="normal-mode-interface" class="mode-interface">
         <div class="filter-section">
           <h2>Rechercher une ville ou UP</h2>
-          <div id="normal-geocoder-container" class="search-container">
-            <button id="normal-geolocate" class="geolocate-btn" title="Utiliser ma position"></button>
+          <div class="search-and-reset-container">
+            <div id="normal-geocoder-container" class="search-container">
+              <button id="normal-geolocate" class="geolocate-btn" title="Utiliser ma position">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                  <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                </svg>
+              </button>
+            </div>
+            <button id="reset-map-inline" class="reset-map-inline">Réinitialiser</button>
           </div>
         </div>
       </div>
@@ -162,12 +258,13 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
       <div id="route-mode-interface" class="mode-interface" style="display:none;">
         <div class="filter-section">
           <h2>Calculer un itinéraire</h2>
+          <button id="reset-map-route" class="reset-map-inline" style="margin-top: 10px; width: 100%;">Réinitialiser la carte</button>
           
           <!-- Interface d'itinéraire avec Points A et B -->
         <div id="route-interface-container">
           <!-- Point A (origine) -->
           <div class="route-point-section" id="point-a-section" style="position: relative;">
-            <button id="add-destination-btn" class="add-point-btn" title="Ajouter une destination" style="position: absolute; top: 8px; right: 8px; z-index: 10; width: 24px; height: 24px; font-size: 14px; padding: 0;">+</button>
+            <button id="add-destination-btn" class="add-point-btn" title="Ajouter une destination" style="position: absolute; top: 8px; right: 8px; z-index: 1; width: 24px; height: 24px; font-size: 14px; padding: 0;">+</button>
             <div class="route-input-group">
               <label>Point A (origine):</label>
               <div id="selected-point-a" style="display:none; padding: 8px 40px 8px 8px; background: #e3f2fd; border-radius: 4px; margin-bottom: 8px; font-size: 14px; color: #1976d2; position: relative;">
@@ -176,7 +273,11 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
               </div>
               <div class="point-input-container">
                 <div id="geocoder-container">
-                  <button id="geolocate" class="geolocate-btn" title="Utiliser ma position"></button>
+                  <button id="geolocate" class="geolocate-btn" title="Utiliser ma position">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm8.94 3c-.46-4.17-3.77-7.48-7.94-7.94V1h-2v2.06C6.83 3.52 3.52 6.83 3.06 11H1v2h2.06c.46 4.17 3.77 7.48 7.94 7.94V23h2v-2.06c4.17-.46 7.48-3.77 7.94-7.94H23v-2h-2.06zM12 19c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/>
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -204,7 +305,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
       </div>
 
       <!-- Common Elements for Both Modes -->
-      <div class="filter-section">
+      <div class="filter-section" id="reset-section" style="display:none;">
         <button id="reset-map">Réinitialiser la carte</button>
       </div>
       
@@ -2252,7 +2353,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             padding: 20px 30px;
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(220, 53, 69, 0.3);
-            z-index: 10000;
+            z-index: 18;
             font-family: Arial, sans-serif;
             text-align: center;
             max-width: 400px;
@@ -2309,7 +2410,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             padding: 30px;
             border-radius: 16px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            z-index: 9999;
+            z-index: 17;
             text-align: center;
             font-family: Arial, sans-serif;
             border: 1px solid rgba(0, 32, 96, 0.1);
@@ -2605,7 +2706,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             font-family: Arial, sans-serif;
             font-size: 14px;
             font-weight: bold;
-            z-index: 1002;
+            z-index: 11;
             animation: slideInFromRight 0.5s ease-out;
         `;
         
@@ -2810,6 +2911,24 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         });
 
         document.getElementById('reset-map').addEventListener('click', resetMap);
+        
+        // Ajouter l'event listener pour le bouton de réinitialisation inline
+        const resetMapInline = document.getElementById('reset-map-inline');
+        if (resetMapInline) {
+            resetMapInline.addEventListener('click', resetMap);
+        }
+        
+        // Ajouter l'event listener pour le bouton de réinitialisation du mode route
+        const resetMapRoute = document.getElementById('reset-map-route');
+        if (resetMapRoute) {
+            resetMapRoute.addEventListener('click', () => {
+                resetMap();
+                // Revenir au mode normal après réinitialisation
+                if (window.switchToNormalMode) {
+                    window.switchToNormalMode();
+                }
+            });
+        }
         
         // Initialiser les event listeners de la légende interactive
         initializeLegendListeners();
@@ -3445,7 +3564,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             radiusControl = document.createElement('div');
             radiusControl.id = 'map-radius-control-overlay';
             radiusControl.className = 'map-radius-control';
-            radiusControl.style.cssText = 'position:absolute;bottom:260px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:901;font-size:13px;display:block;';
+            radiusControl.style.cssText = 'position:absolute;bottom:260px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:9;font-size:13px;display:block;';
             
             // Créer le contenu sans innerHTML pour éviter les problèmes d'iframe
             const h4 = document.createElement('h4');
@@ -3961,7 +4080,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         
         if (isIn3DView) {
             // Bouton "Retour à la carte" car on est EN VUE 3D sur cette UP
-            viewBtn.textContent = 'Retour à la carte';
+            viewBtn.textContent = 'Retour a la carte';
             viewBtn.style.backgroundColor = '#28a745';
             viewBtn.onclick = function() {
                 // Réinitialiser les variables de tracking
@@ -3995,33 +4114,46 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             // Bouton "Voir en 3D" car on n'est pas zoomé sur cette UP
             viewBtn.textContent = 'Voir en 3D';
             viewBtn.onclick = function() {
-                // Marquer qu'on est en train de zoomer vers cette UP EN 3D
-                currentView3DCoordinates = coordinates;
+                // Fonction pour effectuer le zoom 3D
+                const doZoom3D = () => {
+                    // Marquer qu'on est en train de zoomer vers cette UP EN 3D
+                    currentView3DCoordinates = coordinates;
+                    
+                    // Fermer le popup actuel
+                    const popup = activePopups.find(p => {
+                        const popupLngLat = p.getLngLat();
+                        return Math.abs(popupLngLat.lng - coordinates[0]) < 0.0001 && 
+                               Math.abs(popupLngLat.lat - coordinates[1]) < 0.0001;
+                    });
+                    if (popup) {
+                        popup.remove();
+                        const index = activePopups.indexOf(popup);
+                        if (index > -1) activePopups.splice(index, 1);
+                    }
+                    // Fermer aussi le clickedPopup global s'il existe
+                    // Le popup est déjà fermé via activePopups ci-dessus
+                    
+                    map.flyTo({
+                        center: coordinates,
+                        zoom: 17,
+                        pitch: 60,
+                        bearing: 30,
+                        speed: 1.2,
+                        essential: true
+                    });
+                    
+                    updateSidebarBasedOnMapViewport();
+                };
                 
-                // Fermer le popup actuel
-                const popup = activePopups.find(p => {
-                    const popupLngLat = p.getLngLat();
-                    return Math.abs(popupLngLat.lng - coordinates[0]) < 0.0001 && 
-                           Math.abs(popupLngLat.lat - coordinates[1]) < 0.0001;
-                });
-                if (popup) {
-                    popup.remove();
-                    const index = activePopups.indexOf(popup);
-                    if (index > -1) activePopups.splice(index, 1);
+                // Si on est en mode liste, basculer vers la vue carte d'abord
+                if (window.getCurrentLayoutMode && window.getCurrentLayoutMode() === 'sidebarFull') {
+                    window.switchToMapFullScreen();
+                    // Attendre que le changement de vue soit effectué
+                    setTimeout(doZoom3D, 600);
+                } else {
+                    // Sinon, faire le zoom directement
+                    doZoom3D();
                 }
-                // Fermer aussi le clickedPopup global s'il existe
-                // Le popup est déjà fermé via activePopups ci-dessus
-                
-                map.flyTo({
-                    center: coordinates,
-                    zoom: 17,
-                    pitch: 60,
-                    bearing: 30,
-                    speed: 1.2,
-                    essential: true
-                });
-                
-                updateSidebarBasedOnMapViewport();
             };
         }
         
@@ -4819,8 +4951,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             // Bouton itinéraire
             const routeBtn = document.createElement('button');
             routeBtn.className = 'card-action-icon route';
-            routeBtn.setAttribute('aria-label', 'Itinéraire');
-            routeBtn.setAttribute('title', 'Calculer un itinéraire');
+            routeBtn.setAttribute('aria-label', 'Itineraire');
+            routeBtn.setAttribute('title', 'Itineraire');
             routeBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21.71 11.29l-9-9a.996.996 0 00-1.41 0l-9 9a.996.996 0 000 1.41l9 9c.39.39 1.02.39 1.41 0l9-9a.996.996 0 000-1.41zM14 14.5V12h-4v3H8v-4c0-.55.45-1 1-1h5V7.5l3.5 3.5-3.5 3.5z"/></svg>`;
             routeBtn.onclick = (e) => {
                 e.stopPropagation();
@@ -4872,8 +5004,8 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
             if (isCurrently3D) {
                 // Mode retour à la carte
                 view3dBtn.className = 'card-action-icon view3d active';
-                view3dBtn.setAttribute('aria-label', 'Retour à la carte');
-                view3dBtn.setAttribute('title', 'Retour à la carte');
+                view3dBtn.setAttribute('aria-label', 'Retour a la carte');
+                view3dBtn.setAttribute('title', 'Retour a la carte');
                 view3dBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M21 11l-6-6v5H8c-2.76 0-5 2.24-5 5v4h2v-4c0-1.65 1.35-3 3-3h7v5l6-6z"/></svg>`;
                 
                 view3dBtn.onclick = (e) => {
@@ -4907,26 +5039,40 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                 
                 view3dBtn.onclick = (e) => {
                     e.stopPropagation();
-                    // Marquer qu'on est en train de zoomer vers cette UP
-                    zoomingToCoordinates = feature.geometry.coordinates;
-                    currentView3DCoordinates = feature.geometry.coordinates;
                     
-                    // Zoom 3D sur l'établissement
-                    map.flyTo({
-                        center: feature.geometry.coordinates,
-                        zoom: 17,
-                        pitch: 60,
-                        bearing: 30,
-                        speed: 1.2,
-                        essential: true
-                    });
+                    // Fonction pour effectuer le zoom 3D
+                    const doZoom3D = () => {
+                        // Marquer qu'on est en train de zoomer vers cette UP
+                        zoomingToCoordinates = feature.geometry.coordinates;
+                        currentView3DCoordinates = feature.geometry.coordinates;
+                        
+                        // Zoom 3D sur l'établissement
+                        map.flyTo({
+                            center: feature.geometry.coordinates,
+                            zoom: 17,
+                            pitch: 60,
+                            bearing: 30,
+                            speed: 1.2,
+                            essential: true
+                        });
+                        
+                        // Rafraîchir les cards après l'animation
+                        setTimeout(() => {
+                            if (window.currentAppMode === 'normal') {
+                                updateSidebarBasedOnMapViewport();
+                            }
+                        }, 1300);
+                    };
                     
-                    // Rafraîchir les cards après l'animation
-                    setTimeout(() => {
-                        if (window.currentAppMode === 'normal') {
-                            updateSidebarBasedOnMapViewport();
-                        }
-                    }, 1300);
+                    // Si on est en mode liste, basculer vers la vue carte d'abord
+                    if (window.getCurrentLayoutMode && window.getCurrentLayoutMode() === 'sidebarFull') {
+                        window.switchToMapFullScreen();
+                        // Attendre que le changement de vue soit effectué
+                        setTimeout(doZoom3D, 600);
+                    } else {
+                        // Sinon, faire le zoom directement
+                        doZoom3D();
+                    }
                 };
             }
             
@@ -5058,9 +5204,9 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     const address=decodeHTMLEntities(props.Adresse||'N/A');
                     const city=decodeHTMLEntities(props.Ville||'');
                     const postalCode=props["Code postal"]||'';
-                    const phone=props.Phone&&props.Phone!=="null"?props.Phone:null;
-                    const email=props.Email&&props.Email!=="null"?props.Email:null;
-                    const activity=props.activity?props.activity.charAt(0).toUpperCase()+props.activity.slice(1):'N/A';
+                    const phone=props.Phone&&props.Phone!=="null"?decodeHTMLEntities(props.Phone):null;
+                    const email=props.Email&&props.Email!=="null"?decodeHTMLEntities(props.Email):null;
+                    const activity=props.activity?decodeHTMLEntities(props.activity.charAt(0).toUpperCase()+props.activity.slice(1)):'N/A';
                     
                     // Créer le contenu moderne de la modal
                     const modalContent = document.querySelector('.modal-content');
@@ -5102,7 +5248,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     phoneRow.className = 'modal-info-row';
                     const phoneLabel = document.createElement('div');
                     phoneLabel.className = 'modal-info-label';
-                    phoneLabel.textContent = 'Téléphone';
+                    phoneLabel.textContent = 'T\u00E9l\u00E9phone';
                     const phoneValue = document.createElement('div');
                     phoneValue.className = 'modal-info-value';
                     if (phone) {
@@ -5142,7 +5288,7 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
                     activityRow.className = 'modal-info-row';
                     const activityLabel = document.createElement('div');
                     activityLabel.className = 'modal-info-label';
-                    activityLabel.textContent = 'Activité';
+                    activityLabel.textContent = 'Activit\u00E9';
                     const activityValue = document.createElement('div');
                     activityValue.className = 'modal-info-value';
                     const activityBadge = document.createElement('span');
@@ -5266,6 +5412,15 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const mapContainer=document.getElementById('map-container');
         mapContainer.className='layout-sidebar-full';
         currentLayoutMode='sidebarFull';
+        // Mettre à jour l'icône du bouton toggle - on est en vue liste, afficher l'icône carte
+        const toggleIcon = document.getElementById('mobile-toggle-icon');
+        if (toggleIcon) {
+            toggleIcon.setAttribute('d', 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z');
+        }
+        
+        // Supprimer le bouton de réinitialisation
+        removeResetButton();
+        
         setTimeout(()=>{if(map){map.resize();updateSidebarBasedOnMapViewport();}},550);
     }
     
@@ -5273,16 +5428,111 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const mapContainer=document.getElementById('map-container');
         mapContainer.className='layout-map-full';
         currentLayoutMode='mapFull';
+        // Mettre à jour l'icône du bouton toggle - on est en vue carte, afficher l'icône liste
+        const toggleIcon = document.getElementById('mobile-toggle-icon');
+        if (toggleIcon) {
+            toggleIcon.setAttribute('d', 'M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z');
+        }
+        
+        // Créer et afficher le bouton de réinitialisation
+        createResetButton();
+        
         setTimeout(()=>{if(map){map.resize();updateSidebarBasedOnMapViewport();}},550);
     }
+    
+    // Exposer les fonctions et variables dans le scope global pour l'iframe
+    window.switchToMapFullScreen = switchToMapFullScreen;
+    window.getCurrentLayoutMode = () => currentLayoutMode;
     
     function switchToDualView(){
         const mapContainer=document.getElementById('map-container');
         mapContainer.className='layout-dual';
         currentLayoutMode='dual';
+        // Mettre à jour l'icône du bouton toggle - on est en vue duale, afficher l'icône grille
+        const toggleIcon = document.getElementById('mobile-toggle-icon');
+        if (toggleIcon) {
+            toggleIcon.setAttribute('d', 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z');
+        }
+        
+        // Supprimer le bouton de réinitialisation
+        removeResetButton();
+        
         setTimeout(()=>{if(map){map.resize();updateSidebarBasedOnMapViewport();}},550);
     }
+    
+    // Fonction pour créer le bouton de réinitialisation
+    function createResetButton() {
+        // Vérifier si le bouton existe déjà
+        if (document.getElementById('map-reset-btn')) {
+            return;
+        }
+        
+        const mapElement = document.getElementById('map');
+        if (!mapElement) return;
+        
+        // Créer le bouton
+        const resetBtn = document.createElement('button');
+        resetBtn.id = 'map-reset-btn';
+        resetBtn.className = 'map-reset-btn';
+        resetBtn.setAttribute('aria-label', 'Reinitialiser');
+        resetBtn.setAttribute('title', 'Reinitialiser');
+        resetBtn.style.display = 'flex';
+        
+        // Créer l'icône SVG
+        resetBtn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+            </svg>
+        `;
+        
+        // Ajouter l'event listener
+        resetBtn.addEventListener('click', resetMap);
+        
+        // Ajouter le bouton au map
+        mapElement.appendChild(resetBtn);
+    }
+    
+    // Fonction pour supprimer le bouton de réinitialisation
+    function removeResetButton() {
+        const resetBtn = document.getElementById('map-reset-btn');
+        if (resetBtn) {
+            resetBtn.remove();
+        }
+    }
 
+    // Fonction pour décoder les entités HTML et forcer Unicode
+    function decodeHTMLEntities(text) {
+        if (!text) return text;
+        
+        // Remplacer les entités HTML communes par leur équivalent Unicode
+        text = text.toString()
+            .replace(/&eacute;/gi, '\u00E9')
+            .replace(/&egrave;/gi, '\u00E8')
+            .replace(/&ecirc;/gi, '\u00EA')
+            .replace(/&agrave;/gi, '\u00E0')
+            .replace(/&acirc;/gi, '\u00E2')
+            .replace(/&ocirc;/gi, '\u00F4')
+            .replace(/&ugrave;/gi, '\u00F9')
+            .replace(/&ucirc;/gi, '\u00FB')
+            .replace(/&iuml;/gi, '\u00EF')
+            .replace(/&ouml;/gi, '\u00F6')
+            .replace(/&ccedil;/gi, '\u00E7')
+            .replace(/&Eacute;/gi, '\u00C9')
+            .replace(/&Egrave;/gi, '\u00C8')
+            .replace(/&Agrave;/gi, '\u00C0')
+            .replace(/&amp;/gi, '&')
+            .replace(/&lt;/gi, '<')
+            .replace(/&gt;/gi, '>')
+            .replace(/&quot;/gi, '"')
+            .replace(/&#039;/gi, "'")
+            .replace(/&nbsp;/gi, ' ');
+            
+        // Utiliser également la méthode textarea pour les autres entités
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = text;
+        return textarea.value;
+    }
+    
     // Solution: Utiliser des caractères Unicode directement pour éviter la transformation par Drupal
     function safeText(text) {
         // Si on est dans un iframe, utiliser des caractères Unicode échappés
@@ -5463,6 +5713,146 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         setTimeout(fixCardEntities, 3000);
     }
 
+    // Détection si on est dans un iframe
+    function isInIframe() {
+        try {
+            return window.self !== window.top;
+        } catch (e) {
+            return true;
+        }
+    }
+    
+    // Ajuster les styles si on est dans un iframe
+    if (isInIframe()) {
+        // Fonction pour nettoyer les entités HTML dans tout le DOM
+        function cleanHTMLEntities() {
+            const walker = document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            let node;
+            while (node = walker.nextNode()) {
+                if (node.nodeValue && node.nodeValue.includes('&')) {
+                    node.nodeValue = decodeHTMLEntities(node.nodeValue);
+                }
+            }
+        }
+        
+        // Nettoyer périodiquement les entités HTML
+        setInterval(cleanHTMLEntities, 500);
+        
+        // Forcer le container à ne pas dépasser - limiter à 95vw
+        const style = document.createElement('style');
+        style.textContent = `
+            * {
+                box-sizing: border-box !important;
+            }
+            body, html {
+                width: 95vw !important;
+                max-width: 95vw !important;
+                height: 85vh !important;
+                max-height: 85vh !important;
+                overflow: hidden !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            #map-container {
+                width: 95vw !important;
+                max-width: 95vw !important;
+                height: 85vh !important;
+                max-height: 85vh !important;
+                position: relative !important;
+                margin: 0 auto !important;
+            }
+            #map-container.layout-sidebar-full {
+                display: block !important;
+                width: 95vw !important;
+                max-width: 95vw !important;
+                height: 85vh !important;
+                max-height: 85vh !important;
+            }
+            #map-container.layout-sidebar-full #sidebar {
+                width: 95vw !important;
+                max-width: 95vw !important;
+                height: 85vh !important;
+                max-height: 85vh !important;
+                min-width: 0 !important;
+                padding: 10px !important;
+                position: relative !important;
+                transform: none !important;
+                margin: 0 !important;
+            }
+            #map-container.layout-map-full {
+                height: 85vh !important;
+                max-height: 85vh !important;
+            }
+            #map {
+                height: 85vh !important;
+                max-height: 85vh !important;
+            }
+            #map-container.layout-sidebar-full #establishments-view {
+                width: calc(95vw - 40px) !important;
+                max-width: calc(95vw - 40px) !important;
+                overflow-x: hidden !important;
+                margin: 0 !important;
+                padding: 0 10px !important;
+            }
+            #map-container.layout-sidebar-full .establishment-card {
+                width: calc(100% - 10px) !important;
+                max-width: calc(100% - 10px) !important;
+                margin: 5px !important;
+            }
+            .mobile-toggle-btn {
+                right: 15px !important;
+                position: fixed !important;
+            }
+            /* Forcer la barre de recherche à ne pas dépasser */
+            .mapboxgl-ctrl-geocoder {
+                max-width: calc(95vw - 100px) !important;
+            }
+            .search-and-reset-container {
+                max-width: calc(95vw - 40px) !important;
+                overflow: hidden !important;
+            }
+            /* Empêcher tout dépassement */
+            #map-container * {
+                max-width: 95vw !important;
+            }
+            /* Ajuster le modal dans l'iframe */
+            .modal-content {
+                margin: 5vh auto !important;
+                max-height: 75vh !important;
+                overflow-y: auto !important;
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Script de diagnostic et correction automatique
+        function fixOverflow() {
+            const viewportWidth = window.innerWidth || document.documentElement.clientWidth;
+            const elements = document.querySelectorAll('*');
+            
+            elements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.right > viewportWidth) {
+                    console.warn('Element overflowing:', el, 'Width:', rect.width, 'Right:', rect.right);
+                    el.style.maxWidth = '100%';
+                    el.style.width = '100%';
+                    el.style.boxSizing = 'border-box';
+                }
+            });
+        }
+        
+        // Exécuter la correction après le chargement et lors du redimensionnement
+        window.addEventListener('load', fixOverflow);
+        window.addEventListener('resize', fixOverflow);
+        setTimeout(fixOverflow, 1000);
+        setTimeout(fixOverflow, 3000);
+    }
+    
     // Démarrage de l'application
     document.addEventListener('DOMContentLoaded', function() {
         initializeMap();
@@ -5507,40 +5897,27 @@ body,html{margin:0;padding:0;height:100%;font-family:Arial,sans-serif;overflow:h
         const mapContainer = document.getElementById('map-container');
         
         function checkMobile() {
-            // Afficher le switcher tant qu'on n'est pas en desktop (largeur < 1300px)
-            if (window.innerWidth < 1300) {
-                mobileToggle.style.display = 'flex';
-            } else {
-                mobileToggle.style.display = 'none';
-            }
+            // Toujours afficher le switcher
+            mobileToggle.style.display = 'flex';
         }
         
         checkMobile();
         window.addEventListener('resize', checkMobile);
         
         mobileToggle.addEventListener('click', () => {
-            // En mobile (largeur < 1300px), pas de vue duale
-            if (window.innerWidth < 1300) {
-                // Uniquement switcher entre map et sidebar
-                if (currentLayoutMode === 'mapFull') {
-                    switchToSidebarFullScreen();
-                    document.getElementById('mobile-toggle-icon').setAttribute('d', 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z');
-                } else {
-                    switchToMapFullScreen();
-                    document.getElementById('mobile-toggle-icon').setAttribute('d', 'M4 6H20M4 12H20M4 18H11');
-                }
+            // Basculer entre les vues
+            if (currentLayoutMode === 'mapFull') {
+                switchToSidebarFullScreen();
+                // On est maintenant en vue liste, afficher l'icône carte (destination)
+                document.getElementById('mobile-toggle-icon').setAttribute('d', 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z');
+            } else if (currentLayoutMode === 'sidebarFull') {
+                switchToMapFullScreen();
+                // On est maintenant en vue carte, afficher l'icône liste (destination)
+                document.getElementById('mobile-toggle-icon').setAttribute('d', 'M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z');
             } else {
-                // En desktop (largeur >= 1300px), permettre toutes les vues incluant duale
-                if (currentLayoutMode === 'dual') {
-                    switchToMapFullScreen();
-                    document.getElementById('mobile-toggle-icon').setAttribute('d', 'M4 6H20M4 12H20M4 18H11');
-                } else if (currentLayoutMode === 'mapFull') {
-                    switchToSidebarFullScreen();
-                    document.getElementById('mobile-toggle-icon').setAttribute('d', 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z');
-                } else {
-                    switchToDualView();
-                    document.getElementById('mobile-toggle-icon').setAttribute('d', 'M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z');
-                }
+                // Si on est en vue duale, aller vers la carte
+                switchToMapFullScreen();
+                document.getElementById('mobile-toggle-icon').setAttribute('d', 'M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z');
             }
         });
     }
