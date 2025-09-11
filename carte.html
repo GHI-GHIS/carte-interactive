@@ -19,7 +19,7 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
 *{box-sizing:border-box}
 /* Style pour les UP dans l'autocompl\u00e9tion */
 .mapboxgl-ctrl-geocoder--suggestion.is-up{background:linear-gradient(to right,#f0f7ff 0%,#ffffff 100%)!important;border-left:3px solid #002060!important}
-.mapboxgl-ctrl-geocoder--suggestion.is-up .mapboxgl-ctrl-geocoder--suggestion-title{color:#002060!important;font-weight:600}#map-container{display:flex;height:85vh!important;width:100%;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:415px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:15}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:1}.filter-section{margin-bottom:20px}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}
+.mapboxgl-ctrl-geocoder--suggestion.is-up .mapboxgl-ctrl-geocoder--suggestion-title{color:#002060!important;font-weight:600}#map-container{display:flex;height:85vh!important;width:100%;overflow:hidden;position:relative;transition:height .3s ease-in-out}#sidebar{width:30%;min-width:400px;max-width:450px;background-color:#fff;padding:20px;box-sizing:border-box;display:flex;flex-direction:column;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out,transform .5s ease-in-out,min-width .5s ease-in-out;overflow-x:hidden;z-index:15}#map{width:70%;height:100%;transition:width .5s ease-in-out,opacity .5s ease-in-out;opacity:1;z-index:1}.filter-section{margin-bottom:1%}.filter-section h2{margin-bottom:10px;font-size:18px;color:#333}#geocoder-container{display:flex;align-items:center;gap:5px}
 
 /* Container pour recherche et réinitialisation */
 .search-and-reset-container{display:flex;align-items:center;gap:0}
@@ -32,10 +32,14 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
 /* Masquer l'ancien bouton réinitialiser en mode liste */
 #map-container.layout-sidebar-full #reset-section{display:none}
 
+/* En mode liste, ajuster le h2 */
+#map-container.layout-sidebar-full .filter-section h2{margin-bottom:0}
+
 /* Sur petits écrans, mettre le bouton au-dessus */
 @media (max-width:600px){
     .search-and-reset-container{flex-direction:column;align-items:stretch}
-    .reset-map-inline{width:100%;margin-bottom:8px}
+    .reset-map-inline{width:100%;margin-bottom:8px;margin-left:0;margin-top:8px}
+    .container-fluid{padding-left:0px!important;padding-right:0px!important}
 }.geolocate-btn{width:34px;height:34px;border:1px solid #ccc;border-radius:4px;cursor:pointer;background-color:#fff;flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:5px;transition:all 0.2s}
 .geolocate-btn:hover{background-color:#f0f0f0;border-color:#999}
 .geolocate-btn svg{width:18px;height:18px;fill:#333}.mapboxgl-ctrl-geocoder{margin-left:0!important;min-width:0;flex-grow:1}.mapboxgl-ctrl-geocoder .mapboxgl-ctrl-geocoder--icon{display:none!important}#results-count{font-size:14px;color:#555;margin-top:15px;font-weight:bold}#establishments-view{flex-grow:1;overflow-y:auto;margin-top:5px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}/* Nouvelle version compacte et moderne des cards */
@@ -126,8 +130,8 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
     .modal-content{width:95%;margin:10% auto}
     .modal-info-row{flex-direction:column;gap:4px}
     .modal-info-label{min-width:unset}
-}#map-container.layout-dual #sidebar{width:30%;min-width:415px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,415px));opacity:1}#map-container.layout-sidebar-full{height:85vh;width:100%;overflow:hidden}#map-container.layout-sidebar-full #sidebar{width:100%;min-width:unset;max-width:100%;opacity:1;transform:translateX(0);box-sizing:border-box;overflow-x:hidden;overflow-y:auto}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-sidebar-full .mode-switcher-container{display:none!important}#map-container.layout-sidebar-full .custom-zoom-controls{display:none!important}#map-container.layout-map-full{height:85vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none;padding:0}#map-container.layout-map-full #map{width:100%;opacity:1}#map-container.layout-map-full .mode-switcher-container{display:none!important}#map-container.layout-map-full .map-legend{transform:scale(0.65);transform-origin:bottom left}#map-container.layout-map-full .map-radius-control{transform:scale(0.65);transform-origin:bottom left}#map-container.layout-map-full .custom-zoom-controls{transform:scale(0.75);transform-origin:top right;top:20px}#map-container.layout-map-full .mapboxgl-popup{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-sidebar-full .mapboxgl-popup{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-map-full .clicked-popup,#map-container.layout-map-full .hover-tooltip{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-sidebar-full .clicked-popup,#map-container.layout-sidebar-full .hover-tooltip{transform:scale(0.35);transform-origin:bottom center}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:415px}#map-container.layout-dual #map{width:calc(100% - 415px)}}@media (max-width:600px){#map-container.layout-sidebar-full #sidebar{width:100%;min-width:unset}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
-.mode-switcher-container{position:absolute;top:20px;left:10px;z-index:7;background:#fff;border-radius:22px;padding:3px;box-shadow:0 2px 10px rgba(0,0,0,0.2)}.mode-switcher{display:flex;background:transparent;border-radius:20px;padding:0}.mode-btn{padding:8px 16px;background:transparent;border:none;border-radius:18px;cursor:pointer;font-size:13px;font-weight:500;color:#6c757d;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;min-width:90px}.mode-btn:hover{background:rgba(0,0,0,0.05);color:#333}.mode-btn.active{background:#002060;color:white;box-shadow:0 1px 3px rgba(0,32,96,0.3);font-weight:600}.mode-btn.active:hover{background:#003380}.mode-btn .mode-icon{font-size:14px}.mode-btn .mode-label{font-size:12px;letter-spacing:0.3px}.mode-interface{transition:opacity 0.3s ease,transform 0.3s ease}#normal-mode-interface .search-container{display:flex;align-items:center;gap:5px}#normal-geocoder-container{flex:1;display:flex;align-items:center;gap:5px}
+}#map-container.layout-dual #sidebar{width:30%;min-width:400px;opacity:1;transform:translateX(0)}#map-container.layout-dual #map{width:calc(100% - max(30%,400px));opacity:1}#map-container.layout-sidebar-full{height:85vh;width:100%;overflow:hidden}#map-container.layout-sidebar-full #sidebar{width:100%;min-width:unset;max-width:100%;opacity:1;transform:translateX(0);box-sizing:border-box;overflow-x:hidden;overflow-y:auto}#map-container.layout-sidebar-full #map{width:0;opacity:0;pointer-events:none}#map-container.layout-sidebar-full .mode-switcher-container{display:none!important}#map-container.layout-sidebar-full .custom-zoom-controls{display:none!important}#map-container.layout-map-full{height:85vh}#map-container.layout-map-full #sidebar{width:0;min-width:0;opacity:0;transform:translateX(-100%);pointer-events:none;padding:0}#map-container.layout-map-full #map{width:100%;opacity:1}#map-container.layout-map-full .mode-switcher-container{display:none!important}#map-container.layout-map-full .map-legend{transform:scale(0.65);transform-origin:bottom left}#map-container.layout-map-full .map-radius-control{transform:scale(0.65);transform-origin:bottom left}#map-container.layout-map-full .custom-zoom-controls{transform:scale(0.75);transform-origin:top right;top:20px}#map-container.layout-map-full .mapboxgl-popup{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-sidebar-full .mapboxgl-popup{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-map-full .clicked-popup,#map-container.layout-map-full .hover-tooltip{transform:scale(0.35);transform-origin:bottom center}#map-container.layout-sidebar-full .clicked-popup,#map-container.layout-sidebar-full .hover-tooltip{transform:scale(0.35);transform-origin:bottom center}@media (max-width:1383px){#map-container.layout-dual #sidebar{width:400px}#map-container.layout-dual #map{width:calc(100% - 400px)}}@media (max-width:600px){#map-container.layout-sidebar-full #sidebar{width:100%;min-width:unset}}.card-actions{display:flex;gap:10px;margin-top:10px;padding-bottom:5px}.action-btn{flex:1;padding:8px 5px;border-radius:4px;color:#fff!important;text-align:center;text-decoration:none;font-size:14px;transition:transform .2s,background-color .2s}.action-btn:hover{transform:scale(1.05);text-decoration:none}.action-btn.call{background-color:#28a745}.action-btn.call:hover{background-color:#218838}.action-btn.mail{background-color:#007bff}.action-btn.mail:hover{background-color:#0069d9}.action-btn.route{background-color:#17a2b8}.action-btn.route:hover{background-color:#138496}.action-btn:disabled{background-color:#6c757d!important;cursor:not-allowed;transform:none}.action-btn:disabled:hover{transform:none}
+.mode-switcher-container{position:absolute;top:20px;left:10px;z-index:7;background:#fff;border-radius:22px;padding:3px;box-shadow:0 2px 10px rgba(0,0,0,0.2)}.mode-switcher{display:flex;background:transparent;border-radius:20px;padding:0}.mode-btn{padding:8px 16px;background:transparent;border:none;border-radius:18px;cursor:pointer;font-size:13px;font-weight:500;color:#6c757d;transition:all 0.2s ease;display:flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;min-width:90px}.mode-btn:hover{background:rgba(0,0,0,0.05);color:#333}.mode-btn.active{background:#002060;color:white;box-shadow:0 1px 3px rgba(0,32,96,0.3);font-weight:600}.mode-btn.active:hover{background:#003380}.mode-btn .mode-icon{font-size:14px}.mode-btn .mode-label{font-size:12px;letter-spacing:0.3px}.mode-interface{transition:opacity 0.3s ease,transform 0.3s ease}#normal-mode-interface .search-container{display:flex;align-items:center;gap:5px;}#normal-geocoder-container{flex:1;display:flex;align-items:center;gap:5px}
 
 /* Légende de la carte */
 .map-legend{position:absolute;bottom:30px;left:10px;background:#fff;padding:12px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:8;font-size:13px}.map-legend h4{margin:0 0 0px 0;font-size:14px;color:#333;font-weight:bold;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between}.map-legend h4:hover{color:#002060}.map-legend h4::after{content:'\25BC';font-size:10px;transition:transform 0.3s}.map-legend.collapsed h4::after{transform:rotate(-90deg);margin-left: 4px;}.map-legend.collapsed .legend-items{display:none}.legend-item{display:flex;align-items:center;margin:6px 0;cursor:pointer;padding:4px;border-radius:4px;transition:background-color .2s}.legend-item:hover{background-color:#f0f8ff}.legend-item.inactive{opacity:.4}.legend-item.inactive:hover{opacity:.6}.legend-marker{width:30px;height:30px;margin-right:8px;background-size:contain;background-repeat:no-repeat;background-position:center}.legend-marker.beton{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-beton.png')}.legend-marker.granulats{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-granulats.png')}.legend-marker.ciment{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-09/point-interet-ciment.png')}.legend-marker.ciment-prompt{background-image:url('https://www.solutions-vicat.fr/sites/default/files/2024-12/ciment-prompt-naturel.png')}
@@ -136,7 +140,7 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
 .map-radius-control{position:absolute;bottom:160px;left:10px;background:#fff;padding:12px 15px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,.2);z-index:7;font-size:13px;display:none;transition:bottom 0.3s ease}.map-radius-control h4{margin:0 0 8px 0;font-size:14px;color:#333;font-weight:bold;cursor:pointer;user-select:none;display:flex;align-items:center;justify-content:space-between}.map-radius-control h4:hover{color:#002060}.map-radius-control h4::after{content:'\25BC';font-size:10px;transition:transform 0.3s;margin-left:4px}.map-radius-control.collapsed h4::after{transform:rotate(-90deg);margin-left:4px}.map-radius-control.collapsed .radius-control-content{display:none}.radius-control-map{display:flex;align-items:center;gap:10px}.radius-control-map label{font-size:13px;color:#333;white-space:nowrap}.radius-control-map input[type="range"]{flex:1;min-width:120px}.radius-control-map span{font-weight:bold;color:#002060;min-width:50px;font-size:13px}
 
 /* Interface d'itinéraire améliorée */
-#route-interface-container{margin-top:15px}.route-point-section{border:1px solid #ddd;padding:15px;border-radius:6px;background:#f9f9f9;transition:all .3s ease-in-out}.route-input-group{margin-bottom:12px;display:flex;flex-direction:column;gap:5px}.route-input-group label{display:block;margin-bottom:5px;font-weight:bold;color:#333;font-size:14px}.point-input-container{display:flex;align-items:center;gap:5px}.point-input-container #geocoder-container{flex:1;display:flex;align-items:center;gap:5px;min-width:0}.point-input-container #geocoder-container-b{flex:1;display:flex;align-items:center;gap:5px;min-width:0}.point-input-container input{flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px}.search-btn,.add-point-btn{background:#002060;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .2s}.search-btn:hover,.add-point-btn:hover{background:#003380}.add-point-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;flex-shrink:0}.route-actions{display:flex;gap:10px;margin-top:15px}.route-action-btn{padding:10px 15px;border:none;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .2s}.route-action-btn.primary{background:#28a745;color:white}.route-action-btn.primary:hover{background:#218838}.route-action-btn.secondary{background:#6c757d;color:white}.route-action-btn.secondary:hover{background:#545b62}#point-b-section{animation:slideDown .3s ease-in-out}@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}#clear-point-a:hover,#clear-point-b:hover{background:rgba(211,47,47,0.2)!important;border-color:rgba(211,47,47,0.5)!important;transform:translateY(-50%) scale(1.1)!important}
+#route-interface-container{margin-top:15px}.route-point-section{border:1px solid #ddd;padding:2px 7px;border-radius:6px;background:#f9f9f9;transition:all .3s ease-in-out}.route-input-group{margin-bottom:12px;display:flex;flex-direction:column;gap:5px}.route-input-group label{display:block;margin-bottom:5px;font-weight:bold;color:#333;font-size:14px}.point-input-container{display:flex;align-items:center;gap:5px}.point-input-container #geocoder-container{flex:1;display:flex;align-items:center;gap:5px;min-width:0}.point-input-container #geocoder-container-b{flex:1;display:flex;align-items:center;gap:5px;min-width:0}.point-input-container input{flex:1;padding:8px;border:1px solid #ccc;border-radius:4px;font-size:14px}.search-btn,.add-point-btn{background:#002060;color:white;border:none;padding:8px 12px;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .2s}.search-btn:hover,.add-point-btn:hover{background:#003380}.add-point-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;flex-shrink:0}.route-actions{display:flex;gap:10px;margin-top:15px}.route-action-btn{padding:4px 15px;margin-bottom:5px;border:none;border-radius:4px;cursor:pointer;font-size:14px;transition:background-color .2s}.route-action-btn.primary{background:#28a745;color:white}.route-action-btn.primary:hover{background:#218838}.route-action-btn.secondary{background:#6c757d;color:white}.route-action-btn.secondary:hover{background:#545b62}#point-b-section{animation:slideDown .3s ease-in-out}@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}#clear-point-a:hover,#clear-point-b:hover{background:rgba(211,47,47,0.2)!important;border-color:rgba(211,47,47,0.5)!important;transform:translateY(-50%) scale(1.1)!important}
 
 
 /* Animation d'apparition du panneau de routage */
@@ -177,7 +181,7 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}*:focus-visible{outline:2px solid #002060;outline-offset:2px}button:focus-visible,a:focus-visible{outline:2px solid #002060;outline-offset:2px}
 
 /* Bouton toggle mobile - toujours visible */
-.mobile-toggle-btn{position:fixed;bottom:20px;right:20px;z-index:21;background:#002060;color:#fff;border:none;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.3);cursor:pointer;transition:all .3s}.mobile-toggle-btn:hover{transform:scale(1.1);background:#003380}.mobile-toggle-btn svg{width:24px;height:24px}
+.mobile-toggle-btn{position:fixed;bottom:68px;right:23px;z-index:21;background:#002060;color:#fff;border:none;border-radius:50%;width:56px;height:56px;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 10px rgba(0,0,0,.3);cursor:pointer;transition:all .3s}.mobile-toggle-btn:hover{transform:scale(1.1);background:#003380}.mobile-toggle-btn svg{width:24px;height:24px}
 
 /* Bouton de réinitialisation sur la carte */
 .map-reset-btn{
@@ -258,7 +262,7 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
       <div id="route-mode-interface" class="mode-interface" style="display:none;">
         <div class="filter-section">
           <h2>Calculer un itinéraire</h2>
-          <button id="reset-map-route" class="reset-map-inline" style="margin-top: 10px; width: 100%;">Réinitialiser la carte</button>
+          <button id="reset-map-route" class="reset-map-inline" style="margin-top: 0px; width: 100%;">Réinitialiser la carte</button>
           
           <!-- Interface d'itinéraire avec Points A et B -->
         <div id="route-interface-container">
@@ -356,7 +360,7 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
         <!-- Résumé de l'itinéraire -->
         <div id="route-summary" style="background:#002060; color:white; padding:15px; border-radius:8px; margin-bottom:15px; position:relative;">
           <h3 style="margin:0 0 10px 0; font-size:16px; display:flex; justify-content:space-between; align-items:center;">
-            🗺️ Résumé de l'itinéraire
+            <span style="color: white;">&#128506; Résumé de l'itinéraire</span>
             <button id="toggle-route-options" style="
               background:rgba(255,255,255,0.2); 
               border:1px solid rgba(255,255,255,0.3); 
@@ -377,7 +381,7 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
             <span id="route-distance" style="font-weight:bold;">--</span>
             <span id="route-duration" style="font-weight:bold;">--</span>
           </div>
-          <div id="route-vehicle-info" style="font-size:12px; opacity:0.8;">Type: Voiture • Péages: Autorisés</div>
+          <div id="route-vehicle-info" style="font-size:12px; opacity:0.8; color: white;">Type: Voiture &bull; P&eacute;ages: Autoris&eacute;s</div>
         </div>
         
         
@@ -436,7 +440,7 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
   <!-- Contrôles de zoom personnalisés -->
   <div class="custom-zoom-controls">
     <button class="zoom-btn" id="zoom-in-btn" title="Zoomer" aria-label="Zoomer">+</button>
-    <button class="zoom-btn" id="zoom-out-btn" title="Dézoomer" aria-label="Dézoomer">−</button>
+    <button class="zoom-btn" id="zoom-out-btn" title="Dézoomer" aria-label="Dézoomer">-</button>
   </div>
 
   <!-- Bouton mobile pour basculer carte/liste -->
@@ -455,7 +459,7 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
 
 <script>
     // Configuration
-    mapboxgl.accessToken = 'pk.eyJ1IjoiZ2hpc2xhaW5sZXZyYXQiLCJhIjoiY2x0ZTRlYTFpMGM4ZTJrcGI1OWFsNXRjcSJ9.63vk7d4NVv3i75ozPADUbw';
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZ2hpc2xhaW5sZXZyYXQiLCJhIjoiY20ydW9zZjc3MDNkeTJpczVkbzViYWNwMCJ9.BLWt3SPO0Qt0cOQmLHrzrQ';
 
     // Variables globales
     let map;
@@ -3070,7 +3074,7 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
         const addBtn = document.getElementById('add-destination-btn');
         if (pointBSection && addBtn) {
             pointBSection.style.display = 'block';
-            addBtn.textContent = '−';
+            addBtn.textContent = '-';
             addBtn.title = 'Masquer la destination';
         }
     }
@@ -3306,8 +3310,8 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
         
         // Mise à jour des infos véhicule
         const vehicleText = currentVehicleType === 'driving-traffic' ? 'Poids lourd' : 'Voiture';
-        const tollText = currentTollOption === 'avoid' ? 'Péages évités' : 'Péages autorisés';
-        routeVehicleInfo.textContent = `Type: ${vehicleText} • ${tollText}`;
+        const tollText = currentTollOption === 'avoid' ? 'P&eacute;ages &eacute;vit&eacute;s' : 'P&eacute;ages autoris&eacute;s';
+        routeVehicleInfo.innerHTML = `Type: ${vehicleText} &bull; ${tollText}`;
         
     }
     
@@ -5035,7 +5039,7 @@ body,html{margin:0;padding:0;height:100%;width:100%;font-family:Arial,sans-serif
                 view3dBtn.className = 'card-action-icon view3d';
                 view3dBtn.setAttribute('aria-label', 'Voir en 3D');
                 view3dBtn.setAttribute('title', 'Voir en 3D');
-                view3dBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12 7C6.48 7 2 9.24 2 12c0 2.24 2.94 4.13 7 4.77V20l4-4-4-4v2.73c-3.15-.56-5-1.9-5-2.73 0-1.06 3.04-3 8-3s8 1.94 8 3c0 .73-1.46 1.89-4 2.53v1.05c2.8-.59 5-1.94 5-3.58 0-2.76-4.48-5-10-5z"/></svg>`;
+                view3dBtn.innerHTML = `<svg viewBox="0 0 24 24"><text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="bold" fill="currentColor">3D</text></svg>`;
                 
                 view3dBtn.onclick = (e) => {
                     e.stopPropagation();
