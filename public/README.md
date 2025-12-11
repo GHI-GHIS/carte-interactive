@@ -59,7 +59,7 @@ Remplacer le bloc HTML actuel (~6000 lignes) par ce code (~50 lignes) :
 
 ```html
 <!-- Carte Interactive Vicat - Chargée depuis GitHub Pages -->
-<link rel="stylesheet" href="https://ghi-ghis.github.io/carte-interactive/css/vicat-map.css">
+<link rel="stylesheet" href="https://ghi-ghis.github.io/carte-interactive/public/css/vicat-map.css">
 
 <!-- Dépendances Mapbox -->
 <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
@@ -78,8 +78,8 @@ Remplacer le bloc HTML actuel (~6000 lignes) par ce code (~50 lignes) :
 </div>
 
 <!-- Scripts Vicat -->
-<script src="https://ghi-ghis.github.io/carte-interactive/js/establishments-data.js"></script>
-<script src="https://ghi-ghis.github.io/carte-interactive/js/vicat-map.js"></script>
+<script src="https://ghi-ghis.github.io/carte-interactive/public/js/establishments-data.js"></script>
+<script src="https://ghi-ghis.github.io/carte-interactive/public/js/vicat-map.js"></script>
 ```
 
 > **Note :** Le HTML complet du sidebar est dans `index.html`. Tu peux soit l'inclure directement dans Drupal, soit modifier `vicat-map.js` pour qu'il génère dynamiquement le HTML.
