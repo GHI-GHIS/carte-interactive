@@ -5267,7 +5267,54 @@ document.addEventListener('DOMContentLoaded', function() {
             resetBtn.textContent = 'Réinitialiser la carte';
         }
     }, 1000);
+    
+    // Auto-géolocalisation si paramètre URL ?autogeo=true ou variable globale
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('autogeo') === 'true' || window.VICAT_MAP_AUTOGEO === true) {
+        // Attendre que la carte soit chargée
+        setTimeout(() => {
+            triggerAutoGeolocation();
+        }, 1500);
+    }
 });
+
+// Fonction globale pour déclencher la géolocalisation automatiquement
+function triggerAutoGeolocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                currentSearchCenter = [position.coords.longitude, position.coords.latitude];
+                if (geocoder) geocoder.setInput('Ma position actuelle');
+                
+                // Afficher le contrôle de rayon et définir à 80 km
+                if (typeof showRadiusControl === 'function') showRadiusControl();
+                currentSearchRadius = 80;
+                const radiusSlider = document.getElementById('radius-slider');
+                if (radiusSlider) radiusSlider.value = 80;
+                const radiusValue = document.getElementById('radius-value');
+                if (radiusValue) radiusValue.textContent = "80 km";
+                
+                // Dessiner le cercle de 80 km
+                if (typeof drawSearchRadiusCircle === 'function') {
+                    drawSearchRadiusCircle(currentSearchCenter, 80);
+                }
+                
+                // Zoomer pour voir tout le rayon
+                if (map) map.flyTo({ center: currentSearchCenter, zoom: 9.5, duration: 1500 });
+                
+                if (typeof showRouteInterface === 'function') showRouteInterface();
+                if (typeof applyFilters === 'function') applyFilters();
+            },
+            error => {
+                console.warn("Géolocalisation automatique impossible:", error.message);
+            },
+            { enableHighAccuracy: true, timeout: 10000 }
+        );
+    }
+}
+
+// Exposer la fonction globalement
+window.triggerAutoGeolocation = triggerAutoGeolocation;
 
 function initializeSearchAndFilters() {
     
