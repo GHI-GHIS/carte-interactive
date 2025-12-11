@@ -3419,20 +3419,27 @@ function createPopupContent(props, coordinates = null, popupType = 'default') {
     }
     popupDiv.appendChild(emailP);
     
-	// Bouton page
-	const urlP = document.createElement('p');
-
+    // Boutons d'action
+    const actionsDiv = document.createElement('div');
+    actionsDiv.className = 'popup-actions';
+    actionsDiv.style.flexDirection = 'column';
+    actionsDiv.style.gap = '8px';
+    
+    // Bouton vers la page de l'établissement (si URL existe)
     if (url) {
-        const urlBtn = document.createElement('a');
-        urlBtn.href = url;
-        urlBtn.textContent = 'En savoir plus';
-        urlP.appendChild(urlBtn);
-    } else {
-        //emailP.appendChild(document.createTextNode('Non disponible'));
+        const pageBtn = document.createElement('a');
+        pageBtn.href = url;
+        pageBtn.target = '_blank';
+        pageBtn.className = 'popup-view-btn';
+        pageBtn.textContent = 'Voir la fiche établissement';
+        pageBtn.style.textDecoration = 'none';
+        pageBtn.style.display = 'block';
+        pageBtn.style.textAlign = 'center';
+        pageBtn.style.background = 'linear-gradient(135deg, #28a745 0%, #20c997 100%)';
+        actionsDiv.appendChild(pageBtn);
     }
-    popupDiv.appendChild(urlP);
 	
-    // Ajout du bouton approprié selon le contexte
+    // Ajout du bouton 3D/Retour selon le contexte
     const currentZoom = map.getZoom();
     const currentPitch = map.getPitch();
     const mapCenter = map.getCenter();
@@ -3454,9 +3461,6 @@ function createPopupContent(props, coordinates = null, popupType = 'default') {
         currentZoom >= 16 && // DOIT être zoomé
         centerDistance < 0.5 // DOIT être proche du centre
     );
-    
-    const actionsDiv = document.createElement('div');
-    actionsDiv.className = 'popup-actions';
     
     const viewBtn = document.createElement('button');
     viewBtn.className = 'popup-view-btn';
@@ -4460,6 +4464,23 @@ function updateSidebarCards(features) {
         }
         
         actionsContainer.appendChild(view3dBtn);
+        
+        // Bouton vers la page de l'établissement (si URL existe)
+        const establishmentUrl = props.url && props.url !== "null" ? props.url : null;
+        if (establishmentUrl) {
+            const pageBtn = document.createElement('a');
+            pageBtn.className = 'card-action-icon page-link';
+            pageBtn.href = establishmentUrl;
+            pageBtn.target = '_blank';
+            pageBtn.setAttribute('aria-label', `Voir la centrale béton Vicat de ${city}`);
+            pageBtn.setAttribute('title', `Voir la centrale béton Vicat de ${city}`);
+            pageBtn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 00-2 2v14a2 2 0 002 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>`;
+            pageBtn.onclick = (e) => {
+                e.stopPropagation();
+            };
+            actionsContainer.appendChild(pageBtn);
+        }
+        
         card.appendChild(actionsContainer);
         
         // Click handler pour la card entière (focus sur l'établissement ou modal)
@@ -4590,6 +4611,7 @@ function attachModalListeners() {
                 const phone=props.Phone&&props.Phone!=="null"?decodeHTMLEntities(props.Phone):null;
                 const email=props.Email&&props.Email!=="null"?decodeHTMLEntities(props.Email):null;
                 const activity=props.activity?decodeHTMLEntities(props.activity.charAt(0).toUpperCase()+props.activity.slice(1)):'N/A';
+                const establishmentUrl=props.url&&props.url!=="null"?props.url:null;
                 
                 // Créer le contenu moderne de la modal
                 const modalContent = document.querySelector('.modal-content');
@@ -4687,6 +4709,18 @@ function attachModalListeners() {
                 // Footer avec actions
                 const modalFooter = document.createElement('div');
                 modalFooter.className = 'modal-footer';
+                
+                // Bouton "En savoir plus" (si URL existe)
+                if (establishmentUrl) {
+                    const moreInfoBtn = document.createElement('a');
+                    moreInfoBtn.className = 'modal-action-btn primary';
+                    moreInfoBtn.href = establishmentUrl;
+                    moreInfoBtn.target = '_blank';
+                    moreInfoBtn.innerHTML = '🔗 En savoir plus';
+                    moreInfoBtn.style.textDecoration = 'none';
+                    moreInfoBtn.style.color = 'white';
+                    modalFooter.appendChild(moreInfoBtn);
+                }
                 
                 if (phone) {
                     const callBtn = document.createElement('button');
@@ -5278,7 +5312,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Afficher un overlay pour demander la géolocalisation (nécessite une action utilisateur)
+// Afficher un overlay pour demander la géolocalisation ou saisie manuelle
 function showGeolocationOverlay() {
     // Créer l'overlay
     const overlay = document.createElement('div');
@@ -5289,77 +5323,163 @@ function showGeolocationOverlay() {
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 32, 96, 0.9);
+        background: rgba(0, 32, 96, 0.95);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         z-index: 10000;
-        animation: fadeIn 0.3s ease;
     `;
     
     overlay.innerHTML = `
-        <div style="text-align: center; color: white; padding: 40px; max-width: 500px;">
-            <div style="font-size: 64px; margin-bottom: 20px;">📍</div>
-            <h2 style="font-size: 24px; margin-bottom: 15px; font-weight: 600;">
+        <div style="text-align: center; color: white; padding: 30px; max-width: 450px;">
+            <div style="font-size: 56px; margin-bottom: 15px;">📍</div>
+            <h2 style="font-size: 22px; margin-bottom: 12px; font-weight: 600;">
                 Trouvez les centrales à béton près de chez vous
             </h2>
-            <p style="font-size: 16px; margin-bottom: 30px; opacity: 0.9;">
-                Autorisez la géolocalisation pour afficher les établissements Vicat dans un rayon de 80 km autour de votre position.
+            <p style="font-size: 14px; margin-bottom: 25px; opacity: 0.85;">
+                Localisez-vous automatiquement ou entrez votre ville
             </p>
+            
+            <!-- Option 1: Géolocalisation -->
             <button id="geoloc-accept-btn" style="
                 background: white;
                 color: #002060;
                 border: none;
-                padding: 15px 40px;
-                font-size: 16px;
+                padding: 14px 35px;
+                font-size: 15px;
                 font-weight: 600;
                 border-radius: 8px;
                 cursor: pointer;
-                margin-right: 10px;
-                transition: transform 0.2s, box-shadow 0.2s;
+                width: 100%;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
             ">
-                🎯 Me localiser
+                <span style="font-size: 20px;">🎯</span> Me localiser automatiquement
             </button>
-            <button id="geoloc-skip-btn" style="
-                background: transparent;
+            
+            <!-- Séparateur -->
+            <div style="display: flex; align-items: center; margin: 20px 0; opacity: 0.6;">
+                <div style="flex: 1; height: 1px; background: white;"></div>
+                <span style="padding: 0 15px; font-size: 13px;">ou</span>
+                <div style="flex: 1; height: 1px; background: white;"></div>
+            </div>
+            
+            <!-- Option 2: Saisie manuelle -->
+            <div style="margin-bottom: 20px;">
+                <input type="text" id="geoloc-city-input" placeholder="Entrez une ville (ex: Lyon, Grenoble...)" style="
+                    width: 100%;
+                    padding: 14px 15px;
+                    font-size: 15px;
+                    border: none;
+                    border-radius: 8px;
+                    box-sizing: border-box;
+                    outline: none;
+                ">
+            </div>
+            <button id="geoloc-search-btn" style="
+                background: #28a745;
                 color: white;
-                border: 2px solid white;
-                padding: 15px 30px;
-                font-size: 16px;
+                border: none;
+                padding: 14px 35px;
+                font-size: 15px;
                 font-weight: 600;
                 border-radius: 8px;
                 cursor: pointer;
-                transition: background 0.2s;
+                width: 100%;
+                margin-bottom: 20px;
             ">
-                Voir toute la carte
+                🔍 Rechercher
             </button>
+            
+            <!-- Lien pour ignorer -->
+            <a href="#" id="geoloc-skip-btn" style="
+                color: white;
+                opacity: 0.7;
+                font-size: 13px;
+                text-decoration: underline;
+            ">
+                Voir toute la carte de France
+            </a>
+            
+            <!-- Message d'erreur (caché par défaut) -->
+            <div id="geoloc-error" style="
+                display: none;
+                margin-top: 15px;
+                padding: 12px;
+                background: rgba(255,255,255,0.15);
+                border-radius: 6px;
+                font-size: 13px;
+                line-height: 1.4;
+            "></div>
         </div>
     `;
     
     document.body.appendChild(overlay);
     
-    // Bouton accepter - déclenche la géolocalisation
+    // Bouton géolocalisation
     document.getElementById('geoloc-accept-btn').addEventListener('click', function() {
-        triggerAutoGeolocation();
-        overlay.remove();
+        const btn = this;
+        btn.innerHTML = '<span style="font-size: 20px;">⏳</span> Localisation en cours...';
+        btn.disabled = true;
+        
+        triggerAutoGeolocation(function onSuccess() {
+            overlay.remove();
+        }, function onError(message) {
+            btn.innerHTML = '<span style="font-size: 20px;">🎯</span> Me localiser automatiquement';
+            btn.disabled = false;
+            const errorDiv = document.getElementById('geoloc-error');
+            errorDiv.style.display = 'block';
+            errorDiv.innerHTML = `
+                <strong>⚠️ Localisation impossible</strong><br>
+                ${message}<br><br>
+                <em>Utilisez plutôt la recherche par ville ci-dessus.</em>
+            `;
+        });
     });
     
-    // Bouton ignorer - ferme l'overlay
-    document.getElementById('geoloc-skip-btn').addEventListener('click', function() {
+    // Bouton recherche par ville
+    document.getElementById('geoloc-search-btn').addEventListener('click', function() {
+        const city = document.getElementById('geoloc-city-input').value.trim();
+        if (city) {
+            searchByCity(city, function() {
+                overlay.remove();
+            });
+        }
+    });
+    
+    // Touche Entrée dans le champ
+    document.getElementById('geoloc-city-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('geoloc-search-btn').click();
+        }
+    });
+    
+    // Bouton ignorer
+    document.getElementById('geoloc-skip-btn').addEventListener('click', function(e) {
+        e.preventDefault();
         overlay.remove();
     });
 }
 
-// Fonction globale pour déclencher la géolocalisation (doit être appelée suite à une action utilisateur)
-function triggerAutoGeolocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            position => {
-                currentSearchCenter = [position.coords.longitude, position.coords.latitude];
-                if (geocoder) geocoder.setInput('Ma position actuelle');
+// Rechercher par nom de ville via Mapbox Geocoding
+function searchByCity(cityName, onSuccess) {
+    const accessToken = mapboxgl.accessToken;
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(cityName)}.json?country=fr&types=place,locality&access_token=${accessToken}`;
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.features && data.features.length > 0) {
+                const coords = data.features[0].center; // [lng, lat]
+                currentSearchCenter = coords;
                 
-                // Afficher le contrôle de rayon et définir à 80 km
+                if (geocoder) geocoder.setInput(data.features[0].place_name);
+                
+                // Afficher le contrôle de rayon
                 if (typeof showRadiusControl === 'function') showRadiusControl();
                 currentSearchRadius = 80;
                 const radiusSlider = document.getElementById('radius-slider');
@@ -5367,31 +5487,86 @@ function triggerAutoGeolocation() {
                 const radiusValue = document.getElementById('radius-value');
                 if (radiusValue) radiusValue.textContent = "80 km";
                 
-                // Dessiner le cercle de 80 km
+                // Dessiner le cercle
                 if (typeof drawSearchRadiusCircle === 'function') {
                     drawSearchRadiusCircle(currentSearchCenter, 80);
                 }
                 
-                // Zoomer pour voir tout le rayon
+                // Zoomer
                 if (map) map.flyTo({ center: currentSearchCenter, zoom: 9.5, duration: 1500 });
                 
                 if (typeof showRouteInterface === 'function') showRouteInterface();
                 if (typeof applyFilters === 'function') applyFilters();
-            },
-            error => {
-                alert("Impossible d'accéder à votre position. Vérifiez que la géolocalisation est activée dans votre navigateur.");
-                console.warn("Géolocalisation impossible:", error.message);
-            },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 300000 }
-        );
-    } else {
-        alert("La géolocalisation n'est pas supportée par votre navigateur.");
-    }
+                
+                if (onSuccess) onSuccess();
+            } else {
+                alert("Ville non trouvée. Essayez avec un autre nom.");
+            }
+        })
+        .catch(err => {
+            console.error("Erreur geocoding:", err);
+            alert("Erreur lors de la recherche. Réessayez.");
+        });
 }
 
-// Exposer la fonction globalement
+// Fonction pour déclencher la géolocalisation (doit être appelée suite à une action utilisateur)
+function triggerAutoGeolocation(onSuccess, onError) {
+    if (!navigator.geolocation) {
+        if (onError) onError("Votre navigateur ne supporte pas la géolocalisation.");
+        return;
+    }
+    
+    navigator.geolocation.getCurrentPosition(
+        position => {
+            currentSearchCenter = [position.coords.longitude, position.coords.latitude];
+            if (geocoder) geocoder.setInput('Ma position actuelle');
+            
+            // Afficher le contrôle de rayon et définir à 80 km
+            if (typeof showRadiusControl === 'function') showRadiusControl();
+            currentSearchRadius = 80;
+            const radiusSlider = document.getElementById('radius-slider');
+            if (radiusSlider) radiusSlider.value = 80;
+            const radiusValue = document.getElementById('radius-value');
+            if (radiusValue) radiusValue.textContent = "80 km";
+            
+            // Dessiner le cercle de 80 km
+            if (typeof drawSearchRadiusCircle === 'function') {
+                drawSearchRadiusCircle(currentSearchCenter, 80);
+            }
+            
+            // Zoomer pour voir tout le rayon
+            if (map) map.flyTo({ center: currentSearchCenter, zoom: 9.5, duration: 1500 });
+            
+            if (typeof showRouteInterface === 'function') showRouteInterface();
+            if (typeof applyFilters === 'function') applyFilters();
+            
+            if (onSuccess) onSuccess();
+        },
+        error => {
+            let message = "";
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    message = "Vous avez refusé l'accès à votre position. Vérifiez les paramètres de votre navigateur.";
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    message = "Position indisponible. Vérifiez que la localisation est activée sur votre appareil.";
+                    break;
+                case error.TIMEOUT:
+                    message = "Délai dépassé. La localisation a pris trop de temps.";
+                    break;
+                default:
+                    message = "Erreur inconnue lors de la localisation.";
+            }
+            if (onError) onError(message);
+        },
+        { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }
+    );
+}
+
+// Exposer les fonctions globalement
 window.triggerAutoGeolocation = triggerAutoGeolocation;
 window.showGeolocationOverlay = showGeolocationOverlay;
+window.searchByCity = searchByCity;
 
 function initializeSearchAndFilters() {
     
