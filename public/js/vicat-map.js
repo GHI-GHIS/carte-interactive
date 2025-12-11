@@ -5271,14 +5271,87 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-géolocalisation si paramètre URL ?autogeo=true ou variable globale
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('autogeo') === 'true' || window.VICAT_MAP_AUTOGEO === true) {
-        // Attendre que la carte soit chargée
+        // Attendre que la carte soit chargée puis afficher l'overlay
         setTimeout(() => {
-            triggerAutoGeolocation();
+            showGeolocationOverlay();
         }, 1500);
     }
 });
 
-// Fonction globale pour déclencher la géolocalisation automatiquement
+// Afficher un overlay pour demander la géolocalisation (nécessite une action utilisateur)
+function showGeolocationOverlay() {
+    // Créer l'overlay
+    const overlay = document.createElement('div');
+    overlay.id = 'geolocation-overlay';
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 32, 96, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s ease;
+    `;
+    
+    overlay.innerHTML = `
+        <div style="text-align: center; color: white; padding: 40px; max-width: 500px;">
+            <div style="font-size: 64px; margin-bottom: 20px;">📍</div>
+            <h2 style="font-size: 24px; margin-bottom: 15px; font-weight: 600;">
+                Trouvez les centrales à béton près de chez vous
+            </h2>
+            <p style="font-size: 16px; margin-bottom: 30px; opacity: 0.9;">
+                Autorisez la géolocalisation pour afficher les établissements Vicat dans un rayon de 80 km autour de votre position.
+            </p>
+            <button id="geoloc-accept-btn" style="
+                background: white;
+                color: #002060;
+                border: none;
+                padding: 15px 40px;
+                font-size: 16px;
+                font-weight: 600;
+                border-radius: 8px;
+                cursor: pointer;
+                margin-right: 10px;
+                transition: transform 0.2s, box-shadow 0.2s;
+            ">
+                🎯 Me localiser
+            </button>
+            <button id="geoloc-skip-btn" style="
+                background: transparent;
+                color: white;
+                border: 2px solid white;
+                padding: 15px 30px;
+                font-size: 16px;
+                font-weight: 600;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: background 0.2s;
+            ">
+                Voir toute la carte
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(overlay);
+    
+    // Bouton accepter - déclenche la géolocalisation
+    document.getElementById('geoloc-accept-btn').addEventListener('click', function() {
+        triggerAutoGeolocation();
+        overlay.remove();
+    });
+    
+    // Bouton ignorer - ferme l'overlay
+    document.getElementById('geoloc-skip-btn').addEventListener('click', function() {
+        overlay.remove();
+    });
+}
+
+// Fonction globale pour déclencher la géolocalisation (doit être appelée suite à une action utilisateur)
 function triggerAutoGeolocation() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
@@ -5306,15 +5379,19 @@ function triggerAutoGeolocation() {
                 if (typeof applyFilters === 'function') applyFilters();
             },
             error => {
-                console.warn("Géolocalisation automatique impossible:", error.message);
+                alert("Impossible d'accéder à votre position. Vérifiez que la géolocalisation est activée dans votre navigateur.");
+                console.warn("Géolocalisation impossible:", error.message);
             },
-            { enableHighAccuracy: true, timeout: 10000 }
+            { enableHighAccuracy: true, timeout: 15000, maximumAge: 300000 }
         );
+    } else {
+        alert("La géolocalisation n'est pas supportée par votre navigateur.");
     }
 }
 
 // Exposer la fonction globalement
 window.triggerAutoGeolocation = triggerAutoGeolocation;
+window.showGeolocationOverlay = showGeolocationOverlay;
 
 function initializeSearchAndFilters() {
     
