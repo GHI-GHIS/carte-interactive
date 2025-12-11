@@ -5305,10 +5305,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Auto-géolocalisation si paramètre URL ?autogeo=true ou variable globale
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('autogeo') === 'true' || window.VICAT_MAP_AUTOGEO === true) {
-        // Attendre que la carte soit chargée puis afficher l'overlay
-        setTimeout(() => {
-            showGeolocationOverlay();
-        }, 1500);
+        // Vérifier si l'utilisateur a déjà fait un choix pendant cette session
+        const geoChoice = sessionStorage.getItem('vicat_geo_choice');
+        if (!geoChoice) {
+            // Première visite de la session : afficher l'overlay
+            setTimeout(() => {
+                showGeolocationOverlay();
+            }, 1500);
+        } else if (geoChoice === 'accepted') {
+            // L'utilisateur a accepté précédemment : relancer la géoloc automatiquement
+            setTimeout(() => {
+                triggerAutoGeolocation();
+            }, 1500);
+        }
+        // Si geoChoice === 'skipped' ou 'manual', on ne fait rien (carte normale)
     }
 });
 
@@ -5427,6 +5437,8 @@ function showGeolocationOverlay() {
         btn.disabled = true;
         
         triggerAutoGeolocation(function onSuccess() {
+            // Mémoriser le choix pour cette session
+            sessionStorage.setItem('vicat_geo_choice', 'accepted');
             overlay.remove();
         }, function onError(message) {
             btn.innerHTML = '<span style="font-size: 20px;">🎯</span> Me localiser automatiquement';
@@ -5446,6 +5458,8 @@ function showGeolocationOverlay() {
         const city = document.getElementById('geoloc-city-input').value.trim();
         if (city) {
             searchByCity(city, function() {
+                // Mémoriser le choix pour cette session
+                sessionStorage.setItem('vicat_geo_choice', 'manual');
                 overlay.remove();
             });
         }
@@ -5461,6 +5475,8 @@ function showGeolocationOverlay() {
     // Bouton ignorer
     document.getElementById('geoloc-skip-btn').addEventListener('click', function(e) {
         e.preventDefault();
+        // Mémoriser le choix pour cette session
+        sessionStorage.setItem('vicat_geo_choice', 'skipped');
         overlay.remove();
     });
 }
